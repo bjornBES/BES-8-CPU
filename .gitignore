@@ -367,6 +367,6 @@ FodyWeavers.xsd
 src.txt
 Tokens.txt
 *.docx
-./.vs
-./asm/bin/
-./asm/obj/
+.vs
+asm/bin/
+asm/obj/
