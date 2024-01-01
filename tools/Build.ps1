@@ -1,0 +1,1 @@
+./Buildasm -i .\Programs/Kernel.Basm -B .\bin.bin -D -T ./tokens.tok

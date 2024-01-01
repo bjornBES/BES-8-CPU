@@ -1,0 +1,12 @@
+{
+    "color-highlight.languages": [
+
+        "*",
+    ],
+    "color-highlight.matchWords": false,
+    "color-highlight.rgbWithNoFunctionLanguages": [
+
+        "*"
+    ],
+    "color-highlight.enable": false
+}

@@ -1,0 +1,15 @@
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\bin\Debug\net7.0\emu.exe
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\bin\Debug\net7.0\emu.deps.json
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\bin\Debug\net7.0\emu.runtimeconfig.json
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\bin\Debug\net7.0\emu.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\bin\Debug\net7.0\emu.pdb
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.csproj.AssemblyReference.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.AssemblyInfoInputs.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.AssemblyInfo.cs
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.csproj.CoreCompileInputs.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\refint\emu.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.pdb
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\emu.genruntimeconfig.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\emu\obj\Debug\net7.0\ref\emu.dll

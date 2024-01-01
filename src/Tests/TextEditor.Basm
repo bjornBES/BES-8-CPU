@@ -1,0 +1,119 @@
+; User Port1 is a Keyboard at 0x0002
+; read a byte use inb #002h/UPort1
+; cheak it is there 0b0000_0001_0000_0001 -> 0x0101 Returns 0x1 if it is there
+
+.data
+$TestPointer *= 9000h
+$Running = D000h
+
+User_Port1: 
+.word 002h
+
+.text
+Start:
+sti #5011h %TestPointer
+
+sti #0 %Running
+
+mov A #0
+
+; cheaking that the Keyboard is there
+outb User_Port1 #0101h
+inb User_Port1 A
+cmp A #1
+jne Keyboard_Error
+
+Reset:
+
+outb #001h #01FFh   ; clearing the screen
+nop
+
+Loop:
+lor A %Running
+cmp A #1
+jne Exit
+mov A #0
+
+inb User_Port1 A
+cmp A #KW_ENT       ; cmping A to the ascii code for enter
+jme Enter
+
+cmp A #KW_ESC       ; cmping A to the ascii code for escape
+jme Escape          ; exiting the Program
+
+cmp A #KW_BS        ; cmping A to the ascii code for back_space
+jme BackSpace       ; removing a char
+
+outb #001h A        ; printing the Char
+inc CL
+
+lor A %Running
+cmp A #1
+jme Loop            ; jumping if it is 1 or Running
+Exit:
+sti #FFh %Running
+rts
+
+; marcos
+BackSpace:
+dec CL
+call Move_Cursor
+outb #001 #20h
+call Move_Cursor
+
+jmp Loop
+
+Enter:
+inc CH
+lor CL #0
+
+call Move_Cursor
+
+jmp Loop
+
+; exiting the program if the escape key is pressed
+Escape:
+sti #0 %Running				            ; Stoping the program
+rts
+
+Move_Cursor:
+
+; moving the Y curosr
+mov BL CH
+or BH #00000011
+outb #001 B 
+
+; moving the X curosr
+mov BL CL
+or BH #00000101
+outb #001 B 
+
+rts
+
+; errors
+Keyboard_Error:
+outb #0 #1000b
+
+.global _main:
+
+mov AL #FFh
+
+outb #0 #01011000b                      ; setting the unused status to 1
+call Start
+outb #0 #01010000b                      ; setting the unused status to 0
+lor A %Running
+cmp A #1
+jne Program_Error
+
+mov ZX #00h
+rts                                     ; Return 0
+
+Program_Error:
+
+mov ZX #01h
+rts                                     ; Return 1
+
+.data
+
+.org 00FFh
+.word 1000h

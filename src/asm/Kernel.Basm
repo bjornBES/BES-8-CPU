@@ -1,0 +1,55 @@
+; parameters
+; AX data
+; BX disk addr
+; CX Disk
+; calling convention add an offset by 3
+.global WriteToDisk:
+
+push AX
+push BX
+push CX
+
+mov ZX SP
+
+add SP #4
+
+pop CX
+pop BX
+pop AX
+
+mov SP ZX
+
+clf #8              ; clearing the int flag
+
+outb DiskHeader A
+clf #4              ; clearing the carry flag
+add C #010h
+outb X C
+
+pop CX
+pop BX
+pop AX
+
+rts
+
+
+.global ReadFromDisk:
+
+rts
+
+.global screen:
+.byte 1
+.global UserPort1:
+.byte 2
+.global UserPort2:
+.byte 3
+.global UserPort3:
+.byte 4
+.global UserPort4:
+.byte 5
+
+.global DiskHeader:
+.word 010h
+
+.global Disk1:
+.word 011h

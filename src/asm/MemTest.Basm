@@ -1,0 +1,16 @@
+mov A #55h
+
+str A &9000h
+
+mov B &9000h
+lor X &9000h
+
+mov A #0
+str A &FFF9h
+
+mov A #1
+mov B A
+
+halt #10h
+
+int 

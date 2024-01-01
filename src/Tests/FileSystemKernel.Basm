@@ -1,0 +1,58 @@
+; 1 stack disk      X
+; 2 stack address   A
+; Returns in        Z
+; Calling convention
+.global Read_Disk:
+
+push A  ; address
+push X  ; disk
+
+mov Z SP
+
+add SP #3
+pop A
+pop X
+
+mov SP Z
+; code starts
+
+outb #010h A    ; storeing the address
+add X #011h     ; offseting the disk with 11 hex
+inb X Z         ; geting the data into Z
+
+; Returning
+pop X
+pop A
+
+rts
+
+; 1 stack disk      X
+; 2 stack address   A
+; 3 stack data      B
+; Calling convention
+.global Write_Disk:
+
+push A  ; address
+push X  ; disk
+push B  ; data
+
+mov Z SP
+
+add SP #4
+pop B
+pop A
+pop X
+
+mov SP Z
+; code starts
+
+outb #010h A    ; storeing the address
+add X #011h     ; offseting the disk with 11 hex
+outb X B        ; writing the data from B
+
+; Returning
+pop B
+pop X
+pop A
+
+rts

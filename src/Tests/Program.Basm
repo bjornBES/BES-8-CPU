@@ -1,0 +1,49 @@
+$GeneralAddr *= 9000h
+
+.text
+
+mov AX #55AAh
+
+; storing A to 9000 hex
+str A %GeneralAddr
+
+mov A B
+
+mov MB #1 ; swapping the bank to bank 2
+
+push A
+push #55
+
+mov A %GeneralAddr
+
+lor B %GeneralAddr
+
+pop DX
+
+pop CH
+
+mov BL #1
+
+add BL BL
+add BL #1
+
+sti #0 %GeneralAddr
+
+mov BH #0
+
+or BH #1111b
+
+not BH
+
+cmp BH #11110000b
+
+jme End
+
+jmp $
+
+End:
+
+halt #0
+
+.org 1FFFFh
+.word 1101h

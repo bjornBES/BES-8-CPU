@@ -1,0 +1,50 @@
+.newfile1011 C:\Users\bjorn\Desktop\BES-8-CPU\src\tests\Program.Basm
+$GeneralAddr *= 9000h
+
+.text
+
+mov 		00F0 0000 55AA 
+
+
+str 		01F1 0000 9000
+
+mov 		00F2 0000 0001 
+
+mov 		00F0 0007 0001 
+
+push		03F2 0000 
+push		03F0 0037 
+
+mov 		00F1 0000 9000
+
+lor 		02F1 0001 9000
+
+pop 		04F2 0003 
+
+pop 		04F2 0012 
+
+mov 		00F0 0021 0001 
+
+add 		05F2 0021 0021 
+add 		05F0 0021 0001 
+
+sti 		06F1 0000 9000
+
+mov 		00F0 0011 0000 
+
+or  		09F0 0011 000f 
+
+not 		22F2 0011 
+
+cmp 		0bF0 0011 00f0 
+
+jme 		0fF1 
+
+jmp 		0eF1 0033 
+
+End:
+
+halt		10F0 0000 
+
+.org 1FFFFh
+.word 1101h

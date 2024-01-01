@@ -1,0 +1,15 @@
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\bin\Debug\net7.0\asm.exe
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\bin\Debug\net7.0\asm.deps.json
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\bin\Debug\net7.0\asm.runtimeconfig.json
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\bin\Debug\net7.0\asm.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\bin\Debug\net7.0\asm.pdb
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.csproj.AssemblyReference.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.AssemblyInfoInputs.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.AssemblyInfo.cs
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.csproj.CoreCompileInputs.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\refint\asm.dll
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.pdb
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\asm.genruntimeconfig.cache
+C:\Users\bjorn\Desktop\BES-8-CPU\asm\obj\Debug\net7.0\ref\asm.dll

@@ -1,0 +1,29 @@
+.text
+
+push #0
+push #0
+push #1000h
+call Write_Disk
+add SP #3
+
+push #0
+push #0
+call Read_Disk
+add SP #2
+
+call Print_Message
+
+mov XL #FFh
+
+Wait_Loop:
+dec XL
+jnz Wait_Loop
+
+call _main
+
+cmp ZX #0
+jne Fail
+jmp $
+
+Fail:
+HALT

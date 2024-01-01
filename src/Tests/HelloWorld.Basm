@@ -1,0 +1,51 @@
+.text
+
+.global Print_Message:
+outb #1 #120h
+
+push AX
+
+mov AX #0
+Print_Loop:
+mov AL Message,AH
+inc AH
+outb #001 AL
+cmp AL #0
+jne Print_Loop
+
+pop AX
+
+HALT
+
+; Message in stack with null at the end
+.global Print:
+push AX
+
+Print_Loop_stack:
+pop AL
+outb #001 AL
+jnz Print_Loop_stack
+
+; char stack
+; Calling convention
+.global Print_Char:
+push AX
+
+mov Z SP
+
+add SP #2
+pop AX
+
+mov SP Z
+
+outb #001 AX
+
+pop AX
+
+rts
+
+
+
+.data
+Message:
+.str "Hello World"

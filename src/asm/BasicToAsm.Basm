@@ -1,0 +1,85 @@
+; 10 LET TEST = 0
+$TEST = 0
+
+; 00 HOME
+outb #001h #01FFh   ; clearing the screen
+nop
+
+; 20 PRINT TEST
+mov BH #0201h   ; conv A to acsii
+mov A %TEST
+int
+outb #1 A
+
+
+; 30 GOSUB 100
+call SUB1
+
+; 39 REM here we set in a loop
+
+; 40 goto 40
+JmpLoc1:
+jmp JmpLoc1
+
+; 50 PRINT 1 + 10
+mov A #10
+add A #1
+mov BH #0201h   ; conv A to acsii
+int
+outb #1 A
+
+; 51 PRINT 10 - 10
+mov A #10
+sub A #10
+mov BH #0201h   ; conv A to acsii
+int
+outb #1 A
+
+; 52 PRINT 10 * 2
+mov A #10
+mul A #2
+mov BH #0201h   ; conv A to acsii
+int
+outb #1 A
+
+; 53 PRINT 10 / 2
+mov A #10
+div A #2
+mov BH #0201h   ; conv A to acsii
+int
+outb #1 A
+
+; 54 PRINT 1 + 5 * 2 / 4 + (2 + 3) 
+mov AL #3
+add AL #2
+
+mov AH #5
+mul AH #2
+
+div AH #4
+
+add AH #1
+
+add AH AL
+
+mov BH #0201h   ; conv A to acsii
+int
+outb #1 A
+
+SUB1:
+
+; 100 PRINT "Hello World"
+mov XH #0
+PrintLoop1:
+mov XL Message, XH
+jmz Exit_Print_Loop1
+outb #0 XL
+inc XH
+jnc PrintLoop1
+Exit_Print_Loop1:
+
+; 110 RETURN
+rts
+
+Message:
+.str "Hello World"

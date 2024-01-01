@@ -1,0 +1,34 @@
+; X index
+; Return Z
+.global GetData:
+
+push A
+
+mul X #2
+
+mov A #0
+
+Look_Again:
+add X A
+
+inc X
+mov A Data,X
+dec X
+
+cmp A X
+jne Look_Again
+
+mov Z A
+
+pop A
+
+rts
+; .org 7000h
+Data:
+.word 0002h ; offset
+.word 0000h ; index
+.word 5500h ; data
+
+.word 0002h ; offset
+.word 0001h ; index
+.word 0055h ; data

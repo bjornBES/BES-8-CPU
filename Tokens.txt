@@ -1,0 +1,28 @@
+0000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\tests\Program.Basm
+0000 | Var Pointer $GeneralAddr 0000 at 9000
+0000 | mov Reg AX Imm 55AAh
+0003 | str Reg A Var %GeneralAddr
+0006 | mov Reg A Reg B
+0009 | mov Reg MB Imm 1
+000c | push Reg A
+000e | push Imm 55
+0010 | mov Reg A Var %GeneralAddr
+0013 | lor Reg B Var %GeneralAddr
+0016 | pop Reg DX
+0018 | pop Reg CH
+001a | mov Reg BL Imm 1
+001d | add Reg BL Reg BL
+0020 | add Reg BL Imm 1
+0023 | sti Imm 0 Var %GeneralAddr
+0026 | mov Reg BH Imm 0
+0029 | or Reg BH Imm 1111b
+002c | not Reg BH
+002e | cmp Reg BH Imm 11110000b
+0031 | jme Lable End
+0033 | jmp Get current Addr at 33
+0035 | Lable End:
+0035 | halt Imm 0
+0037 | org to 1FFFFh
+
+
+0035 | Lable End 

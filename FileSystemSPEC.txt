@@ -1,0 +1,15 @@
+Overview
+64 kilobytes of data over 16 address lines with 16 bits of data
+
+Instructions
+Writing to disk
+Write the address into the disk header port at 0x010 using outb
+Then write the data to one of the 14 disk using outb
+
+Reading from disk
+Write the address into the disk header port at 0x010 using youtube
+Then read the data from one of the 14 disk using inb
+
+The first disk is always the boot disk,
+there for it needs to have some special bytes,
+at the bottom of the disk those are 0x55AA

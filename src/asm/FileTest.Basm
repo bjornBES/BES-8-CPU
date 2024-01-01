@@ -1,0 +1,145 @@
+_main:
+
+mov SP #91FFh
+
+push #1000h
+push #5555h
+push #0h
+call Read
+
+
+; Stack Addr
+; Stack Data
+; Stack Disk (000 - 00F)
+Read:
+ ; PC            91FF
+ ; #1000         91FE
+ ; #5555         92FD
+ ; #0            92FC
+ ; Return addr   91FB
+ ; A             91FA
+ ; B             91F9
+ ; X             91F8
+ ;               91F7
+ 
+ ; sp = 91FA
+ 
+ add sp #4
+ 
+ push PC
+ 
+ ; sp = 91FE
+ 
+ sub sp #4
+ 
+ push A
+ push B
+ push X
+ 
+ ; sp = 91F7
+ 
+ add sp #5
+ 
+ ; sp = 91FC
+ 
+ pop X
+ pop B
+ pop A
+ 
+ ; sp = 91FF
+ 
+ sub sp #8
+ 
+ ; sp = 91F7
+ 
+ 
+ outb #010h A
+ clf #4
+ add X #010h
+ outb X B
+ 
+ ; PC            91FF
+ ; #1000         91FE
+ ; #5555         92FD
+ ; #0            92FC
+ ; Return addr   91FB
+ ; A             91FA
+ ; B             91F9
+ ; X             91F8
+ ;               91F7 
+
+ inc sp
+ ; sp 91F8
+ 
+ pop X
+ pop B
+ pop A
+ ; sp = 91FB
+ ret
+
+; Stack Addr
+; Stack Data Return
+; Stack Disk (000 - 00F)
+write:
+ ; calling convention
+
+ ;               9200
+ ; PC            9201
+ ; #1000         9202
+ ; #5555         9203
+ ; #0            9204
+ ; Return addr   9205
+ ; A             9206
+ ; B             9207
+ ; X             9208
+ ;               9209
+ 
+ ; sp = 9206
+ 
+ add sp #5
+ 
+ push PC
+ 
+ ; sp = 9200
+ 
+ sub sp #6
+ 
+ push A
+ push B
+ push X
+ 
+ ; sp = 9209
+ 
+ add sp #5
+ 
+ ; sp = 9204
+ 
+ pop X
+ pop B
+ pop A
+ 
+ ; sp = 9201
+ 
+ sub sp #8
+ 
+ ; sp = 9209
+ ; code
+ outb #010h A
+ clf #4
+ add X #010h
+ inb X Z
+ 
+ ; ret from func
+
+ inc sp
+ ; sp 9208
+ 
+ pop X
+ pop B
+ pop A
+ ; sp = 9205
+ 
+ add sp #4
+ ; sp = 9201
+ 
+ pop PC ; rts
