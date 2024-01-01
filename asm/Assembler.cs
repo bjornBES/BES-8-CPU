@@ -37,7 +37,7 @@ namespace asm
             if (Registers.Count == 0)
             {
                 MCcode.Initialize();
-                Array.Fill(MCcode, "0000", 0x0000, 0x1FFFF);
+                Array.Fill(MCcode, "0000", 0x0000, 0x1FFFF + 1);
                 Registers.Add("A", 0b00_0000);
                 Registers.Add("AX", 0b00_0000); Registers.Add("AL", 0b10_0000); Registers.Add("AH", 0b01_0000);
                 Registers.Add("B", 0b00_0001);
