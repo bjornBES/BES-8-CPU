@@ -1,5 +1,9 @@
 $GeneralAddr *= 9000h
 
+.data
+
+.word 5500h
+
 .text
 
 mov AX #55AAh
