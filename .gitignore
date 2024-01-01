@@ -364,3 +364,9 @@ FodyWeavers.xsd
 *.ps1
 .vscode/
 .vs/
+src.txt
+Tokens.txt
+*.docx
+*/.vs
+*./asm/bin/
+*./asm/obj/
