@@ -23,6 +23,7 @@
 0035 | Lable End:
 0035 | halt Imm 0
 0037 | org to 1FFFFh
+1ffff | word 1101h
 
 
 0035 | Lable End 

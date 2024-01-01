@@ -46,5 +46,6 @@ End:
 
 halt		10F0 0000 
 
+.data
 .org 1FFFFh
 .word 1101h
