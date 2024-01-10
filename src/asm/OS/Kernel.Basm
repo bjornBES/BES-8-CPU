@@ -21,7 +21,7 @@ mov SP ZX
 
 clf #8              ; clearing the int flag
 
-outb DiskHeader A
+outb [DiskHeader] A
 clf #4              ; clearing the carry flag
 add C #010h
 outb X C

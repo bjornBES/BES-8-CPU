@@ -10,7 +10,7 @@ namespace emu
         public ushort DX = 0;
         public ushort ZX = 0;
         public uint PC = 0;
-        public ushort SP = 0;
+        public uint SP = 0;
         public ushort MB = 0;
         public ushort X = 0;
         public ushort Y = 0;
@@ -45,7 +45,7 @@ namespace emu
         {
             Ports.TICKAll(ref mem);
 
-            ushort InstructionRegister = mem.Read(PC, MB);
+            uint InstructionRegister = mem.Read(PC, MB);
 
             PC++;
 
@@ -55,25 +55,25 @@ namespace emu
 
         public Instructions InstructionAtPC(MEM mem)
         {
-            byte[] SplitInstr = Split16(mem.Read(PC, 0));
+            byte[] SplitInstr = Split16(Split32(mem.Read(PC, 0))[1]);
 
             Instructions instructions = (Instructions)Enum.Parse(typeof(Instructions), SplitInstr[1].ToString());
             return instructions;
         }
 
-        private void ExecutionInstructions(ushort Instruction, ref MEM mem)
+        private void ExecutionInstructions(uint Instruction, ref MEM mem)
         {
             //decode
 
-            byte[] SplitInstr = Split16(Instruction);
+            byte[] SplitInstr = Split16(Split32(Instruction)[0]);
             Instructions instructions = (Instructions)Enum.Parse(typeof(Instructions), SplitInstr[1].ToString());
 
             byte argumentIdent = Split8(SplitInstr[0])[0];
             //exe
-            ushort imm;
-            ushort reg;
+            uint imm;
+            uint reg;
             Register register;
-            ushort Addr;
+            uint Addr;
             switch (instructions)
             {
                 case Instructions.MOV:
@@ -84,15 +84,15 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:     // imm
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             LoadRegisterImm(register, data);
                             break;
                         case 1:     // addr
-                            ushort addr = mem.Read(PC, MB);
+                            uint addr = mem.Read(PC, MB);
                             LoadRegisterAdd(register, addr, mem);
                             break;
                         case 2:     // reg
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             LoadRegistergReg(register, register1);
                             break;
@@ -107,8 +107,8 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 1:     // addr
-                            ushort addr = mem.Read(PC, MB);
-                            WriteMEMReg(register, addr, ref mem);
+                            Addr = mem.Read(PC, MB);
+                            WriteMEMReg(register, Addr, ref mem);
                             break;
                     }
                     PC++;
@@ -121,7 +121,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 1:     // addr
-                            ushort addr = mem.Read(PC, MB);
+                            uint addr = mem.Read(PC, MB);
                             LoadRegisterAdd(register, addr, mem);
                             break;
                     }
@@ -132,7 +132,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:     // imm
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             PushImm(data, mem);
                             break;
                         case 2:     // reg
@@ -163,11 +163,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             AddImms(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             Addregs(register, register1);
                             break;
@@ -181,7 +181,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 1:
-                            ushort addr = mem.Read(PC, MB);
+                            uint addr = mem.Read(PC, MB);
                             WriteMEMImm(imm, addr, mem);
                             break;
                     }
@@ -195,11 +195,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             SubImms(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             Subregs(register, register1);
                             break;
@@ -214,11 +214,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             AndImms(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             Andregs(register, register1);
                             break;
@@ -233,11 +233,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             OrImms(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             Orregs(register, register1);
                             break;
@@ -252,11 +252,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             NorImms(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             Norregs(register, register1);
                             break;
@@ -271,11 +271,11 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             CMPimm(register, data);
                             break;
                         case 2:
-                            ushort reg1 = mem.Read(PC, MB);
+                            uint reg1 = mem.Read(PC, MB);
                             Register register1 = DecodeRegister(reg1);
                             CMPregs(register, register1);
                             break;
@@ -309,7 +309,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             PC++;
                             mem.Write(0xFFFE, data, MB);
                             break;
@@ -332,7 +332,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 1:
-                            ushort addr = mem.Read(PC, MB);
+                            uint addr = mem.Read(PC, MB);
                             Inc_Addr(addr, mem);
                             break;
                         case 2:
@@ -347,7 +347,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 1:
-                            ushort addr = mem.Read(PC, MB);
+                            uint addr = mem.Read(PC, MB);
                             Dec_Addr(addr, mem);
                             break;
                         case 2:
@@ -364,7 +364,7 @@ namespace emu
                     switch (argumentIdent)
                     {
                         case 0:
-                            ushort data = mem.Read(PC, MB);
+                            uint data = mem.Read(PC, MB);
                             Ports.Write(imm, data);
                             break;
                         case 2:
@@ -387,12 +387,12 @@ namespace emu
                 case Instructions.SEF:
                     imm = mem.Read(PC, MB);
                     PC++;
-                    Setflag(imm, 1);
+                    Setflag((ushort)imm, 1);
                     break;
                 case Instructions.CLF:
                     imm = mem.Read(PC, MB);
                     PC++;
-                    Setflag(imm, 0);
+                    Setflag((ushort)imm, 0);
                     break;
                 case Instructions.JMZ:
                     Addr = mem.Read(PC, MB);
@@ -429,30 +429,30 @@ namespace emu
             }
         }
 
-        private void Inc_Addr(ushort addr, MEM mem)
+        private void Inc_Addr(uint addr, MEM mem)
         {
-            ushort value = (ushort)(mem.Read(addr, MB) + 1);
+            uint value = (uint)(mem.Read(addr, MB) + 1);
             mem.Write(addr, value, MB);
         }
         private void Inc_Reg(Register register)
         {
-            ushort value = (ushort)(GetRegValue(register) + 1);
+            uint value = (uint)(GetRegValue(register) + 1);
             LoadRegisterImm(register, value);
         }
-        private void Dec_Addr(ushort addr, MEM mem)
+        private void Dec_Addr(uint addr, MEM mem)
         {
-            ushort value = (ushort)(mem.Read(addr, MB) - 1);
+            uint value = (uint)(mem.Read(addr, MB) - 1);
             mem.Write(addr, value, MB);
         }
         private void Dec_Reg(Register register)
         {
-            ushort value = (ushort)(GetRegValue(register) - 1);
+            uint value = (uint)(GetRegValue(register) - 1);
             LoadRegisterImm(register, value);
         }
 
-        private void CMPimm(Register register, ushort data)
+        private void CMPimm(Register register, uint data)
         {
-            ushort RegValue = GetRegValue(register);
+            uint RegValue = GetRegValue(register);
 
             if(RegValue > data)
             {
@@ -463,7 +463,7 @@ namespace emu
                 Setflag(Flag_Less, 1);
             }
 
-            ushort CMPValue = (ushort)(RegValue - data);
+            uint CMPValue = (uint)(RegValue - data);
             if (CMPValue == 0)
             {
                 Setflag(Flag_Equal, 1);
@@ -477,7 +477,7 @@ namespace emu
 
         private void CMPregs(Register register, Register register1)
         {
-            ushort RegValue = GetRegValue(register);
+            uint RegValue = GetRegValue(register);
 
             if (RegValue > GetRegValue(register1))
             {
@@ -488,7 +488,7 @@ namespace emu
                 Setflag(Flag_Less, 1);
             }
 
-            ushort CMPValue = (ushort)(RegValue - GetRegValue(register1));
+            uint CMPValue = (uint)(RegValue - GetRegValue(register1));
             if (CMPValue == 0)
             {
                 Setflag(Flag_Equal, 1);
@@ -501,50 +501,50 @@ namespace emu
 
         private void Andregs(Register register, Register register1)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) & GetRegValue(register1)));
+            LoadReg(register, (uint)(GetRegValue(register) & GetRegValue(register1)));
         }
 
-        private void AndImms(Register register, ushort data)
+        private void AndImms(Register register, uint data)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) & data));
+            LoadReg(register, (uint)(GetRegValue(register) & data));
         }
         private void Norregs(Register register, Register register1)
         {
-            LoadReg(register, (ushort)(~GetRegValue(register) | ~GetRegValue(register1)));
+            LoadReg(register, (uint)(~GetRegValue(register) | ~GetRegValue(register1)));
         }
 
-        private void NorImms(Register register, ushort data)
+        private void NorImms(Register register, uint data)
         {
-            LoadReg(register, (ushort)(~GetRegValue(register) | ~data));
+            LoadReg(register, (uint)(~GetRegValue(register) | ~data));
         }
         private void Orregs(Register register, Register register1)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) | GetRegValue(register1)));
+            LoadReg(register, (uint)(GetRegValue(register) | GetRegValue(register1)));
         }
 
-        private void OrImms(Register register, ushort data)
+        private void OrImms(Register register, uint data)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) | data));
+            LoadReg(register, (uint)(GetRegValue(register) | data));
         }
 
         private void Subregs(Register register, Register register1)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) - GetRegValue(register1) - Getflag(Flag_Carry)));
+            LoadReg(register, (uint)(GetRegValue(register) - GetRegValue(register1) - Getflag(Flag_Carry)));
         }
 
-        private void SubImms(Register register, ushort data)
+        private void SubImms(Register register, uint data)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) - data - Getflag(Flag_Carry)));
+            LoadReg(register, (uint)(GetRegValue(register) - data - Getflag(Flag_Carry)));
         }
 
-        private void AddImms(Register register, ushort data)
+        private void AddImms(Register register, uint data)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) + data + Getflag(Flag_Carry)));
+            LoadReg(register, (uint)(GetRegValue(register) + data + Getflag(Flag_Carry)));
         }
 
         private void Addregs(Register register, Register register1)
         {
-            LoadReg(register, (ushort)(GetRegValue(register) + GetRegValue(register1) + Getflag(Flag_Carry)));
+            LoadReg(register, (uint)(GetRegValue(register) + GetRegValue(register1) + Getflag(Flag_Carry)));
         }
 
         private void PushReg(Register register, MEM mem)
@@ -553,16 +553,16 @@ namespace emu
             SP--;
         }
 
-        private void PushImm(ushort data, MEM mem)
+        private void PushImm(uint data, MEM mem)
         {
             mem.Write(SP, data, MB);
             SP--;
         }
         private void PushImm32(uint data, MEM mem)
         {
-            mem.Write(SP, GetHigh(data), MB);
+            mem.Write(SP, (uint)GetHigh(data), MB);
             SP--;
-            mem.Write(SP, GetLow(data), MB);
+            mem.Write(SP, (uint)GetLow(data), MB);
             SP--;
         }
         private void POPReg(Register register, MEM mem)
@@ -571,16 +571,16 @@ namespace emu
             LoadReg(register, mem.Read(SP, MB));
         }
 
-        private Register DecodeRegister(ushort reg)
+        private Register DecodeRegister(uint reg)
         {
             return (Register)Enum.Parse(typeof(Register), reg.ToString());
         }
 
-        void LoadRegisterImm(Register register, ushort data)
+        void LoadRegisterImm(Register register, uint data)
         {
             LoadReg(register, data);
         }
-        void LoadRegisterAdd(Register register, ushort addr, MEM mem)
+        void LoadRegisterAdd(Register register, uint addr, MEM mem)
         {
             LoadReg(register, mem.Read(addr, MB));
         }
@@ -589,22 +589,22 @@ namespace emu
             LoadReg(register, GetRegValue(data));
         }
 
-        void WriteMEMReg(Register register, ushort addr, ref MEM mem)
+        void WriteMEMReg(Register register, uint addr, ref MEM mem)
         {
             mem.Write(addr, GetRegValue(register), MB);
         }
-        void WriteMEMImm(ushort imm, ushort addr, MEM mem)
+        void WriteMEMImm(uint imm, uint addr, MEM mem)
         {
             mem.Write(addr, imm, MB);
         }
 
         // marcos
-        void OutByte(ushort Data, ushort Port, MEM mem)
+        void OutByte(uint Data, uint Port, MEM mem)
         {
             Ports.Write(Port, Data);
             Ports.TICK(Port, ref mem);
         }
-        ushort InByte(ushort Port)
+        uint InByte(uint Port)
         {
             return Ports.Read(Port);
         }
@@ -614,7 +614,7 @@ namespace emu
         /// <param name="addr"></param>
         /// <param name="flag">jumps imm if 255</param>
         /// <param name="value"></param>
-        void Jump(ushort addr, ushort flag, ushort value)
+        void Jump(uint addr, uint flag, uint value)
         {
             if(flag == 0xFF)
             {
@@ -628,14 +628,14 @@ namespace emu
                 }
             }
         }
-        void LoadReg(Register reg, ushort data)
+        void LoadReg(Register reg, uint data)
         {
             if (data == 0) Setflag(Flag_Zero, 1);
             else Setflag(Flag_Zero, 0);
             switch (reg)
             {
                 case Register.AX:
-                    AX = data;
+                    AX = (ushort)data;
                     break;
                 case Register.AL:
                     LoadLow(0b10_0000, (byte)data);
@@ -644,7 +644,7 @@ namespace emu
                     LoadHigh(0b01_0000, (byte)data);
                     break;
                 case Register.BX:
-                    BX = data;
+                    BX = (ushort)data;
                     break;
                 case Register.BL:
                     LoadLow(0b10_0001, (byte)data);
@@ -653,7 +653,7 @@ namespace emu
                     LoadHigh(0b01_0001, (byte)data);
                     break;
                 case Register.CX:
-                    CX = data;
+                    CX = (ushort)data;
                     break;
                 case Register.CL:
                     LoadLow(0b10_0010, (byte)data);
@@ -662,7 +662,7 @@ namespace emu
                     LoadHigh(0b01_0010, (byte)data);
                     break;
                 case Register.DX:
-                    DX = data;
+                    DX = (ushort)data;
                     break;
                 case Register.DL:
                     LoadLow(0b10_0011, (byte)data);
@@ -671,7 +671,7 @@ namespace emu
                     LoadHigh(0b01_0011, (byte)data);
                     break;
                 case Register.ZX:
-                    ZX = data;
+                    ZX = (ushort)data;
                     break;
                 case Register.ZL:
                     LoadLow(0b10_0100, (byte)data);
@@ -686,10 +686,10 @@ namespace emu
                     SP = data;
                     break;
                 case Register.MB:
-                    MB = data;
+                    MB = (ushort)data;
                     break;
                 case Register.X:
-                    X = data;
+                    X = (ushort)data;
                     break;
                 case Register.XL:
                     LoadLow(0b10_1000, (byte)data);
@@ -698,7 +698,7 @@ namespace emu
                     LoadHigh(0b01_1000, (byte)data);
                     break;
                 case Register.Y:
-                    Y = data;
+                    Y = (ushort)data;
                     break;
                 case Register.YL:
                     LoadLow(0b10_1001, (byte)data);
@@ -707,7 +707,7 @@ namespace emu
                     LoadHigh(0b01_1001, (byte)data);
                     break;
                 case Register.F:
-                    F = data;
+                    F = (ushort)data;
                     break;
                 default:
                     break;
@@ -730,14 +730,14 @@ namespace emu
         {
             return Split32(reg)[1];
         }
-        ushort GetRegValue(Register register)
+        uint GetRegValue(Register register)
         {
             switch (register)
             {
                 case Register.AX:
                     return AX;
                 case Register.AL:
-                    return GetLow(AX);
+                    return (byte)GetLow(AX);
                 case Register.AH:
                     return GetHigh(AX);
                 case Register.BX:
@@ -788,7 +788,7 @@ namespace emu
                     return 0;
             }
         }
-        void LoadLow(ushort reg, byte data)
+        void LoadLow(uint reg, byte data)
         {
             string Low = Convert.ToString(data, 16).PadLeft(2, '0');
             string High = Convert.ToString(Split16(reg)[1], 16).PadLeft(2, '0');
@@ -823,7 +823,7 @@ namespace emu
                     break;
             }
         }
-        void LoadHigh(ushort reg, byte data)
+        void LoadHigh(uint reg, byte data)
         {
             string High = Convert.ToString(data, 16).PadLeft(2, '0');
             string Low = Convert.ToString(Split16(reg)[0], 16).PadLeft(2, '0');
@@ -867,7 +867,7 @@ namespace emu
 
             return new ushort[] { Convert.ToByte(LowStr, 16), Convert.ToByte(HighStr, 16) };
         }
-        byte[] Split16(ushort data)
+        byte[] Split16(uint data)
         {
             string value = Convert.ToString(data, 16).PadLeft(4, '0');
 
@@ -886,7 +886,7 @@ namespace emu
 
             return new byte[] { Convert.ToByte(LowStr, 16), Convert.ToByte(HighStr, 16) };
         }
-        public ushort Getflag(ushort flag)
+        public uint Getflag(uint flag)
         {
             char[] StrFlags = Convert.ToString(F, 2).PadLeft(16, '0').ToCharArray();
 

@@ -3,16 +3,23 @@
     public class AssemblerErrors
     {
         public Assembler Assembler;
+        public void ErrorSyntax(string From)
+        {
+            Error("19094"); // todo error codes
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("".PadLeft(Assembler.Src[Assembler.LineIndex].Length, '~') + " ");
+            Console.WriteLine("");
+            Console.ResetColor();
+            Console.WriteLine("Error Syntax from " + From);
+        }
         public void ErrorRegisterNotFound(string regsiter)
         {
-            Console.WriteLine(Assembler.Src[Assembler.LineIndex]);
             Error("19094"); // todo error codes
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("".PadLeft(Assembler.Src[Assembler.LineIndex].Length, '~') + " ");
             Console.WriteLine("");
             Console.ResetColor();
             Console.WriteLine("can't find the Register");
-            Environment.Exit(1);
         }
         public void ErrorDirInstructionNotFound(string Instr)
         {
@@ -22,7 +29,6 @@
             Console.WriteLine("");
             Console.ResetColor();
             Console.WriteLine("can't find the Instruction");
-            Environment.Exit(1);
         }
         public void ErrorInstrLength(int ErrorIndex, string[] arg)
         {
@@ -36,7 +42,6 @@
             Console.WriteLine("");
             Console.ResetColor();
             Console.WriteLine("the arguments are not right length");
-            Environment.Exit(1);
         }
         public void ErrorCantFindInputFile(string FilePath)
         {
@@ -45,7 +50,6 @@
             Console.WriteLine(FilePath);
             Console.ResetColor();
             Console.WriteLine("can't find the input file");
-            Environment.Exit(1);
         }
         public void ErrorInstructionNotFound(string Instr)
         {
@@ -55,7 +59,6 @@
             Console.WriteLine("");
             Console.ResetColor();
             Console.WriteLine("can't find the Instruction");
-            Environment.Exit(1);
         }
         public void ErrorLebleNotFound(string Name)
         {
@@ -74,7 +77,7 @@
             Console.WriteLine("\t\t" + "".PadLeft(Name.Length, '~'));
             Console.ResetColor();
             Console.WriteLine("can't find the Lable");
-            Environment.Exit(1);
+            Assembler.HasError = true;
         }
         public void ErrorVariableNotFound(string Name)
         {
@@ -91,7 +94,6 @@
             Console.WriteLine("\t\t" + "".PadLeft(Name.Length, '~'));
             Console.ResetColor();
             Console.WriteLine("can't find the Variable");
-            Environment.Exit(1);
         }
         private void Error(string code)
         {
@@ -99,12 +101,12 @@
             Console.Write("Error");
             Console.ResetColor();
             Console.Write(" BES-" + code + " ");
-            Console.Write("in " + Assembler.CurrentFile + " at line " + Assembler.LineNumber);
-            //Console.WriteLine(Assembler.LineNumber + " " + Assembler.Src.Length + " " + Assembler.OrgSrc[Assembler.LineNumber]);
+            Console.Write("in " + Assembler.CurrentFile + " at line ");
 
-            Console.WriteLine(GetLineNumber(Assembler.Src[Assembler.LineIndex]));
+            Console.WriteLine(Assembler.LineNumber);
             Console.WriteLine("\t\t" + Assembler.Src[Assembler.LineIndex]);
             Console.Write("\t\t");
+            Assembler.HasError = true;
         }
         private void ErrorOutAssembler(string code)
         {
@@ -113,6 +115,7 @@
             Console.ResetColor();
             Console.WriteLine(" BES-" + code + " ");
             Console.Write("\t\t");
+            Assembler.HasError = true;
         }
         private void ErrorPlus(string code)
         {
@@ -131,7 +134,7 @@
         {
             if (Program.Files == null) return Assembler.CurrentFile;
 
-            for (int f = 0; f < Program.Files.Length; f++)
+            for (int f = 0; f < Program.Files.Count; f++)
             {
                 string[] src = File.ReadAllText(Program.Files[f].FullName).Split("\r\n");
                 for (int i = 0; i < src.Length; i++)

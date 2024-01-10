@@ -1,0 +1,278 @@
+; offseted by 2
+; Disk (0 - 13)
+; Addr
+; return ZX
+.global Read:
+ push XL
+ push AX
+ 
+ mov ZX SP
+ 
+ add SP #3
+ 
+ pop XL
+ pop AX
+ 
+ mov SP ZX
+ 
+ ; Code
+ outb #010h AX
+ add XL #11h
+ inb XL ZX
+ 
+ pop AX
+ pop XL
+ 
+ rts
+
+; offseted by 2
+; Disk (0 - 13)
+; StartAddr
+; Count
+; returns using Text_Buffer
+.global Read_Count:
+ push X
+ push AX
+ push BX
+
+ mov ZX SP
+ 
+ add SP #4
+ 
+ pop XH ; Count 
+ pop AX ; StartAddr
+ pop XL ; disk
+ 
+ mov SP ZX
+ 
+ ; Code
+ add XL #11h
+ Read_Count_Loop:
+ outb #010h AX
+ inb XL ZX
+ str BL [Text_Buffer],BH
+ inc BH
+ dec XH
+ jnz [Read_Count_Loop]
+ 
+ pop BX
+ pop AX
+ pop X
+ 
+ rts
+
+; offseted by 3
+; Disk(0-13)
+; Addr
+; Data
+.global Write:
+ push XL
+ push AX
+ push BX
+ 
+ mov ZX SP
+ 
+ add SP #4
+ 
+ pop BX
+ pop AX
+ pop XL 
+ 
+ mov SP ZX
+ 
+ ; Code
+ outb #010h AX
+ add XL #10h
+ outb XL BX
+ 
+ pop BX
+ pop AX
+ pop XL
+ 
+ rts
+
+; offseted by size of Name + 2
+; stack Name (string with 0)
+; disk (0 - 13)
+; deep (1 - 255) where root is 1
+; return Addr (ZX)
+.global GetFile:
+ push X
+ push Y
+ push BX
+ push AX
+ 
+ mov ZX SP
+ 
+ add SP #5
+ 
+ pop XL
+ pop XH
+ 
+ mov SP ZX
+ 
+ ; Code
+ mov Y #000Fh
+ add XL #10h
+ 
+ GetFile_Loop:
+ inc Y
+ outb #10h Y
+ inb XL AX
+ 
+ ; compining AX to '\'
+ cmp AX #5Ch
+ jne [GetFile_Loop]
+ dec XH
+ jnz [GetFile_Loop]
+
+ ; if we are at the dir
+
+ mov ZX SP
+ add SP #7
+
+ GetFile_File_Loop:
+ inc YL
+
+ outb #10h YL
+ inb XL AX
+ 
+ pop BH
+ cmp BH #5Ch
+ jme [GetFile_Error_Name_Could_Not_Be_Found]
+ 
+ mov BH BH
+ jmz [GetFile_Done]
+
+ cmp BH AX
+ jne [GetFile_Retry]
+
+ mov AX [Text_Buffer],BL
+ inc BL
+ 
+ cmp BL #Fh
+ jme [GetFile_Error_Name_Could_Not_Be_Found]
+ 
+ jmp [GetFile_File_Loop]
+
+ GetFile_Retry:
+ push Y
+ jmp [GetFile_File_Loop]
+
+ GetFile_Done:
+ mov SP ZX
+
+ mov YH XL
+
+ outb #10h YL
+ inb YH XL
+
+ inc YL
+ outb #10h YL
+ inb YH XH
+
+ sub XH #30h
+ sub XL #30h
+
+ rol XL #4h
+ ror X #4h
+ mov ZH XH
+
+ inc YL
+ outb #10h YL
+ inb YH XH
+
+ inc YL
+ outb #10h YL
+ inb YH XL
+
+ sub XH #30h
+ sub XL #30h
+
+ rol XL #4h
+ ror X #4h
+ mov ZL XH
+
+ add ZX #200h
+
+ jmp [GetFile_Return] 
+
+ GetFile_Error_Name_Could_Not_Be_Found:
+ pop AX
+ pop BX
+ pop Y
+ pop X
+ mov AL #1
+ sef #3
+ jmp [GetFile_Return_With_Error]
+
+
+ GetFile_Return:
+ pop AX
+ pop BX
+ pop Y
+ pop X
+
+ GetFile_Return_With_Error:
+ rts
+
+; offseted by 3
+; Disk (0 - 13)
+; File offset
+; returns using Text_Buffer
+.global Get_Continue_Addr:
+ push AX
+ push BX
+ push X
+
+ mov ZX SP
+ 
+ add SP #4
+ 
+ pop AX
+ pop XL
+ 
+ mov SP ZX
+ 
+ ; code
+ push XL
+ push AX
+ push #4
+ call [Read_Count]
+ mov XH #0
+ add SP #3
+ mov AL [Text_Buffer],0
+ mov BL [Text_Buffer],1
+ rol BL #4
+ or AL BL
+ mov AH [Text_Buffer],2
+ mov BH [Text_Buffer],3
+ rol BH #4
+ or AH BH
+ call [BinToBcd]
+ mov XH #0
+ mov XL AL
+ and XL #0Fh
+ str XL [Text_Buffer],XH
+ inc XH
+ mov XL AL
+ and XL #F0h
+ str XL [Text_Buffer],XH
+ inc XH
+ mov XL AH
+ and XL #0Fh
+ str XL [Text_Buffer],XH
+ inc XH
+ mov XL AH
+ and XL #F0h
+ str XL [Text_Buffer],XH
+
+ pop X
+ pop BX
+ pop AX
+
+ rts
+
+
+.org 37000h
+Text_Buffer:

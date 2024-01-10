@@ -1,0 +1,68 @@
+$KB #= 2
+$Screen #= 1
+
+_Start_BIOS:
+push #0
+push #FEh
+call [Read]
+
+mov ZX AL
+
+push #0
+push #FFh
+call [Read]
+
+mov ZL ZX
+mov ZH AL
+
+cmp ZX #55AAh
+jme [Boot]
+
+jmp 
+
+Boot:
+; jumping to the BootLoader
+jmp &01000h
+
+; AX Char
+.global COut:
+outb %Screen AX
+rts
+
+; returned in AX
+.global CIn:
+inb %KB AX
+rts
+
+; AL Color data
+.global PixelOut:
+; TODO add some more data
+outb %Screen AL
+rts
+
+Error_Cant_Find_An_Boot_Disk:
+mov BX #0
+mov AX #0
+mov AL #1
+Print_Error_Disk_Loop:
+mov CX [Boot_Disk_Error],BH
+jmz [Exit]
+mov BL AL
+mov AX CX
+call [COut]
+mov AL BL
+inc BH
+jmp [Print_Error_Disk_Loop]
+
+; AL Exit Code
+Exit:
+mov &FFFFE AL
+halt #0
+jmp $
+
+Boot_Disk_Error:
+.str "can't find an bootable disk"
+
+.include src/asm/FileTest
+
+.include src/asm/BootLoader

@@ -1,5 +1,7 @@
 00 HOME
 10 LET TEST = 0
+11 LET Hello = 10
+12 TEST = 65535
 20 PRINT TEST
 30 GOSUB 100
 39 REM here we set in a loop
@@ -8,7 +10,6 @@
 51 PRINT 10 - 10
 52 PRINT 10 * 2
 53 PRINT 10 / 2
-54 PRINT 1 + 5 * 2 / 4 + (2 + 3) 
 
 100 PRINT "Hello World"
 110 RETURN

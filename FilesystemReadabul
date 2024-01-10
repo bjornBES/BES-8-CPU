@@ -1,6 +1,0 @@
-root/
-boot/
-
-dos.Basm test \
-OS.Basm .org 0000h
-.word 55FFh \

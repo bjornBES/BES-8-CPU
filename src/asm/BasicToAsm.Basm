@@ -13,13 +13,13 @@ outb #1 A
 
 
 ; 30 GOSUB 100
-call SUB1
+call [SUB1]
 
 ; 39 REM here we set in a loop
 
 ; 40 goto 40
 JmpLoc1:
-jmp JmpLoc1
+jmp [JmpLoc1]
 
 ; 50 PRINT 1 + 10
 mov A #10
@@ -71,11 +71,11 @@ SUB1:
 ; 100 PRINT "Hello World"
 mov XH #0
 PrintLoop1:
-mov XL Message, XH
-jmz Exit_Print_Loop1
+mov XL [Message], XH
+jmz [Exit_Print_Loop1]
 outb #0 XL
 inc XH
-jnc PrintLoop1
+jnc [PrintLoop1]
 Exit_Print_Loop1:
 
 ; 110 RETURN

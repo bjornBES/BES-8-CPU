@@ -1,0 +1,28 @@
+.org 01000h
+; this is the boot loader
+; here the user can write there OS from
+; at the start the user only have 1 sectors to use
+; but can add some more if needed
+
+; this is where we start the boot loader at 01000h
+mov AX #0
+mov X #0
+
+Write_Message_Loop:
+mov AX [Message],X
+jmz [Exit_Loop]
+inc X
+call [COut]
+Exit_Loop:
+
+mov AL #0
+mov AH #0
+int
+
+Message:
+.str "Hello World"
+
+.include src/Kernel
+
+.org 010FEh
+.word 55AAh

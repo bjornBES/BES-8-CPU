@@ -9,13 +9,13 @@ namespace emu
 {
     public class MEM
     {
-        public const int MAX_MEM = 1024 * 64;
+        public const uint MAX_MEM = 16384 * 64;
         public const int MEM_BANK = 0x3FFF + 1;
-        public ushort[] mem = new ushort[MAX_MEM];
+        public uint[] mem = new uint[MAX_MEM];
 
-        public List<ushort[]> banks = new List<ushort[]>();
+        public List<uint[]> banks = new List<uint[]>();
 
-        public void Reset(ushort[] program)
+        public void Reset(uint[] program)
         {
             ResetBanks();
             mem.Initialize();
@@ -23,12 +23,12 @@ namespace emu
             Console.WriteLine(program.Length);
             for (int i = 0; i < program.Length; i++)
             {
-                Write(i, program[i], 0);
+                Write((uint)i, program[i], 0);
             }
         }
         const ushort Bank_addr_MIN = 0xA000;
         const ushort Bank_addr_MAX = 0xCFFF;
-        public ushort Read(ushort addr, ushort MB)
+        public uint Read(uint addr, ushort MB)
         {
             if(addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
             {
@@ -39,18 +39,18 @@ namespace emu
                 return mem[addr];
             }
         }
-        public ushort Read(uint addr, ushort MB)
+        public ushort Read(ushort addr, ushort MB)
         {
             if (addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
             {
-                return banks[MB][addr - Bank_addr_MIN];
+                return (ushort)banks[MB][addr - Bank_addr_MIN];
             }
             else
             {
-                return mem[addr];
+                return (ushort)mem[addr];
             }
         }
-        public void Write(int addr, ushort data, ushort MB)
+        public void Write(uint addr, uint data, ushort MB)
         {
             if (addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
             {
@@ -69,7 +69,7 @@ namespace emu
         }
         public void AddBank(ushort count = 1)
         {
-            ushort[] BankArray = new ushort[MEM_BANK];
+            uint[] BankArray = new uint[MEM_BANK];
             BankArray.Initialize();
             for (int i = 0; i < count; i++)
             {

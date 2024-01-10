@@ -1,29 +1,27 @@
-.text
+$GeneralAddr = 0
 
-push #0
-push #0
-push #1000h
-call Write_Disk
-add SP #3
+add DX #0
 
-push #0
-push #0
-call Read_Disk
-add SP #2
+mov %GeneralAddr #55h
 
-call Print_Message
+mov AX #10h
+mov AX %GeneralAddr
+mov BX AX
 
-mov XL #FFh
+mov &37010h #55h
+mov &37010h AX
+mov &37010h $
 
-Wait_Loop:
-dec XL
-jnz Wait_Loop
+push AX
+push #10
 
-call _main
+pop BX
+pop %GeneralAddr
 
-cmp ZX #0
-jne Fail
-jmp $
+add BX CX
+add CX #1
 
-Fail:
-HALT
+sub BX CX
+sub CX #1
+
+halt #0

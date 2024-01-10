@@ -15,12 +15,21 @@ public class Program
     static readonly Assembler assembler = new();
     static bool UseDebuger = false;
     static bool WriteBin = false;
-    public static FileInfo[] Files = null;
+    public static List<FileInfo> Files = new List<FileInfo>();
+
+    public const int Max_Length = 0xFFFFF + 1;
+    public const int Pading_Length = 5;
+
     public static void Main(string[] args)
     {
         Console.CursorVisible = false;
 
-        DecodeArguments(args);
+        string SettingsFile = args[0];
+        Conv(ref SettingsFile);
+
+        DecodeArguments(File.ReadAllText(SettingsFile).Split("\r\n"));
+
+        //Environment.Exit(0);
         if (InputFile == "\0\0") Exit(1);
         if (OutputFile == "")
         {
@@ -38,6 +47,10 @@ public class Program
         if (ProgramPath != "")
         {
             Conv(ref ProgramPath);
+        }
+        else
+        {
+            ProgramPath = InputFile;
         }
         if (OutputSrcFile != "")
         {
@@ -61,24 +74,61 @@ public class Program
         if (Directory.Exists(ProgramPath))
         {
             DirectoryInfo Programdirectory = new DirectoryInfo(ProgramPath);
-            Files = Programdirectory.GetFiles("*.Basm");
+            Files = Programdirectory.GetFiles("*.Basm").ToList();
+            List<FileInfo> FilesCopy = Files;
             string src;
-            src = ".newfile1011 " + Input + "\r\n";
+            src = ".newfile " + Input + "\r\n";
             src += File.ReadAllText(Input) + "\r\n";
-            for (int i = 0; i < Files.Length; i++)
+            for (int i = 0; i < src.Split("\r\n").Length; i++)
             {
-                if (Files[i].FullName != Input)
+                bool InTheSame = false;
+                if (src.Split("\r\n")[i].Contains(".include"))
                 {
-                    src += ".newfile1011 " + OGPorgramPath + "\\" + Files[i].Name + "\r\n";
-                    src += File.ReadAllText(Files[i].FullName) + "\r\n";
+                    string file = Environment.CurrentDirectory
+                        + "\\" + src.Split("\r\n")[i].Split(' ')[1] + ".Basm";
+                    file = file.Replace("/", "\\"); 
+                    for (int f = 0; f < FilesCopy.Count; f++)
+                    {
+                        if(file == FilesCopy[f].FullName)
+                        {
+                            FilesCopy.RemoveAt(f);
+                            InTheSame = true;
+                        }
+                    }
+                    if(InTheSame == true)
+                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n; in the same dir " + file + "\r\n" + File.ReadAllText(file));
+                    else
+                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
                 }
             }
+
+            for (int f = 0; f < FilesCopy.Count; f++)
+            {
+                if (FilesCopy[f].FullName != Input)
+                {
+                    src += ".newfile " + OGPorgramPath + "\\" + FilesCopy[f].Name + "\r\n";
+                    src += File.ReadAllText(FilesCopy[f].FullName) + "\r\n";
+                }
+            }
+
             assembler.Build(src.Split("\r\n"));
         }
         else
         {
             string src = File.ReadAllText(Input);
-            src = ".newfile1011 " + Input + "\r\n" + src;
+            src = ".newfile " + Input + "\r\n" + src;
+
+            for (int i = 0; i < src.Split("\r\n").Length; i++)
+            {
+                if (src.Split("\r\n")[i].Contains(".include"))
+                {
+                    string file = Environment.CurrentDirectory
+                        + "\\" + src.Split("\r\n")[i].Split(' ')[1] + ".Basm";
+                    Console.WriteLine("INFO " + file);
+                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
+                    Environment.Exit(0);
+                }
+            }
 
             assembler.Build(src.Split("\r\n"));
         }
@@ -89,9 +139,11 @@ public class Program
             File.WriteAllLines(OutputSrcFile, assembler.OrgSrc);
         }
 
+        if(assembler.HasError)
+            Environment.Exit(0);
 
         Console.WriteLine("starter");
-
+        //Environment.Exit(0);
         if (DoClear) Console.Clear();
 
         Console.WriteLine("Writing");
@@ -105,19 +157,24 @@ public class Program
         string outputString = "";
 
         // main
-        for (int i = 0; i < assembler.MCcode.Length; i++)
+        for (int i = 0; i < Max_Length; i++)
         {
             if (string.IsNullOrEmpty(assembler.MCcode[i]) == false)
             {
+                //if (i >= 0x30000 && i <= 0x30FFF) continue;
+                //if (i >= 0x37000 && i <= 0xFFFF9) continue;
+                //if (i == 0x31000) outputString += "%31000\r\n";
+                //if (i == 0xFFFFA) outputString += "%FFFFA\r\n";
                 //Console.WriteLine("data " + assembler.MCcode[i]);
                 string Value = assembler.MCcode[i].Trim().ToUpper();
-                outputString += Value.PadLeft(4, '0') + "|";
+                outputString += Value.PadLeft(Pading_Length, '0') + "|";
                 // info
 
-                int percentComplete = (int)(0.5f + ((100f * i) / 0x1FFFF));
+
+                int percentComplete = (int)(0.5f + ((100f * i) / (Max_Length - 1)));
                 if (DoClear == false)
                 {
-                    int ProgressBar = (int)(0.5f + (((Console.WindowWidth - 1) * i) / 0x1FFFF));
+                    int ProgressBar = (int)(0.5f + (((Console.WindowWidth - 1) * i) / (Max_Length - 1)));
                     for (int p = SaveProgressBar; p < ProgressBar; p++)
                     {
                         Console.SetCursorPosition(p, Console.WindowHeight - 1);
@@ -126,41 +183,40 @@ public class Program
                         Console.Write("-");
                     }
                     SaveProgressBar = ProgressBar;
+                    Console.SetCursorPosition((Console.WindowWidth - 18 / 2) / 2, Console.WindowHeight - 2);
+                    Console.Write(Convert.ToString(i, 16).PadLeft(5, '0') + " / " + Convert.ToString(Max_Length, 16));
+                    Console.SetCursorPosition((Console.WindowWidth - 14 / 2) / 2, Console.WindowHeight - 1);
+                    Console.Write(percentComplete.ToString().PadLeft(3, '0') + "% / 100%");
                 }
-                Console.SetCursorPosition((Console.WindowWidth - 18 / 2) / 2, Console.WindowHeight - 2);
-                Console.Write(Convert.ToString(i, 16).PadLeft(5, '0') + " / 1FFFF");
-                Console.SetCursorPosition((Console.WindowWidth - 12 / 2) / 2, Console.WindowHeight - 1);
-                Console.Write(percentComplete.ToString().PadLeft(3, '0') + "% / 100%");
             }
         }
+        Console.WriteLine("DONE");
         File.WriteAllText(OutputFile, outputString);
 
     }
     static void WriteOutBin()
     {
         string outputString = "";
-
-
-        for (int i = 0; i < assembler.MCcode.Length; i++)
+        for (int i = 0; i < Max_Length; i++)
         {
             if (string.IsNullOrEmpty(assembler.MCcode[i]) == false)
             {
-                if (i >= 0x10000 && i <= 0x11FFF) continue;
-                if (i >= 0x14000 && i <= 0x16FFF) continue;
+                if (i >= 0x30000 && i <= 0x30FFF) continue;
+                if (i >= 0x37000 && i <= 0xFFFF9) continue;
                 //Console.WriteLine("data " + assembler.MCcode[i]);
                 string Value = assembler.MCcode[i].Trim().ToUpper();
                 if (i % 16 == 0)
                 {
                     if (i == 0)
                     {
-                        outputString += "00000: ";
+                        outputString += "".PadLeft(Pading_Length, '0') + ": ";
                     }
                     else
                     {
-                        outputString += "\n" + Convert.ToString(i, 16).PadLeft(5, '0').ToUpper() + ": ";
+                        outputString += "\n" + Convert.ToString(i, 16).PadLeft(Pading_Length, '0').ToUpper() + ": ";
                     }
                 }
-                outputString += Value.PadLeft(4, '0') + " ";
+                outputString += Value.PadLeft(Pading_Length, '0') + " ";
             }
         }
         if (File.Exists(BinFile))
@@ -178,26 +234,26 @@ public class Program
         Environment.Exit(exitCode);
     }
 
-    static void DecodeArguments(string[] args)
+    static void DecodeArguments(string[] text)
     {
-        DecodeInstr(args, "-i", ref InputFile);
-        DecodeInstr(args, "-o", ref OutputFile);
-        DecodeInstr(args, "-v", ref assembler.VarPC);
-        DecodeInstr(args, "-s", ref DoClear, true);
-        DecodeInstr(args, "-vh", SetvarHex);
-        DecodeInstr(args, "-I", ref ProgramPath);
-        DecodeInstr(args, "-B", useBinFiles);
-        DecodeInstr(args, "-D", useDebug);
+        DecodeInstr(text, "Input", ref InputFile);
+        DecodeInstr(text, "InputDir", ref ProgramPath);
+        DecodeInstr(text, "Output", ref OutputFile);
+        DecodeInstr(text, "VariableCounter", ref assembler.VariablePC);
+        DecodeInstr(text, "Silent", ref DoClear, true);
+        DecodeInstr(text, "UseSections", ref assembler.UseSections);
+        DecodeInstr(text, "UseBinary", useBinFiles);
+        DecodeInstr(text, "UseDebuger", useDebug);
     }
 
     static void DecodeInstr(string[] args, string instr, ref string Result)
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
-                i++;
-                Result = args[i];
+                Result = args[i].Split(" ", 2)[1];
+                return;
             }
         }
     }
@@ -205,21 +261,24 @@ public class Program
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
-                i++;
-                if (args[i] == TRUE)
+                string[] instrs = args[i].Split(" "); 
+                for (int a = 1; a < instrs.Length; a++)
                 {
-                    Result = true;
-                }
-                else if (args[i] == FALSE)
-                {
-                    Result = false;
-                }
-                else
-                {
-                    Exit(1);
-                    Result = false;
+                    if (instrs[a] == TRUE)
+                    {
+                        Result = true;
+                    }
+                    else if (instrs[a] == FALSE)
+                    {
+                        Result = false;
+                    }
+                    else
+                    {
+                        Exit(1);
+                        Result = false;
+                    }
                 }
             }
         }
@@ -228,7 +287,7 @@ public class Program
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
                 Result = TO;
             }
@@ -238,10 +297,24 @@ public class Program
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
-                i++;
-                Result = int.Parse(args[i]);
+                string[] instrs = args[i].Split(" ");
+                for (int a = 0; a < instrs.Length; a++)
+                {
+                    if (instrs[a].Contains("0x"))
+                    {
+                        Result = Convert.ToInt32(instrs[a].Remove(0, 2), 16);
+                    }
+                    else if (instrs[a].Contains("0b"))
+                    {
+                        Result = Convert.ToInt32(instrs[a].Remove(0, 2), 2);
+                    }
+                    else
+                    {
+                        Result = int.Parse(instrs[a].Remove(0, 2));
+                    }
+                }
             }
         }
     }
@@ -249,10 +322,24 @@ public class Program
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
-                i++;
-                Result = ushort.Parse(args[i]);
+                string[] instrs = args[i].Split(" ");
+                for (int a = 1; a < instrs.Length; a++)
+                {
+                    if (instrs[a].Contains("0x"))
+                    {
+                        Result = Convert.ToUInt32(instrs[a].Remove(0,2), 16);
+                    }
+                    else if (instrs[a].Contains("0b"))
+                    {
+                        Result = Convert.ToUInt32(instrs[a].Remove(0, 2), 2);
+                    }
+                    else
+                    {
+                        Result = uint.Parse(instrs[a].Remove(0, 2));
+                    }
+                }
             }
         }
     }
@@ -260,10 +347,13 @@ public class Program
     {
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == instr)
+            if (args[i].Contains(instr))
             {
-                i++;
-                func(i, args);
+                string[] instrs = args[i].Split(" ");
+                for (int a = 0; a < instrs.Length; a++)
+                {
+                    func(a, instrs);
+                }
             }
         }
     }
@@ -282,16 +372,6 @@ public class Program
         TokenFile = "./Tokens.txt";
         return false;
     }
-    static bool SetvarHex(int index, string[] args)
-    {
-        string Value = args[index];
-        ushort Dec = Convert.ToUInt16(Value, 16);
-
-        assembler.VarPC = Dec;
-
-        return false;
-    }
-
     static void Conv(ref string file)
     {
         file = file.Replace(".\\", Environment.CurrentDirectory + "\\");

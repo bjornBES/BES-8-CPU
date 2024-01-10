@@ -1,0 +1,131 @@
+; the high part of the cursor is the Y cursor
+; the low part of the cursor is the X cursor
+$Cursor = 6F3Fh
+.text
+; cheaking for a keyboard
+outb [KeyBoardPort] #1010h
+inb [KeyBoardPort] AX
+cmp AX #1
+jne [Keyboard_Not_Found]
+
+; clearing the scrren
+outb #1 #01FFh
+
+; here is the main loop where the user can write
+Write_loop:
+mov AX #0
+; get an input from the keyboard into AX
+inb [KeyBoardPort] AX
+
+; here we are cmp the AX to a KW enter
+; if Input == KW_ENT
+cmp AX #KW_ENT
+jme [ENTER]
+
+; else if Input
+
+; else
+cmp AX #NULL
+jme [Write_loop]
+
+call [Convert_Mouse]
+
+mov BX [Command_Buffer],ZX
+cmp BX #51FFh
+jme [OverflowError]
+
+; writing the value into Command_Buffer
+str AX [Command_Buffer],ZX
+
+jmp [Write_loop]
+
+; returns in ZX
+Convert_Mouse:
+mov BX [CursorStartValue]
+
+push F
+push BX
+clf #4
+
+mov ZX %Cursor
+sub ZL BL
+jmc [OverflowError]
+sub ZH BH
+jmc [OverflowError]
+
+; compining the ZX reg into 1
+mov BX ZX
+mov ZX #0
+add BL BH
+mov ZX BL
+
+
+pop BX
+pop F
+rts
+
+ENTER:
+mov X %Cursor
+mov BX [CursorStartValue]
+
+clf #4
+
+; getting the pos of the cursor
+call [Convert_Mouse]
+
+sti #0Ah [Code],ZX
+
+inc XH
+jmc [OverflowError]
+mov XL BL
+str X %Cursor
+
+jmp [Write_loop]
+
+OverflowError:
+mov AL #1
+mov AH #3
+jmp [Exit]
+
+Keyboard_Not_Found:
+mov AL #1
+mov AH #2
+jmp [Exit]
+
+; AL Exitcode
+; AH ErrorCode if its used
+Exit:
+str AL &FFFFEh
+halt #0
+
+.data
+KeyBoardPort:
+.byte 0
+CursorStartValue:
+.word 6F3Fh
+
+Command_Buffer:
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 0000h
+.word 51FFh
+
+
+; here all the code is going to be at using pointers and shit
+Code:
+.word 0000h

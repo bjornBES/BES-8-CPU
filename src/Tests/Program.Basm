@@ -1,9 +1,5 @@
 $GeneralAddr *= 9000h
 
-.data
-
-.word 5500h
-
 .text
 
 mov AX #55AAh
@@ -43,12 +39,40 @@ cmp BH #11110000b
 
 jme End
 
-jmp $
+; jumps to the main func
 
+
+call GoMainFunc
+
+sti #0 &1FFFEh
+halt #0
 End:
 
+; setting the exit code to be 1
+sti #1 &1FFFEh
+; halting with 0 errors
 halt #0
+
+GoMainFunc:
+jmpl _main_
+
+.global _main_:
+pushr
+.out _main_
+
+mov ZX #0
+mov AX #0
+; exiting the program
+int
+
+jmp _Exit
+
+_Exit:
+popr
+pop PC
+rts
 
 .data
 .org 1FFFFh
 .word 1101h
+

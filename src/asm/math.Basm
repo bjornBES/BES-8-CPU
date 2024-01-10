@@ -1,0 +1,101 @@
+; A stack
+; B stack
+; return ZX
+.global MOD:
+push AX
+push BX
+
+mov ZX SP
+
+add SP #3
+
+pop BX
+pop AX
+
+mov SP ZX
+
+; org A in Z
+mov ZX AX
+
+;q = A / B
+;AX = AX / BX
+div AX BX
+
+;p = q * b
+;AX = AX * BX
+mul AX BX
+
+;r = p - a
+;AX = AX - ZX
+sub AX ZX
+
+;ZX = r
+;ZX = AX
+mov ZX AX
+
+pop BX
+
+pop AX
+
+rts
+
+; data in AX
+; return in BX AX
+.global BinToBcd:
+ push X
+ push ZX
+
+ ; AX % 10
+ push AX
+ push #10
+ call [MOD]
+ add SP #2
+
+ mov XL ZL
+
+ ; AX / 10
+ div AX #10
+
+ ; AX % 10
+ push AX
+ push #10
+ call [MOD]
+ add SP #2
+
+ rol ZL #4
+
+ or XL ZL
+
+ ; AX / 10
+ div AX #10
+
+ ; AX % 10
+ push AX
+ push #10
+ call [MOD]
+ add SP #2
+
+ mov XH ZL
+
+ ; AX / 10
+ div AX #10
+
+ ; AX % 10
+ push AX
+ push #10
+ call [MOD]
+ add SP #2
+
+ rol ZL #4
+
+ or XH ZL
+
+ ; AX / 10
+ div AX #10
+
+ push AX
+ mov AX X
+ pop BX
+ pop ZX
+ pop X
+ rts

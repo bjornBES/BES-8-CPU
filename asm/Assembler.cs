@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,20 +14,25 @@ namespace asm
         List<Lable> Alllables = new List<Lable>();
         List<Lable> GlobalLables = new List<Lable>();
         List<Variables> Variables = new List<Variables>();
-        public string[] MCcode = new string[0x1FFFF + 1];
+        List<Variables> ImmVariables = new List<Variables>();
+        List<Variables> PointerVariables = new List<Variables>();
+        public string[] MCcode = new string[0xFFFFF + 1];
         public List<string> Tokens = new List<string>();
         Dictionary<string, string> KeyPattens = new Dictionary<string, string>();
         public Dictionary<string, byte> Registers = new Dictionary<string, byte>();
         public uint PC = 0x0000;
-        public uint VarPC = 0x11000;
+        public uint VariablePC = 0x31000;
         public string[] OrgSrc = new string[0];
         public string[] Src;
         public string CurrentFile;
         public int LineNumber = 0;
         public int LineIndex = 0;
+        public bool UseSections = true;
 
         bool InCodeSection = false;
         bool InDataSection = false;
+
+        public bool HasError = false;
         public void Build(string[] src)
         {
             Src = (string[])src.Clone();
@@ -37,7 +43,7 @@ namespace asm
             if (Registers.Count == 0)
             {
                 MCcode.Initialize();
-                Array.Fill(MCcode, "0000", 0x0000, 0x1FFFF + 1);
+                Array.Fill(MCcode, "0000", 0x0000, 0xFFFFF + 1);
                 Registers.Add("A", 0b00_0000);
                 Registers.Add("AX", 0b00_0000); Registers.Add("AL", 0b10_0000); Registers.Add("AH", 0b01_0000);
                 Registers.Add("B", 0b00_0001);
@@ -60,14 +66,14 @@ namespace asm
                 Registers.Add("F", 0b00_1111);
             }
 
-            KeyPattens.Add("NULL", "00");
+            KeyPattens.Add("NULL", "#00");
             KeyPattens.Add("KW_ENT", "#Dh");
             KeyPattens.Add("KW_ESC", "#1Bh");
             KeyPattens.Add("KW_BS", "#8h");
             KeyPattens.Add("KW_SP", "#20h");
 
 
-            Console.WriteLine("varPC is at " + Convert.ToString(VarPC, 16));
+            Console.WriteLine("varPC is at " + Convert.ToString(VariablePC, 16));
             Console.WriteLine("DONE");
 
             Console.WriteLine("Start MC " + MCcode.Length);
@@ -78,12 +84,12 @@ namespace asm
         }
         void Loop(string[] src)
         {
-            uint VarPCCopy = VarPC;
-            for (int Q = 0; Q < 2; Q++)
+            uint VarPCCopy = VariablePC;
+            for (int Q = 0; Q < 2 && HasError == false; Q++)
             {
                 LineNumber = 0;
                 OrgSrc = (string[])src.Clone();
-                VarPC = VarPCCopy;
+                VariablePC = VarPCCopy;
                 MCcode.Initialize();
                 PC = 0;
                 for (LineIndex = 0; LineIndex < src.Length; LineIndex++)
@@ -171,17 +177,18 @@ namespace asm
                             AssemblerInstruction(instr, arg, Q);
                             continue;
                         }
-                        if (InCodeSection == true)
+                        if (UseSections == false || InCodeSection == true)
                         {
-                            MCcode[PC] = GetInstrCode(instr, out Instructions instruction).PadRight(3, '0');
+                            MCcode[PC] = GetInstrCode(instr, out Instructions instruction).PadRight(2, '0');
                             InstructionHasLength(instruction, arg, instr);
 
                             OrgSrc[LineIndex] = instr.PadRight(4, ' ') + "\t\t";
-                            OrgSrc[LineIndex] += MCcode[PC].PadLeft(3, '0') + "| ";
-                            MCcode[PC] += "|";
-                            string TokenBuffer = Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr;
+                            OrgSrc[LineIndex] += MCcode[PC].PadLeft(2, '0') + "/|F ";
+                            MCcode[PC] += "/|F";
+                            string TokenBuffer = Convert.ToString(PC, 16).PadLeft(5, '0') + " | " + instr;
                             PC++;
                             string AM = "F";
+                            string AM1 = "F";
                             int offset = 0;
                             if (HasArgs)
                             {
@@ -217,40 +224,71 @@ namespace asm
 
                                             OrgSrc[LineIndex] += ConvTo32(16, arg[a], BASE).PadLeft(8, '0') + " ";
 
-                                            AM = "8";
+                                            if (AM == "F")
+                                                AM = "8";
+                                            else
+                                                AM1 = "8";
                                             offset++;
                                             offset++;
+                                            continue;
                                         }
                                         else
                                         {
                                             TokenBuffer += " Imm " + arg[a];
+                                            char EndChar = arg[a][arg[a].Length - 1];
                                             MCcode[PC] = ConvFrom(ref arg[a]);
-                                            OrgSrc[LineIndex] += MCcode[PC].PadLeft(4, '0') + " ";
                                             PC++;
+                                            arg[a] = arg[a].TrimEnd('h', 'b');
+                                            int BASE = 16;
+
+                                            OrgSrc[LineIndex] += ConvTo32(16, arg[a], BASE).PadLeft(5, '0') + " ";
                                             offset++;
-                                            AM = "0";
+
+                                            if (AM == "F")
+                                                AM = "0";
+                                            else
+                                                AM1 = "0";
+                                            continue;
                                         }
                                     }
                                     else if (arg[a].StartsWith('&'))
                                     {
                                         if (arg[a].Length == 5)
                                         {
-                                            AM = "5";
+                                            if (AM == "F")
+                                                AM = "5";
+                                            else
+                                                AM1 = "5";
                                         }
                                         else
                                         {
-                                            AM = "1";
+                                            if (AM == "F")
+                                                AM = "1";
+                                            else
+                                                AM1 = "1";
                                         }
                                         arg[a] = arg[a].TrimStart('&');
                                         TokenBuffer += " addr " + arg[a];
+                                        char EndChar = arg[a][arg[a].Length - 1];
+
                                         MCcode[PC] = ConvFrom(ref arg[a]);
-                                        OrgSrc[LineIndex] += MCcode[PC].PadLeft(4, '0') + " ";
                                         PC++;
+                                        arg[a] = arg[a].TrimEnd('h', 'b');
+
+                                        int BASE = 10;
+
+                                        if (EndChar == 'h') BASE = 16;
+                                        if (EndChar == 'b') BASE = 2;
+                                        OrgSrc[LineIndex] += ConvTo32(16, arg[a], BASE).PadLeft(5, '0') + " ";
                                         offset++;
+                                        continue;
                                     }
                                     else if (arg[a].Contains(','))
                                     {
-                                        AM = "3";
+                                        if (AM == "F")
+                                            AM = "3";
+                                        else
+                                            AM1 = "3";
                                         string Lable = "";
                                         string Register = "";
                                         if (arg.Length - 1 == a + 1)
@@ -265,19 +303,32 @@ namespace asm
                                         }
                                         a++;
 
+                                        if (Lable.StartsWith('['))
+                                        {
+                                            Lable = Lable.Replace("[", "");
+                                            Lable = Lable.Replace("]", "");
+                                            MCcode[PC] = "LABLE:" + Lable;
+                                        }
+                                        else
+                                        {
+                                            ErrorSyntax("ARGS");
+                                        }
                                         TokenBuffer += " Indexed " + Lable + " " + Register;
-                                        MCcode[PC] = "LABLE:" + Lable;
-                                        PC++;
                                         if (Registers.TryGetValue(Register, out byte Value))
                                         {
+                                            offset++;
+                                            PC++;
                                             MCcode[PC] = ConvTo(16, Value.ToString().PadLeft(6, '0'), 10).PadLeft(4, '0');
+                                        }
+                                        else if (char.IsNumber(Register[0]))
+                                        {
+                                            MCcode[PC] += "+" + Register;
                                         }
                                         else
                                         {
                                             ErrorRegisterNotFound(Register);
                                         }
                                         PC++;
-                                        offset++;
                                         offset++;
                                         continue;
                                     }
@@ -286,61 +337,90 @@ namespace asm
                                         TokenBuffer += " Reg " + arg[a];
                                         MCcode[PC] = ConvTo(16, Value.ToString().PadLeft(6, '0'), 10).PadLeft(4, '0');
                                         OrgSrc[LineIndex] += MCcode[PC].PadLeft(4, '0') + " ";
-                                        AM = "2";
+                                        if (AM == "F")
+                                            AM = "2";
+                                        else
+                                            AM1 = "2";
                                         PC++;
                                         offset++;
+                                        continue;
                                     }
                                     else if (arg[a].StartsWith('%'))
                                     {
-                                        if ((UseVariables(arg[a]) & 0x10000) == 0x10000)
-                                        {
-                                            AM = "5";
-                                            OrgSrc[LineIndex] += ConvTo20(16, UseVariables(arg[a]).ToString(), 10).PadLeft(4, '0');
-                                            MCcode[PC] = ConvTo20(16, UseVariables(arg[a]).ToString(), 10).PadLeft(4, '0');
-                                        }
+                                        string Addr = Convert.ToString(UseVariables(arg[a], out string NEWAM), 16) + "h";
+
+                                        if (AM == "F")
+                                            AM = NEWAM;
                                         else
-                                        {
-                                            OrgSrc[LineIndex] += ConvTo(16, UseVariables(arg[a]).ToString(), 10).PadLeft(4, '0');
-                                            MCcode[PC] = ConvTo(16, UseVariables(arg[a]).ToString(), 10).PadLeft(4, '0');
-                                            AM = "1";
-                                        }
-                                        TokenBuffer += " Var " + arg[a];
+                                            AM1 = NEWAM;
+
+                                        MCcode[PC] = ConvFrom(ref Addr);
                                         PC++;
+
+                                        Addr = Addr.TrimEnd('h', 'b');
+                                        int BASE = 16;
+
+                                        OrgSrc[LineIndex] += ConvTo32(16, Addr, BASE).PadLeft(5, '0') + " ";
                                         offset++;
+                                        TokenBuffer += " Var " + arg[a];
+                                        continue;
                                     }
                                     else if (arg[a].StartsWith('$'))
                                     {
                                         if ((PC & 0x10000) == 0x10000)
                                         {
-                                            AM = "5";
+                                            if (AM == "F")
+                                                AM = "5";
+                                            else
+                                                AM1 = "5";
                                         }
                                         else
                                         {
-                                            AM = "1";
+                                            if (AM == "F")
+                                                AM = "1";
+                                            else
+                                                AM1 = "1";
                                         }
                                         ushort CopyPC = (ushort)(PC - (offset + 1));
+                                        string addr = Convert.ToString(CopyPC, 16) + "h";
                                         TokenBuffer += " Get current Addr at " + ConvTo(16, CopyPC.ToString(), 10);
-                                        MCcode[PC] = ConvTo(16, CopyPC.ToString(), 10);
-                                        OrgSrc[LineIndex] += ConvTo(16, CopyPC.ToString(), 10).PadLeft(4, '0') + " ";
+
+                                        MCcode[PC] = ConvFrom(ref addr);
                                         PC++;
+                                        addr = addr.TrimEnd('h', 'b');
+                                        OrgSrc[LineIndex] += ConvTo(16, CopyPC.ToString(), 10).PadLeft(4, '0') + " ";
                                         offset++;
+                                        continue;
                                     }
-                                    else
+                                    else if (arg[a].StartsWith('['))
                                     {
                                         if (Q == 1)
                                         {
+                                            arg[a] = arg[a].Replace("[", "");
+                                            arg[a] = arg[a].Replace("]", "");
+
                                             MCcode[PC] = "LABLE:" + arg[a];
 
                                             TokenBuffer += " Lable " + arg[a];
 
-                                            AM = "1";
+                                            if (AM == "F")
+                                                AM = "1";
+                                            else
+                                                AM1 = "1";
                                             PC++;
                                             offset++;
                                             continue;
                                         }
-
                                     }
+                                    else
+                                    {
+                                        ErrorSyntax("ARGS ERROR LABLE");
+                                    }
+
                                 }
+                                MCcode[PC - (offset + 1)] = MCcode[PC - (offset + 1)].Replace("/", AM);
+                                OrgSrc[LineIndex] = OrgSrc[LineIndex].Replace("/", AM);
+                                //Console.WriteLine((PC - (offset + 1)).ToString().PadLeft(4, '0') + ": " + instr.PadRight(5, ' ') + "\t" + MCcode[Math.Max(PC - (offset + 1), 0)]);
                             }
                             else
                             {
@@ -350,8 +430,13 @@ namespace asm
                             {
                                 Tokens.Add(TokenBuffer);
                             }
-                            OrgSrc[LineIndex] = OrgSrc[LineIndex].Replace("|", AM).PadLeft(4, '0');
-                            MCcode[PC - (offset + 1)] = MCcode[PC - (offset + 1)].Replace("|", AM);
+
+                            uint Off = (uint)(PC - (offset + 1));
+
+                            OrgSrc[LineIndex] = OrgSrc[LineIndex].Replace("|", AM1);
+                            OrgSrc[LineIndex] = OrgSrc[LineIndex].Replace("/", AM).PadLeft(4, '0');
+                            MCcode[Off] = MCcode[Off].Replace("|", AM1);
+                            MCcode[Off] = MCcode[Off].Replace("/", AM);
                         }
                     }
                     else
@@ -363,7 +448,7 @@ namespace asm
                                 OrgSrc[LineIndex] = OrgSrc[LineIndex].TrimStart('.');
                                 if (OrgSrc[LineIndex].StartsWith("global"))
                                 {
-                                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | Global Lable " + OrgSrc[LineIndex]);
+                                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Global Lable " + OrgSrc[LineIndex]);
                                     GlobalLables.Add(new Lable()
                                     {
                                         Name = OrgSrc[LineIndex].Split(' ')[1].TrimEnd(':'),
@@ -377,7 +462,7 @@ namespace asm
                                     ErrorDirInstructionNotFound(OrgSrc[LineIndex]);
                                 }
                             }
-                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | Lable " + OrgSrc[LineIndex]);
+                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Lable " + OrgSrc[LineIndex]);
                             lables.Add(new Lable()
                             {
                                 Name = OrgSrc[LineIndex].TrimEnd(':'),
@@ -397,17 +482,19 @@ namespace asm
             LineIndex = 0;
             PC = 0;
             Tokens.Add("\r\n");
-            for (int i = 0; i < 0x8000; i++)
+            for (int i = 0; i < 0x2FFFF; i++)
             {
                 PC = (ushort)i;
-                if (MCcode[i].EndsWith("F0") || MCcode[i].EndsWith("F1") || MCcode[i].EndsWith("F3") || MCcode[i].EndsWith("F4") || MCcode[i].EndsWith("F5") || MCcode[i].EndsWith("FF"))
-                {
-                    LineIndex++;
-                }
                 if (MCcode[i].StartsWith("LABLE:"))
                 {
-                    string Name = MCcode[i].Split(':')[1];
-                    MCcode[i] = ConvTo(16, UseLableUsingAll(Name).ToString(), 10).PadLeft(4, '0');
+                    uint Add = 0;
+                    if (MCcode[i].Contains('+'))
+                    {
+                        Add = uint.Parse(MCcode[i].Split('+')[1]);
+                    }
+                    string Name = MCcode[i].Split(':', '+')[1];
+                    string addr = Convert.ToString(UseLableUsingAll(Name) + Add) + "h";
+                    MCcode[i] = ConvFrom(ref addr);
                 }
             }
             PC = 0;
@@ -481,6 +568,18 @@ namespace asm
                 case Instructions.MUL: if (arg.Length == 2) return; break;
                 case Instructions.DIV: if (arg.Length == 2) return; break;
                 case Instructions.NOT: if (arg.Length == 1) return; break;
+                case Instructions.ADDL: if (arg.Length == 2) return; break;
+                case Instructions.SUBL: if (arg.Length == 2) return; break;
+                case Instructions.ORL: if (arg.Length == 2) return; break;
+                case Instructions.NORL: if (arg.Length == 2) return; break;
+                case Instructions.NOTL: if (arg.Length == 1) return; break;
+                case Instructions.JMPL: if (arg.Length == 1) return; break;
+                case Instructions.PUSHL: if (arg.Length == 1) return; break;
+                case Instructions.POPL: if (arg.Length == 1) return; break;
+                case Instructions.PUSHR: if (arg.Length == 0) return; break;
+                case Instructions.POPR: if (arg.Length == 0) return; break;
+                case Instructions.ROL: if (arg.Length == 1 || arg.Length == 2) return; break;
+                case Instructions.ROR: if (arg.Length == 1 || arg.Length == 2) return; break;
                 default:
                     ErrorInstructionNotFound(instr);
                     break;
@@ -490,36 +589,43 @@ namespace asm
 
         string ConvTo(int Base, string value, int FromBase)
         {
-            return Convert.ToString(Convert.ToUInt16(value, FromBase), Base);
-        }
-        string ConvTo20(int Base, string value, int FromBase)
-        {
-            return Convert.ToString(Convert.ToUInt32(value, FromBase), Base);
+            return Convert.ToString(Convert.ToUInt16(value, FromBase), Base).PadLeft(5, '0');
         }
         string ConvTo32(int Base, string value, int FromBase)
         {
-            return Convert.ToString(Convert.ToUInt32(value, FromBase), Base);
+            return Convert.ToString(Convert.ToUInt32(value, FromBase), Base).PadLeft(5, '0');
         }
         string ConvFrom(ref string value)
         {
             if (value.Last() == 'h')
             {
-                value = value.TrimEnd('h').PadLeft(4, '0');
+                value = value.TrimEnd('h').PadLeft(5, '0');
                 return value;
             }
             else if (value.Last() == 'b')
             {
                 value = value.TrimEnd('b');
-                value = ConvTo(16, value, 2).PadLeft(4, '0');
+                value = ConvTo(16, value, 2).PadLeft(5, '0');
                 return value;
             }
             else if (!char.IsDigit(value[0]))
             {
-                return "LABLE: " + value;
+                if (value.StartsWith('['))
+                {
+                    value = value.Replace("[", "");
+                    value = value.Replace("]", "");
+                    return "LABLE: " + value;
+                }
+                else
+                {
+                    ErrorSyntax("ARGS CONVFROM");
+                    value = "Null";
+                    return "Null";
+                }
             }
             else
             {
-                value = ConvTo(16, value, 10).PadLeft(4, '0');
+                value = ConvTo(16, value, 10).PadLeft(5, '0');
                 return value;
             }
         }
@@ -533,7 +639,7 @@ namespace asm
                 if (name[i] == instr.ToUpper())
                 {
                     instruction = (Instructions)Enum.Parse(typeof(Instructions), instr.ToUpper());
-                    return Convert.ToString(instructions[i], 16).PadLeft(2, '0') + "F";
+                    return Convert.ToString(instructions[i], 16).PadLeft(2, '0');
                 }
             }
             ErrorInstructionNotFound(instr);
@@ -541,17 +647,38 @@ namespace asm
             return "XXXXXX";
         }
 
-        private uint UseVariables(string Name)
+        private uint UseVariables(string Name, out string AddrMode)
         {
+            Name = Name.TrimStart('%');
             for (int i = 0; i < Variables.Count; i++)
             {
-                if (Name.TrimStart('%') == Variables[i].Name)
+                if (Name == Variables[i].Name)
                 {
                     string HexString = Convert.ToString(Variables[i].Addr, 16).PadLeft(5, '0').Remove(0, 1);
+                    AddrMode = "1";
+                    return Convert.ToUInt32(HexString, 16);
+                }
+            }
+            for (int i = 0; i < PointerVariables.Count; i++)
+            {
+                if (Name == PointerVariables[i].Name)
+                {
+                    string HexString = Convert.ToString(PointerVariables[i].Addr, 16).PadLeft(5, '0').Remove(0, 1);
+                    AddrMode = "1";
+                    return Convert.ToUInt32(HexString, 16);
+                }
+            }
+            for (int i = 0; i < ImmVariables.Count; i++)
+            {
+                if (Name == ImmVariables[i].Name)
+                {
+                    string HexString = Convert.ToString(ImmVariables[i].Addr, 16).PadLeft(5, '0').Remove(0, 1);
+                    AddrMode = "0";
                     return Convert.ToUInt32(HexString, 16);
                 }
             }
             ErrorVariableNotFound(Name);
+            AddrMode = "F";
             return 0;
         }
 
@@ -580,7 +707,7 @@ namespace asm
             {
                 if (name.TrimEnd(':') == Alllables[i].Name)
                 {
-                    Tokens.Add(Convert.ToString(Alllables[i].Addr, 16).PadLeft(4, '0') + " | " + "Lable " + name + " ");
+                    Tokens.Add(Convert.ToString(Alllables[i].Addr, 16).PadLeft(5, '0') + " | " + "Lable " + name + " ");
                     return Alllables[i].Addr;
                 }
             }
@@ -588,7 +715,7 @@ namespace asm
             {
                 if (name.TrimEnd(':') == GlobalLables[i].Name)
                 {
-                    Tokens.Add(Convert.ToString(GlobalLables[i].Addr, 16).PadLeft(4, '0') + " | " + "Global Lable " + name + " ");
+                    Tokens.Add(Convert.ToString(GlobalLables[i].Addr, 16).PadLeft(5, '0') + " | " + "Global Lable " + name + " ");
                     return GlobalLables[i].Addr;
                 }
             }
@@ -600,27 +727,41 @@ namespace asm
             if (arg[0] == "=")
             {
                 if (Q == 1)
-                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + "Var " + instr + " " + arg[1] + " at " + Convert.ToString(VarPC, 16));
+                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Var " + instr + " " + arg[1] + " at " + Convert.ToString(VariablePC, 16));
                 ConvFrom(ref arg[1]);
-                MCcode[VarPC] = arg[1];
+                MCcode[VariablePC] = arg[1];
                 Variables.Add(new Variables()
                 {
                     Name = instr.TrimStart('$'),
-                    Addr = VarPC
+                    Addr = VariablePC
                 });
-                VarPC++;
+                VariablePC++;
             }
             else if (arg[0] == "*=")
             {
                 ConvFrom(ref arg[1]);
                 if (Q == 1)
-                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + "Var Pointer " + instr + " 0000" + " at " + Convert.ToString(Convert.ToUInt16(arg[1], 16), 16));
-                MCcode[Convert.ToUInt16(arg[1], 16)] = "FFFF";
-                Variables.Add(new Variables()
+                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + "Var Pointer " + instr + " 0000" + " at " + Convert.ToString(Convert.ToUInt32(arg[1], 16), 16));
+                MCcode[Convert.ToUInt32(arg[1], 16)] = "FFFFF";
+                PointerVariables.Add(new Variables()
                 {
                     Name = instr.TrimStart('$'),
-                    Addr = Convert.ToUInt16(arg[1], 16)
+                    Addr = Convert.ToUInt32(arg[1], 16)
                 });
+            }
+            else if (arg[0] == "#=")
+            {
+                ConvFrom(ref arg[1]);
+                if (Q == 1)
+                    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + "Imm Var " + instr + " 0000" + " at " + Convert.ToString(Convert.ToUInt32(arg[1], 16), 16));
+                ConvFrom(ref arg[1]);
+                MCcode[VariablePC] = arg[1];
+                ImmVariables.Add(new Variables()
+                {
+                    Name = instr.TrimStart('$'),
+                    Addr = VariablePC
+                });
+                VariablePC++;
             }
         }
         void AssemblerInstruction(string instr, string[] arg, int Q)
@@ -630,7 +771,7 @@ namespace asm
             {
                 case "byte":
                 case "word":
-                    if (InDataSection)
+                    if (UseSections || InDataSection)
                     {
                         if (arg[0].Contains('#') || arg[0].Contains('&'))
                         {
@@ -638,7 +779,7 @@ namespace asm
                             Environment.Exit(1);
                         }
                         if (Q == 1)
-                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr + " " + arg[0]);
+                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | " + instr + " " + arg[0]);
 
                         ConvFrom(ref arg[0]);
                         if (!char.IsDigit(arg[0][0]))
@@ -654,7 +795,7 @@ namespace asm
                     Assembler = this;
                     break;
                 case "str":
-                    if (InDataSection)
+                    if (UseSections || InDataSection)
                     {
                         if (arg[0].Contains('#') || arg[0].Contains('&'))
                         {
@@ -665,7 +806,7 @@ namespace asm
                         string FullString = OrgSrc[LineIndex].Split(' ', 2)[1];
 
                         if (Q == 1)
-                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr + " " + FullString);
+                            Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | " + instr + " " + FullString);
 
                         if (FullString.StartsWith('"') && FullString.EndsWith('"'))
                         {
@@ -677,7 +818,7 @@ namespace asm
 
                             for (int b = 0; b < bytes.Count; b++)
                             {
-                                MCcode[PC] = Convert.ToString(bytes[b], 16).PadLeft(4, '0');
+                                MCcode[PC] = Convert.ToString(bytes[b], 16).PadLeft(5, '0');
                                 PC++;
                             }
 
@@ -687,7 +828,7 @@ namespace asm
                         {
                             //todo error
                             if (Q == 1)
-                                Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | ERROR B3032");
+                                Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | ERROR B3032");
                         }
                         Assembler = this;
                     }
@@ -699,47 +840,62 @@ namespace asm
                         Environment.Exit(1);
                     }
                     if (Q == 1)
-                        Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr + " to " + arg[0]);
+                        Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | " + instr + " to " + arg[0]);
                     ConvFrom(ref arg[0]);
                     PC = Convert.ToUInt32(arg[0], 16);
                     Assembler = this;
                     break;
                 case "section":
 
-                    //if (Q == 1)
-                    //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr + " " + arg[0]);
-                    switch (arg[0])
+                    if (UseSections)
                     {
-                        case "data":
-                            InDataSection = true;
-                            InCodeSection = false;
-                            break;
-                        case "text":
-                            InDataSection = false;
-                            InCodeSection = true;
-                            break;
+                        //if (Q == 1)
+                        //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | " + instr + " " + arg[0]);
+                        switch (arg[0])
+                        {
+                            case "data":
+                                InDataSection = true;
+                                InCodeSection = false;
+                                break;
+                            case "text":
+                                InDataSection = false;
+                                InCodeSection = true;
+                                break;
+                        }
                     }
                     Assembler = this;
                     break;
                 case "data":
-                    //if (Q == 1)
-                    //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | in section " + instr);
-                    InDataSection = true;
-                    InCodeSection = false;
+                    if (UseSections)
+                    {
+                        //if (Q == 1)
+                        //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | in section " + instr);
+                        InDataSection = true;
+                        InCodeSection = false;
+                    }
                     break;
                 case "text":
-                    //if(Q == 1)
-                    //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | in section " + instr);
-                    InDataSection = false;
-                    InCodeSection = true;
+                    if (UseSections)
+                    {
+                        //if(Q == 1)
+                        //    Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | in section " + instr);
+                        InDataSection = false;
+                        InCodeSection = true;
+                    }
                     break;
-                case "newfile1011":
+                case "newfile":
                     lables.Clear();
                     LineNumber = 0;
                     if (Q == 1)
-                        Tokens.Add(Convert.ToString(PC, 16).PadLeft(4, '0') + " | New File " + arg[0]);
+                        Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | New File " + arg[0]);
                     CurrentFile = arg[0];
                     Assembler = this;
+                    break;
+                case "out":
+
+                    break;
+                case "include":
+
                     break;
                 default:
                     ErrorDirInstructionNotFound(instr);

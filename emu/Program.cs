@@ -23,17 +23,22 @@ class Program
 
         if (File.Exists(InputPath) == false) Exit(1);
 
+
+        List<uint> Instrs = new List<uint>();
+
+
         string[] src = File.ReadAllText(InputPath).Split('|');
-
-        List<ushort> Instrs = new List<ushort>();
-
         for (int i = 0; i < src.Length; i++)
         {
             if (string.IsNullOrEmpty(src[i]) == false)
             {
-                Instrs.Add(Convert.ToUInt16(src[i], 16));
+                Instrs.Add(Convert.ToUInt32(src[i], 16));
             }
         }
+        Console.WriteLine(Instrs[0]);
+
+        Environment.Exit(0);
+
 
         Console.WriteLine("Starting the CPU");
         Ports.Reset();

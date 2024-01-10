@@ -29,19 +29,9 @@ public class Program
             DebugFile = DebugPath,
         };
         basic.Build(src);
-        string outputString = "";
         //string BinStr = "";
         Console.WriteLine("starter");
-        for (int i = 0; i < basic.Asm.Length; i++)
-        {
-            if (string.IsNullOrEmpty(basic.Asm[i]) == false)
-            {
-                //Console.WriteLine(assembler.MCcode[i]);
-                ushort Value = Convert.ToUInt16(basic.Asm[i].Trim(), 2);
-                outputString += Convert.ToString(Value, 16).PadLeft(4, '0') + "|";
-            }
-        }
-        File.WriteAllText(OutputPath, outputString);
+        File.WriteAllLines(OutputPath, basic.Asm);
     }
 
     private static void Exit(int exitCode = 0)

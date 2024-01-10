@@ -1,0 +1,49 @@
+const int trueValue = 1;  // Declaring a constant named trueValue with a value of 1
+const int falseValue = 0; // Declaring a constant named falseValue with a value of 0
+
+bool condition = trueValue;  // Declaring a boolean variable and assigning the value true
+
+if (condition == falseValue) {
+    // Code block executed if 'condition' is equal to 0
+    // Add your code here for the case when 'condition' is 0
+} else if (condition == trueValue) {
+    // Code block executed if 'condition' is equal to 1
+    // Add your code here for the case when 'condition' is 1
+} else {
+    // Code block executed if 'condition' is neither 0 nor 1
+    // Add your code here for all other cases
+}
+
+// More code can follow here
+
+// Keywords
+bool isTrue = true;  // Declaring a boolean variable and assigning the value true
+
+if (isTrue) {
+    // Code block executed if the condition is true
+} else {
+    // Code block executed if the condition is false
+}
+
+while (isTrue) {
+    // Code block executed as long as the condition is true
+}
+
+do {
+    // Code block executed at least once and repeated as long as the condition is true
+} while (isTrue);
+
+switch (variable) {
+    case 1:
+        // Code block executed if variable is 1
+        break;
+    case 2:
+        // Code block executed if variable is 2
+        break;
+    default:
+        // Code block executed if none of the cases match
+        break;
+}
+
+enum Days { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday };
+Days today = Wednesday; // Declaring and initializing an enum variable

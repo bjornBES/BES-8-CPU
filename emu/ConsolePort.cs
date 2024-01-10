@@ -10,8 +10,8 @@ namespace emu
     {
         ushort[] VRam = new ushort[0x6C00];
         public MEM MEM { get; set; }
-        public ushort DataBus { get; set; }
-        public ushort AddrBus { get; set; }
+        public uint DataBus { get; set; }
+        public uint AddrBus { get; set; }
         public bool Read { get; set; }
         public ushort MemBank { get; set; }
 

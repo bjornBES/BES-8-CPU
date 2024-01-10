@@ -46,5 +46,10 @@
         JMPL,
         PUSHL,
         POPL,
+        PUSHR,
+        POPR,
+        ROL,
+        ROR,
+        JER,
     }
 }

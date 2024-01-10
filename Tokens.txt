@@ -1,29 +1,21 @@
-0000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\tests\Program.Basm
-0000 | Var Pointer $GeneralAddr 0000 at 9000
-0000 | mov Reg AX Imm 55AAh
-0003 | str Reg A Var %GeneralAddr
-0006 | mov Reg A Reg B
-0009 | mov Reg MB Imm 1
-000c | push Reg A
-000e | push Imm 55
-0010 | mov Reg A Var %GeneralAddr
-0013 | lor Reg B Var %GeneralAddr
-0016 | pop Reg DX
-0018 | pop Reg CH
-001a | mov Reg BL Imm 1
-001d | add Reg BL Reg BL
-0020 | add Reg BL Imm 1
-0023 | sti Imm 0 Var %GeneralAddr
-0026 | mov Reg BH Imm 0
-0029 | or Reg BH Imm 1111b
-002c | not Reg BH
-002e | cmp Reg BH Imm 11110000b
-0031 | jme Lable End
-0033 | jmp Get current Addr at 33
-0035 | Lable End:
-0035 | halt Imm 0
-0037 | org to 1FFFFh
-1ffff | word 1101h
+00000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\Tests\tests.Basm
+00000 | Var $GeneralAddr 0 at 31000
+00000 | add Reg DX Imm 0
+00003 | mov Var %GeneralAddr Imm 55h
+00006 | mov Reg AX Imm 10h
+00009 | mov Reg AX Var %GeneralAddr
+0000c | mov Reg BX Reg AX
+0000f | mov addr 37010h Imm 55h
+00012 | mov addr 37010h Reg AX
+00015 | mov addr 37010h Get current Addr at 00015
+00018 | push Reg AX
+0001a | push Imm 10
+0001c | pop Reg BX
+0001e | pop Var %GeneralAddr
+00020 | add Reg BX Reg CX
+00023 | add Reg CX Imm 1
+00026 | sub Reg BX Reg CX
+00029 | sub Reg CX Imm 1
+0002c | halt Imm 0
 
 
-0035 | Lable End 

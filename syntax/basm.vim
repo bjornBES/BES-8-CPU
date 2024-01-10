@@ -8,17 +8,21 @@ if exists("b:current_syntax")
   syn keyword BasmTODO contained TODO
   syn match BasmComment ";.*$" contains=BasmTODO
   syn match BasmDirective "^\s*[.][a-zA-Z]\+"
+  syn match BasmGlobalDirective ".global[a-zA-Z0-9_.]\+:"
   syn match BasmNumber "[0-9]\+"
   syn match BasmNumber "[#&][0-9]\+"
   syn match BasmNumber "[0-9A-F]\+[hb]"
   syn match BasmNumber "[#&][0-9A-F]\+[hb]"
-  syn match BasmVariabal "[$][A-Za-z]\+ [*=]"
-  syn match BasmVariabal "[$][A-Za-z]\+ [=]"
+  syn match BasmVariabal "[$][A-Za-z_]\+ [*=]"
+  syn match BasmVariabal "[$][A-Za-z_]\+ [=]"
   syn match BasmUsedVariabal "[%][A-Za-z]\+"
   syn match BasmInstrs "[a-zA-Z]\+"
   syn match BasmToAddr "[$]"
+  syn match BasmIndexed "[,]"
+  syn match BasmKeyBoardWord "[#][A-Za-z_]\+"
   
   " syn region jdhOp start='^' end='$'
+  syn region BasmUseLable start="\[[A-Za-z_]" end="\]" contains=BasmUsedLable
   syn region BasmLabel start="[a-zA-Z0-9_.]" end=":" oneline contains=BasmLabelName
   syn region BasmString start='"' end='"'
   
@@ -26,10 +30,14 @@ if exists("b:current_syntax")
   syn match BasmAddrLabel '[a-zA-Z0-9_\.]\+' contained
   
   let b:current_syntax = "basm"
+  hi def link BasmUseLable Label
+  hi def link BasmIndexed Label
   hi def link BasmInstrs Function
   hi def link BasmTODO Todo
   hi def link BasmComment Comment
   hi def link BasmLabelName Label
+  hi def link BasmKeyBoardWord Label
+  hi def link BasmGlobalDirective Label
   hi def link BasmAddrLabel Label
   hi def link BasmDirective Macro
   hi def link BasmVariabal Macro

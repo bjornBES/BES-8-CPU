@@ -24,7 +24,7 @@ namespace emu
             ExpansionPort[portAddr] = port;
             ExpansionPort[portAddr].Con(mem);
         }
-        public static ushort Read(int port)
+        public static uint Read(uint port)
         {
             Console.WriteLine("Ports " + port);
             if(port == 1)                           // port 1           Screen
@@ -57,14 +57,14 @@ namespace emu
             }
             return 0;
         }
-        public static void TICK(int port, ref MEM mem)
+        public static void TICK(uint port, ref MEM mem)
         {
             if (UserPorts[port] != null)
             {
                 UserPorts[port].TICK(ref mem);
             }
         }
-        public static void Write(int port, ushort data)
+        public static void Write(uint port, uint data)
         {
             if (port < 4)
             {
@@ -124,11 +124,11 @@ namespace emu
                 }
             }
         }
-        public static ushort GetStatusPort(MEM mem)
+        public static uint GetStatusPort(MEM mem)
         {
             if (UserPorts[0] != null)
             {
-                ushort Buf = UserPorts[0].InputBus;
+                uint Buf = UserPorts[0].InputBus;
                 UserPorts[0].TICK(ref mem);
 
                 UserPorts[0].InputBus = Buf;
@@ -141,8 +141,8 @@ namespace emu
 
     public interface IPort
     {
-        public ushort OutputBus { get; set; }
-        public ushort InputBus { get; set; }
+        public uint OutputBus { get; set; }
+        public uint InputBus { get; set; }
 
         public void TICK(ref MEM mem);
         public void RESET(ref MEM mem);
@@ -150,8 +150,8 @@ namespace emu
     public interface IExpansionPort
     {
         public MEM MEM { get; set; }
-        public ushort DataBus { get; set; }
-        public ushort AddrBus { get; set; }
+        public uint DataBus { get; set; }
+        public uint AddrBus { get; set; }
         public bool Read { get; set; }
         public ushort MemBank { get; set; }
 
