@@ -370,3 +370,7 @@ Tokens.txt
 .vs
 asm/bin/
 asm/obj/
+emu/.vs/emu/v17/.suo
+emu/.vs/ProjectEvaluation/emu.metadata.v7.bin
+emu/.vs/ProjectEvaluation/emu.projects.v7.bin
+*.pdb
