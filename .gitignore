@@ -374,3 +374,12 @@ emu/.vs/emu/v17/.suo
 emu/.vs/ProjectEvaluation/emu.metadata.v7.bin
 emu/.vs/ProjectEvaluation/emu.projects.v7.bin
 *.pdb
+asm/bin/Debug/net7.0/asm.dll
+asm/bin/Debug/net7.0/asm.pdb
+asm/obj/Debug/net7.0/asm.dll
+asm/obj/Debug/net7.0/asm.pdb
+Basic/obj/Basic.csproj.nuget.dgspec.json
+Basic/obj/project.nuget.cache
+emu/.vs/emu/DesignTimeBuild/.dtbcache.v2
+emu/.vs/emu/v17/.futdcache.v2
+emu/.vs/emu/v17/.suo
