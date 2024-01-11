@@ -1,14 +1,22 @@
 $KB #= 2
 $Screen #= 1
+.org 32000h
+VRAM:
+.org 0
 
 _Start_BIOS:
-push #0
+mov XL #FFh
+
+
+Post_Loop:
+inc XL
+push XL
 push #FEh
 call [Read]
 
 mov ZX AL
 
-push #0
+push XL
 push #FFh
 call [Read]
 
@@ -18,27 +26,13 @@ mov ZH AL
 cmp ZX #55AAh
 jme [Boot]
 
-jmp 
+cmp XL #14
+jne [Post_Loop]
+jmp [Error_Cant_Find_An_Boot_Disk]
 
 Boot:
-; jumping to the BootLoader
+; jumping to the start of the OS 
 jmp &01000h
-
-; AX Char
-.global COut:
-outb %Screen AX
-rts
-
-; returned in AX
-.global CIn:
-inb %KB AX
-rts
-
-; AL Color data
-.global PixelOut:
-; TODO add some more data
-outb %Screen AL
-rts
 
 Error_Cant_Find_An_Boot_Disk:
 mov BX #0
@@ -56,13 +50,24 @@ jmp [Print_Error_Disk_Loop]
 
 ; AL Exit Code
 Exit:
-mov &FFFFE AL
+mov &FFFFEh AL
+halt #0
+jmp $
+
+; AL exit code
+; AH Any Errors
+.global ExitOut:
+mov &FFFFEh AL
+mov &FFFFDh AH
 halt #0
 jmp $
 
 Boot_Disk_Error:
 .str "can't find an bootable disk"
 
-.include src/asm/FileTest
+.include src/asm/OS/IO
 
-.include src/asm/BootLoader
+.include src/asm/OS/FileTest
+
+.include src/asm/OS/BootLoader
+

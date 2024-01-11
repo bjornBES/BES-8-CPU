@@ -1,0 +1,3 @@
+00 HOME
+10 LET CX = 1 : LET CY = 1
+20 LET H = 25 : LET W = 40

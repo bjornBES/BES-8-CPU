@@ -128,9 +128,9 @@ MEMORY LAYOUT
 0x30000 - 0x301FF: IO
 0x30200 - 0x30FFF: STACK
 0x31000 - 0x31FFF: contains
-0x32000 - 0x36FFF: GENERAL PURPOSE RAM (BANKED)
-0x37000 - 0x3700F: Program Buffer
-0x37010 - 0xFFFF9: GENERAL PURPOSE RAM
+0x32000 - 0x41FFF: GENERAL PURPOSE RAM (BANKED)
+0x41000 - 0x4100F: Program Buffer
+0x41010 - 0xFFFF9: GENERAL PURPOSE RAM
 0xFFFFA - 0xFFFFA: UNUSED
 0xFFFFB - 0xFFFFB: UNUSED
 0xFFFFC - 0xFFFFC: UNUSED
@@ -140,7 +140,7 @@ MEMORY LAYOUT
 
 0x32000 - 0x36FFF can be swapped using the MB register, 
 if MB = 0 indicates that the built-in RAM is in use.
-if MB = 1 indicates that the RAM 
+if MB = 1 indicates that the VRAM 
 
 PORTS
 PORTS are used to communicate with devices or by the BES-8 itself. See
@@ -166,7 +166,8 @@ this can be a mouse, a Keyboard and other things for example extar RAM.
 SCREEN
 The screen circuit can be read/written to using INB and OUTB instructions.
 It contains 5 registers that can be read/written for the curosrs and other things, 
-The screen is 192 x 144 pixles and the screen buffer is on bord, with a 128 color palette.
+The screen is 192 x 144 pixles and the screen buffer is in the other part of VRAM, 
+with a 128 color palette.
 the screen can be in to different modes depending on the starting value sent to register 1
 
 Micro Instructions

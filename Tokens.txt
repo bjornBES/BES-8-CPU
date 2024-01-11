@@ -1,21 +1,325 @@
-00000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\Tests\tests.Basm
-00000 | Var $GeneralAddr 0 at 31000
-00000 | add Reg DX Imm 0
-00003 | mov Var %GeneralAddr Imm 55h
-00006 | mov Reg AX Imm 10h
-00009 | mov Reg AX Var %GeneralAddr
-0000c | mov Reg BX Reg AX
-0000f | mov addr 37010h Imm 55h
-00012 | mov addr 37010h Reg AX
-00015 | mov addr 37010h Get current Addr at 00015
-00018 | push Reg AX
-0001a | push Imm 10
-0001c | pop Reg BX
-0001e | pop Var %GeneralAddr
-00020 | add Reg BX Reg CX
-00023 | add Reg CX Imm 1
-00026 | sub Reg BX Reg CX
-00029 | sub Reg CX Imm 1
-0002c | halt Imm 0
+00000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\asm\OS\BIOS.Basm
+0000 | Imm Var $KB 0000 at 2
+0000 | Imm Var $Screen 0000 at 1
+00000 | Lable _Start_BIOS:
+00000 | mov Reg XL Imm FFh
+00003 | Lable Post_Loop:
+00003 | inc Reg XL
+00005 | push Reg XL
+00007 | push Imm FEh
+00009 | call Lable Read
+0000b | mov Reg ZX Reg AL
+0000e | push Reg XL
+00010 | push Imm FFh
+00012 | call Lable Read
+00014 | mov Reg ZL Reg ZX
+00017 | mov Reg ZH Reg AL
+0001a | cmp Reg ZX Imm 55AAh
+0001d | jme Lable Boot
+0001f | cmp Reg XL Imm 14
+00022 | jne Lable Post_Loop
+00024 | jmp Lable Error_Cant_Find_An_Boot_Disk
+00026 | Lable Boot:
+00026 | jmp addr 01000h
+00028 | Lable Error_Cant_Find_An_Boot_Disk:
+00028 | mov Reg BX Imm 0
+0002b | mov Reg AX Imm 0
+0002e | mov Reg AL Imm 1
+00031 | Lable Print_Error_Disk_Loop:
+00031 | mov Reg CX Indexed Boot_Disk_Error BH
+00035 | jmz Lable Exit
+00037 | mov Reg BL Reg AL
+0003a | mov Reg AX Reg CX
+0003d | call Lable COut
+0003f | mov Reg AL Reg BL
+00042 | inc Reg BH
+00044 | jmp Lable Print_Error_Disk_Loop
+00046 | Lable Exit:
+00046 | mov addr FFFFEh Reg AL
+00049 | halt Imm 0
+0004b | jmp Get current Addr at 0004b
+0004d | Lable Boot_Disk_Error:
+0004d | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\asm\OS\IO.Basm
+0004d | Global Lable global COut:
+0004d | outb Var %Screen Reg AX
+00050 | rts
+00051 | Global Lable global CIn:
+00051 | inb Var %KB Reg AX
+00054 | rts
+00055 | Global Lable global PixelOut:
+00055 | push Reg AX
+00057 | push Reg MB
+00059 | mov Reg MB Imm 1
+0005c | mov Reg AL Reg XH
+0005f | add Reg X Reg AL
+00062 | mov Indexed VRAM,X AL
+00065 | pop Reg MB
+00067 | pop Reg AX
+00069 | rts
+0006a | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\asm\OS\FileTest.Basm
+0006a | Global Lable global Read:
+0006a | push Reg XL
+0006c | push Reg AX
+0006e | mov Reg ZX Reg SP
+00071 | add Reg SP Imm 3
+00074 | pop Reg XL
+00076 | pop Reg AX
+00078 | mov Reg SP Reg ZX
+0007b | outb Imm 010h Reg AX
+0007e | add Reg XL Imm 11h
+00081 | inb Reg XL Reg ZX
+00084 | pop Reg AX
+00086 | pop Reg XL
+00088 | rts
+00089 | Global Lable global Read_Count:
+00089 | push Reg X
+0008b | push Reg AX
+0008d | push Reg BX
+0008f | mov Reg ZX Reg SP
+00092 | add Reg SP Imm 4
+00095 | pop Reg XH
+00097 | pop Reg AX
+00099 | pop Reg XL
+0009b | mov Reg SP Reg ZX
+0009e | add Reg XL Imm 11h
+000a1 | Lable Read_Count_Loop:
+000a1 | outb Imm 010h Reg AX
+000a4 | inb Reg XL Reg ZX
+000a7 | str Reg BL Indexed Text_Buffer BH
+000ab | inc Reg BH
+000ad | dec Reg XH
+000af | jnz Lable Read_Count_Loop
+000b1 | pop Reg BX
+000b3 | pop Reg AX
+000b5 | pop Reg X
+000b7 | rts
+000b8 | Global Lable global Write:
+000b8 | push Reg XL
+000ba | push Reg AX
+000bc | push Reg BX
+000be | mov Reg ZX Reg SP
+000c1 | add Reg SP Imm 4
+000c4 | pop Reg BX
+000c6 | pop Reg AX
+000c8 | pop Reg XL
+000ca | mov Reg SP Reg ZX
+000cd | outb Imm 010h Reg AX
+000d0 | add Reg XL Imm 10h
+000d3 | outb Reg XL Reg BX
+000d6 | pop Reg BX
+000d8 | pop Reg AX
+000da | pop Reg XL
+000dc | rts
+000dd | Global Lable global GetFile:
+000dd | push Reg X
+000df | push Reg Y
+000e1 | push Reg BX
+000e3 | push Reg AX
+000e5 | mov Reg ZX Reg SP
+000e8 | add Reg SP Imm 5
+000eb | pop Reg XL
+000ed | pop Reg XH
+000ef | mov Reg SP Reg ZX
+000f2 | mov Reg Y Imm 000Fh
+000f5 | add Reg XL Imm 10h
+000f8 | Lable GetFile_Loop:
+000f8 | inc Reg Y
+000fa | outb Imm 10h Reg Y
+000fd | inb Reg XL Reg AX
+00100 | cmp Reg AX Imm 5Ch
+00103 | jne Lable GetFile_Loop
+00105 | dec Reg XH
+00107 | jnz Lable GetFile_Loop
+00109 | mov Reg ZX Reg SP
+0010c | add Reg SP Imm 7
+0010f | Lable GetFile_File_Loop:
+0010f | inc Reg YL
+00111 | outb Imm 10h Reg YL
+00114 | inb Reg XL Reg AX
+00117 | pop Reg BH
+00119 | cmp Reg BH Imm 5Ch
+0011c | jme Lable GetFile_Error_Name_Could_Not_Be_Found
+0011e | mov Reg BH Reg BH
+00121 | jmz Lable GetFile_Done
+00123 | cmp Reg BH Reg AX
+00126 | jne Lable GetFile_Retry
+00128 | mov Reg AX Indexed Text_Buffer BL
+0012c | inc Reg BL
+0012e | cmp Reg BL Imm Fh
+00131 | jme Lable GetFile_Error_Name_Could_Not_Be_Found
+00133 | jmp Lable GetFile_File_Loop
+00135 | Lable GetFile_Retry:
+00135 | push Reg Y
+00137 | jmp Lable GetFile_File_Loop
+00139 | Lable GetFile_Done:
+00139 | mov Reg SP Reg ZX
+0013c | mov Reg YH Reg XL
+0013f | outb Imm 10h Reg YL
+00142 | inb Reg YH Reg XL
+00145 | inc Reg YL
+00147 | outb Imm 10h Reg YL
+0014a | inb Reg YH Reg XH
+0014d | sub Reg XH Imm 30h
+00150 | sub Reg XL Imm 30h
+00153 | rol Reg XL Imm 4h
+00156 | ror Reg X Imm 4h
+00159 | mov Reg ZH Reg XH
+0015c | inc Reg YL
+0015e | outb Imm 10h Reg YL
+00161 | inb Reg YH Reg XH
+00164 | inc Reg YL
+00166 | outb Imm 10h Reg YL
+00169 | inb Reg YH Reg XL
+0016c | sub Reg XH Imm 30h
+0016f | sub Reg XL Imm 30h
+00172 | rol Reg XL Imm 4h
+00175 | ror Reg X Imm 4h
+00178 | mov Reg ZL Reg XH
+0017b | add Reg ZX Imm 200h
+0017e | jmp Lable GetFile_Return
+00180 | Lable GetFile_Error_Name_Could_Not_Be_Found:
+00180 | pop Reg AX
+00182 | pop Reg BX
+00184 | pop Reg Y
+00186 | pop Reg X
+00188 | mov Reg AL Imm 1
+0018b | sef Imm 3
+0018d | jmp Lable GetFile_Return_With_Error
+0018f | Lable GetFile_Return:
+0018f | pop Reg AX
+00191 | pop Reg BX
+00193 | pop Reg Y
+00195 | pop Reg X
+00197 | Lable GetFile_Return_With_Error:
+00197 | rts
+00198 | Global Lable global Get_Continue_Addr:
+00198 | push Reg AX
+0019a | push Reg BX
+0019c | push Reg X
+0019e | mov Reg ZX Reg SP
+001a1 | add Reg SP Imm 4
+001a4 | pop Reg AX
+001a6 | pop Reg XL
+001a8 | mov Reg SP Reg ZX
+001ab | push Reg XL
+001ad | push Reg AX
+001af | push Imm 4
+001b1 | call Lable Read_Count
+001b3 | mov Reg XH Imm 0
+001b6 | add Reg SP Imm 3
+001b9 | mov Reg AL Indexed Text_Buffer 0
+001bc | mov Reg BL Indexed Text_Buffer 1
+001bf | rol Reg BL Imm 4
+001c2 | or Reg AL Reg BL
+001c5 | mov Reg AH Indexed Text_Buffer 2
+001c8 | mov Reg BH Indexed Text_Buffer 3
+001cb | rol Reg BH Imm 4
+001ce | or Reg AH Reg BH
+001d1 | call Lable BinToBcd
+001d3 | mov Reg XH Imm 0
+001d6 | mov Reg XL Reg AL
+001d9 | and Reg XL Imm 0Fh
+001dc | str Reg XL Indexed Text_Buffer XH
+001e0 | inc Reg XH
+001e2 | mov Reg XL Reg AL
+001e5 | and Reg XL Imm F0h
+001e8 | str Reg XL Indexed Text_Buffer XH
+001ec | inc Reg XH
+001ee | mov Reg XL Reg AH
+001f1 | and Reg XL Imm 0Fh
+001f4 | str Reg XL Indexed Text_Buffer XH
+001f8 | inc Reg XH
+001fa | mov Reg XL Reg AH
+001fd | and Reg XL Imm F0h
+00200 | str Reg XL Indexed Text_Buffer XH
+00204 | pop Reg X
+00206 | pop Reg BX
+00208 | pop Reg AX
+0020a | rts
+0020b | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\asm\math.Basm
+0020b | Global Lable global MOD:
+0020b | push Reg AX
+0020d | push Reg BX
+0020f | mov Reg ZX Reg SP
+00212 | add Reg SP Imm 3
+00215 | pop Reg BX
+00217 | pop Reg AX
+00219 | mov Reg SP Reg ZX
+0021c | mov Reg ZX Reg AX
+0021f | div Reg AX Reg BX
+00222 | mul Reg AX Reg BX
+00225 | sub Reg AX Reg ZX
+00228 | mov Reg ZX Reg AX
+0022b | pop Reg BX
+0022d | pop Reg AX
+0022f | rts
+00230 | Global Lable global BinToBcd:
+00230 | push Reg X
+00232 | push Reg ZX
+00234 | push Reg AX
+00236 | push Imm 10
+00238 | call Lable MOD
+0023a | add Reg SP Imm 2
+0023d | mov Reg XL Reg ZL
+00240 | div Reg AX Imm 10
+00243 | push Reg AX
+00245 | push Imm 10
+00247 | call Lable MOD
+00249 | add Reg SP Imm 2
+0024c | rol Reg ZL Imm 4
+0024f | or Reg XL Reg ZL
+00252 | div Reg AX Imm 10
+00255 | push Reg AX
+00257 | push Imm 10
+00259 | call Lable MOD
+0025b | add Reg SP Imm 2
+0025e | mov Reg XH Reg ZL
+00261 | div Reg AX Imm 10
+00264 | push Reg AX
+00266 | push Imm 10
+00268 | call Lable MOD
+0026a | add Reg SP Imm 2
+0026d | rol Reg ZL Imm 4
+00270 | or Reg XH Reg ZL
+00273 | div Reg AX Imm 10
+00276 | push Reg AX
+00278 | mov Reg AX Reg X
+0027b | pop Reg BX
+0027d | pop Reg ZX
+0027f | pop Reg X
+00281 | rts
+00282 | org to 37000h
+37000 | Lable Text_Buffer:
+37000 | New File C:\Users\bjorn\Desktop\BES-8-CPU\src\asm\OS\BootLoader.Basm
+37000 | org to 01000h
+01000 | mov Reg AX Imm 0
+01003 | mov Reg X Imm 0
+01006 | Lable Write_Message_Loop:
+01006 | mov Reg AX Indexed Message X
+0100a | jmz Lable Exit_Loop
+0100c | inc Reg X
+0100e | call Lable COut
+01010 | Lable Exit_Loop:
+01010 | mov Reg AL Imm 0
+01013 | mov Reg AH Imm 0
+01016 | int
+01017 | Lable Message:
+01017 | org to 010FEh
+010fe | org to 32000h
+32000 | Lable VRAM:
 
 
+0004d | Global Lable COut 
+00031 | Lable Print_Error_Disk_Loop 
+00230 | Global Lable BinToBcd 
+37000 | Lable Text_Buffer 
+37000 | Lable Text_Buffer 
+37000 | Lable Text_Buffer 
+37000 | Lable Text_Buffer 
+0020b | Global Lable MOD 
+0020b | Global Lable MOD 
+0020b | Global Lable MOD 
+0020b | Global Lable MOD 
+01017 | Lable Message 
+01010 | Lable Exit_Loop 
+0004d | Global Lable COut 

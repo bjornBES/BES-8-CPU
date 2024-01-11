@@ -12,11 +12,12 @@ namespace Basic
         public List<string> Consts = new List<string>();
         public required string DebugFile;
         public Variables[] Variables = new Variables[0xC8FE9 + 1];
-        const int VariablesOffset = 0x37010;
+        const int VariablesOffset = 0x32000;
         int Line = 0;
         string src = "";
         public void Build(string[] Src)
         {
+            Asm.Add(".include BIOS");
             Variables.Initialize();
             for (int i = 0; i < Variables.Length; i++)
             {
@@ -29,12 +30,12 @@ namespace Basic
                 string Number = Src[Line].Split(' ', 2)[0];
                 string Instr = Src[Line].Split(' ', 2)[1];
                 string Args = "";
-                Asm.Add("\r\nLINE_" + Number + ":");
                 if(Instr.Split(" ").Length > 1)
                 {
                     Args = Instr.Split(" ", 2)[1];
                 }
                 Instr = Src[Line].Split(' ', 3)[1];
+                Asm.Add("\r\nLINE_" + Number + ":");
 
                 if (Instr.ToUpper().StartsWith("HOME"))
                 {
@@ -66,7 +67,7 @@ namespace Basic
                             Asm.Add("PRINT_LOOP_" + Line + ":");
                             Asm.Add("MOV AX [Constr_Message_" + Line + "], X");
                             Asm.Add("JMZ [EXIT_PRINT_LOOP_" + Line + "]");
-                            Asm.Add("OUTB #1 AX");
+                            Asm.Add("CALL [COut]");
                             Asm.Add("INC X");
                             Asm.Add("JMP [EXIT_PRINT_LOOP_" + Line + "]");
                             Asm.Add("EXIT_PRINT_LOOP_" + Line + ":");
@@ -86,7 +87,7 @@ namespace Basic
                             Asm.Add("PRINT_LOOP_" + Line + ":");
                             Asm.Add("POP AX");
                             Asm.Add("JMZ [EXIT_PRINT_LOOP_" + Line + "]");
-                            Asm.Add("OUTB #1 AX");
+                            Asm.Add("CALL [COut]");
                             Asm.Add("JMP [EXIT_PRINT_LOOP_" + Line + "]");
                             Asm.Add("EXIT_PRINT_LOOP_" + Line + ":");
                         }
@@ -140,6 +141,7 @@ namespace Basic
                     Variables[i].Name = Name;
                     Variables[i].Addr = (uint)i;
                     Variables[i].Data = value;
+                    Asm.Add("MOV MB #0");
                     Asm.Add("MOV &" + Convert.ToString(i + VariablesOffset, 16) + "h #" + Convert.ToString(value, 16) + "h");
                     return i;
                 }
@@ -175,6 +177,7 @@ namespace Basic
                 if (Variables[i].Name == Name)
                 {
                     Variables[i].Data = To;
+                    Asm.Add("MOV MB #0");
                     Asm.Add("MOV &" + Convert.ToString(i + VariablesOffset, 16) + "h #" + Convert.ToString(To, 16) + "h");
                     return;
                 }
@@ -186,6 +189,7 @@ namespace Basic
             {
                 if (Variables[i].Name == Name)
                 {
+                    Asm.Add("MOV MB #0");
                     Asm.Add("MOV &" + Convert.ToString(i + VariablesOffset, 16) + "h #0h");
                     Variables[i].Name = "";
                     return;

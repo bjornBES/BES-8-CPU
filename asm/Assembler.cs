@@ -28,6 +28,7 @@ namespace asm
         public int LineNumber = 0;
         public int LineIndex = 0;
         public bool UseSections = true;
+        int LastNewFile = 0;
 
         bool InCodeSection = false;
         bool InDataSection = false;
@@ -480,14 +481,14 @@ namespace asm
             }
             Console.WriteLine("Done Assembling");
             LineIndex = 0;
-            PC = 0;
             Tokens.Add("\r\n");
+            PC = 0;
             for (int i = 0; i < 0x2FFFF; i++)
             {
                 PC = (ushort)i;
                 if (MCcode[i].StartsWith("LABLE:"))
                 {
-                    uint Add = 0;
+                    uint Add = 0;   
                     if (MCcode[i].Contains('+'))
                     {
                         Add = uint.Parse(MCcode[i].Split('+')[1]);
@@ -698,8 +699,7 @@ namespace asm
                     return GlobalLables[i].Addr;
                 }
             }
-            ErrorLebleNotFound(name);
-            return 0;
+            return 0x8000;
         }
         uint UseLableUsingAll(string name)
         {
@@ -884,12 +884,32 @@ namespace asm
                     }
                     break;
                 case "newfile":
+                    if (lables.Count != 0)
+                    {
+                        for (int i = LastNewFile; i < LineIndex + 1; i++)
+                        {
+                            if (MCcode[i].StartsWith("LABLE:"))
+                            {
+                                uint Add = 0;
+                                if (MCcode[i].Contains('+'))
+                                {
+                                    Add = uint.Parse(MCcode[i].Split('+')[1]);
+                                }
+                                string Name = MCcode[i].Split(':', '+')[1];
+                                string addr = Convert.ToString(UseLable(Name) + Add) + "h";
+                                if(addr != "8FFFh")
+                                    MCcode[i] = ConvFrom(ref addr);
+                            }
+                        }
+                    }
+
                     lables.Clear();
                     LineNumber = 0;
                     if (Q == 1)
                         Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | New File " + arg[0]);
                     CurrentFile = arg[0];
                     Assembler = this;
+                    LastNewFile = LineIndex;
                     break;
                 case "out":
 

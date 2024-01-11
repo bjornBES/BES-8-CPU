@@ -1,5 +1,0 @@
-Input ./src/Tests/tests.Basm
-UseDebuger
-Output ./Builds/a.out
-Silent
-UseSections false

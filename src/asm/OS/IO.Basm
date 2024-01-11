@@ -1,0 +1,23 @@
+; AX Char
+.global COut:
+outb %Screen AX
+rts
+
+; returned in AX
+.global CIn:
+inb %KB AX
+rts
+
+; AL Color data
+; XL Y Pos
+; XH X Pos
+.global PixelOut:
+push AX
+push MB
+mov MB #1
+mov AL XH
+add X AL
+mov [VRAM],X AL
+pop MB
+pop AX
+rts

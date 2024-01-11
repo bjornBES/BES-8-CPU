@@ -273,6 +273,7 @@
 
  rts
 
+.include src/asm/math
 
 .org 37000h
 Text_Buffer:

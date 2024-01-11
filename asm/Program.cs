@@ -79,28 +79,7 @@ public class Program
             string src;
             src = ".newfile " + Input + "\r\n";
             src += File.ReadAllText(Input) + "\r\n";
-            for (int i = 0; i < src.Split("\r\n").Length; i++)
-            {
-                bool InTheSame = false;
-                if (src.Split("\r\n")[i].Contains(".include"))
-                {
-                    string file = Environment.CurrentDirectory
-                        + "\\" + src.Split("\r\n")[i].Split(' ')[1] + ".Basm";
-                    file = file.Replace("/", "\\"); 
-                    for (int f = 0; f < FilesCopy.Count; f++)
-                    {
-                        if(file == FilesCopy[f].FullName)
-                        {
-                            FilesCopy.RemoveAt(f);
-                            InTheSame = true;
-                        }
-                    }
-                    if(InTheSame == true)
-                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n; in the same dir " + file + "\r\n" + File.ReadAllText(file));
-                    else
-                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
-                }
-            }
+            Includes(ref src, true, FilesCopy);
 
             for (int f = 0; f < FilesCopy.Count; f++)
             {
@@ -118,17 +97,7 @@ public class Program
             string src = File.ReadAllText(Input);
             src = ".newfile " + Input + "\r\n" + src;
 
-            for (int i = 0; i < src.Split("\r\n").Length; i++)
-            {
-                if (src.Split("\r\n")[i].Contains(".include"))
-                {
-                    string file = Environment.CurrentDirectory
-                        + "\\" + src.Split("\r\n")[i].Split(' ')[1] + ".Basm";
-                    Console.WriteLine("INFO " + file);
-                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
-                    Environment.Exit(0);
-                }
-            }
+            Includes(ref src, false);
 
             assembler.Build(src.Split("\r\n"));
         }
@@ -194,6 +163,47 @@ public class Program
         File.WriteAllText(OutputFile, outputString);
 
     }
+
+    private static void Includes(ref string src, bool Mult, List<FileInfo> FilesCopy = null)
+    {
+        for (int i = 0; i < src.Split("\r\n").Length; i++)
+        {
+            bool InTheSame = false;
+            if (src.Split("\r\n")[i].Contains(".include"))
+            {
+                string FileName = src.Split("\r\n")[i].Split(' ')[1];
+                string file = Environment.CurrentDirectory + "\\";
+                if(FileName == "BIOS")
+                {
+                    file += "src/asm/os/BIOS.Basm";
+                }
+                else
+                {
+                    file += FileName + ".Basm";
+                }
+                file = file.Replace("/", "\\");
+
+                if (Mult == true)
+                {
+                    for (int f = 0; f < FilesCopy.Count; f++)
+                    {
+                        if (file == FilesCopy[f].FullName)
+                        {
+                            FilesCopy.RemoveAt(f);
+                            InTheSame = true;
+                        }
+                    }
+                    if (InTheSame == true)
+                    {
+                        src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n; in the same dir " + file + "\r\n" + File.ReadAllText(file));
+                        continue;
+                    }
+                }
+                src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
+            }
+        }
+    }
+
     static void WriteOutBin()
     {
         string outputString = "";

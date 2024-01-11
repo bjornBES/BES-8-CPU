@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Language/basm"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.ps1": "powershell",
+			"*.BE": "plaintext",
+			"*.Basm": "Bassembly",
+			"*.bin": "code-text-binary",
+			"*.ino": "arduino",
+			"variant": "cpp"
+		},
+		"applesoft.detokenizer.escapes": [
+			10,
+			13
+		]
+	}
+}

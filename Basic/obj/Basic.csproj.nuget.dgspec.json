@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\basic\\Basic.csproj": {}
+    "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\Basic\\Basic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\basic\\Basic.csproj": {
+    "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\Basic\\Basic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\basic\\Basic.csproj",
+        "projectUniqueName": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\Basic\\Basic.csproj",
         "projectName": "Basic",
-        "projectPath": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\basic\\Basic.csproj",
+        "projectPath": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\Basic\\Basic.csproj",
         "packagesPath": "C:\\Users\\bjorn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\basic\\obj\\",
+        "outputPath": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\Basic\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\bjorn\\AppData\\Roaming\\NuGet\\NuGet.Config",

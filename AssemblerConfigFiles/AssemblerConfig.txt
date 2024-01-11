@@ -1,0 +1,4 @@
+Input ./src/asm/OS/BIOS.Basm
+UseDebuger
+Output ./Builds/a.out
+UseSections false
