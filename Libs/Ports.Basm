@@ -1,0 +1,23 @@
+; arg 2 data
+; arg 1 Port
+.global Func_Port_Out:
+push AX
+push X
+
+mov ZX SP
+
+add SP #3
+
+mov AX #FFFFFh
+
+pop X   ; Port
+pop AX  ; data
+
+mov SP ZX
+
+outb X AX
+
+pop X
+pop AX
+
+rts

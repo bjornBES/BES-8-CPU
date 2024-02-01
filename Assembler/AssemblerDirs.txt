@@ -1,0 +1,10 @@
+.bits number                    what type instructions is used
+.org number                     sets the addr at the number
+.word/byte number               sets a word/byte at the addr
+JUMP_instr far addr             offsets a number by 0x10000
+JUMP_instr long addr            offsets a number by 0x20000
+NULL                            0x00
+#KW_ENT                          0xD 
+#KW_ESC                          0x1B
+#KW_BS                           0x8 
+#KW_SP                           0x20

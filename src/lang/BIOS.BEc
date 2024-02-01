@@ -1,0 +1,29 @@
+inc STD 
+
+namespace BIOS
+
+ptr word VIDEO_MEMORY = new ptr(2, 0)
+
+func WriteChar(char data)
+{
+    *VIDEO_MEMORY = data
+    word Instr = 0
+    Instr =>> data  // setting the low part of the Instr to data
+    Instr =<< 0x82  // setting the high part of the Instr to 0x82
+    Port.Out(1, data)
+}
+
+global class Port
+{
+    global func Out(word PortIndex, word data)
+    {
+        ptr addr = new prt(1, PortIndex)
+        addr = data
+    }
+    global Word In(word PortIndex)
+    {
+        ptr addr = new prt(1, PortIndex)
+        word Result = *addr
+        return Result
+    }
+}

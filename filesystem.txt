@@ -1,0 +1,10 @@
+version is 0001
+there is free 254 pages
+page 1 is in use
+
+directorys and files
+root/boot.bin
+which is a file
+located at page 0001
+the size is 1000
+start addr is at 0x1000 is going to 0x1FFF

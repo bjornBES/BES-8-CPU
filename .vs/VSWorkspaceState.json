@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\asm"
+    "\\Basic",
+    "\\emu"
   ],
-  "SelectedNode": "\\asm\\asm.csproj",
+  "SelectedNode": "\\Basic\\Program.cs",
   "PreviewInSolutionExplorer": false
 }

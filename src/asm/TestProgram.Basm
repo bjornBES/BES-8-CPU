@@ -1,0 +1,19 @@
+.bits 16
+
+mov AX #1
+mov BX #48h
+int #10h ; output H to the std output
+
+mov MB #1
+sti #48h &32000h
+
+; jumps to 0x18000
+jmp far &8000h
+
+Here:
+
+mov AX #FFFFh
+
+.org 18000h
+mov AX #FFFFh
+jmp [Here] 

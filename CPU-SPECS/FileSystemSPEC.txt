@@ -1,0 +1,59 @@
+Overview: 
+The system encompasses 1 megabyte of data distributed over 20 address lines,
+each carrying 16 bits of data. The disk is divided into 511 pages, 
+each containing 2048 bytes. Each page is further split into 4 sectors,
+each of which is 0x200 bytes in width.
+
+Instructions:
+Writing to Disk:
+Write the address to the disk header port at 0x010 using `outb`.
+In the low part, specify the sector you wish to write, 
+and in the high data byte, indicate the disk.
+Write the data to one of the 14 disks using `outb`.
+
+Reading from Disk
+Write the sector you wish to read to the disk header port at 0x010 using OUTB.
+In the low part, specify the page you want to read, 
+and in the high data byte, indicate the disk.
+Read the data from memory at 0x10000 - 0x104FF in bank 2.
+
+Note: The first disk always serves as the boot disk and requires special bytes 
+for proper functioning. Ensure there is a 0x55AA at the bottom 
+of the first page user page of the disk to enable booting.
+
+directory/file entrie layout
+[0000-000F] Name
+[0010-0013] Start address
+[0014-0017] File length
+[0018-0019] Flags more at Flags
+[001A-001B] Folder deep
+[001C-001F] continue address
+
+page layout
+[0000-01FF] sector 1
+[0200-03FF] sector 2
+[0400-05FF] sector 3
+[0600-0800] sector 4
+
+on the first page all the metadata is located (this is in bytes)
+[0000-0002] file system version
+[0003-0004] free pages count
+
+[0100-06FF] root directory entries (49 entries)
+[0700-0705] Mata name
+
+Pages
+page 0 is the metadata/file system data 
+page 1 - 510 is user defind
+
+
+Flags
+bits
+    0   file or directory (1 == directory and 0 == a file)
+    1   occupied
+    2   
+    3
+    4
+    5
+    6
+    7

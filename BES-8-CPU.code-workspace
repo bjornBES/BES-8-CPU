@@ -19,6 +19,7 @@
 		"applesoft.detokenizer.escapes": [
 			10,
 			13
-		]
+		],
+		"powershell.cwd": "BES-8-CPU"
 	}
 }

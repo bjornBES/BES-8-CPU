@@ -1,4 +1,7 @@
-Input ./src/asm/OS/BIOS.Basm
+Input ./src/asm/Terminal/Terminal.Basm
 UseDebuger
+ObjFile ./Builds/a.obj
+UseBinary ./Builds/bin.bin
 Output ./Builds/a.out
 UseSections false
+Build false

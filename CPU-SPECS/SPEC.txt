@@ -1,0 +1,233 @@
+OVERVIEW
+ 20 bit data width
+ 20 bit addr width ~ 131 kilobytes
+ Memory banking via the MB register allowing for 65535 possible memory banks
+ 
+INSTRUCTIONS
+ 00 MOV     reg/addr,      reg/imm/addr         -> reg = reg/imm/mem[addr] || mem[addr] = reg/imm/mem[addr]
+ 01
+ 02 
+ 03 PUSH    reg16/imm16                         -> mem[SP] = reg16/imm16 SP--
+ 04 POP     reg16/addr                          -> SP++ reg16/addr = mem[SP]
+ 05 ADD     reg16,              reg16/imm       -> reg16 = reg16 + reg16/imm16 + C
+ 06 
+ 07 SUB     reg16,              reg16/imm       -> reg16 = reg16 - reg16/imm16 - C
+ 08 AND     reg16,              reg16/imm       -> reg16 = reg16 & reg16/imm16
+ 09 OR      reg16,              reg16/imm       -> reg16 = reg16 | reg16/imm16
+ 0A NOR     reg16,              reg16/imm       -> reg16 = !(reg16 | reg16/imm16)
+ 0B CMP     reg/addr,           reg16/imm       -> F = reg16/mem[addr] - imm/reg16
+ 0C JNE     addr                                -> PC = addr if E == 0
+ 0D INT     imm16/null                          -> system call 
+ 0E JMP     addr                                -> PC = addr
+ 0F JME     addr                                -> PC = addr if E == 1
+ 10 HALT    imm16/null                          -> DIS
+ 11 CALL    addr                                -> push PC, PC = addr
+ 12 RTS                                         -> pop PC
+ 13 INC     reg16/addr                          -> reg16/mem[addr]++
+ 14 DEC     reg16/addr                          -> reg16/mem[addr]--
+ 15 OUTB    imm16/reg16           reg16/imm16   -> port[imm16/reg16] = reg16/imm16
+ 16 INB     imm16/reg16           reg16         -> reg = port[imm16/reg16]
+ 17 NOP                                         -> 
+ 18 SEF     imm16                               -> F[imm16] = 1
+ 19 CLF     imm16                               -> F[imm16] = 0
+ 1A JMZ     addr                                -> PC = addr if Z == 1
+ 1B JNZ     addr                                -> PC = addr if Z == 0
+ 1C JML     addr                                -> PC = addr if L == 1
+ 1D JMG     addr                                -> PC = addr if L == 0
+ 1E JMC     addr                                -> PC = addr if C == 1
+ 1F JNC     addr                                -> PC = addr if C == 0
+ 20 MUL     reg16,              reg16/imm16     -> reg16 = reg16 * reg16/imm16
+ 21 DIV     reg16,              reg16/imm16     -> reg16 = reg16 / reg16/imm16
+ 22 NOT     reg16                               -> reg16 = !reg16 
+ 23 PUSHR                                       -> push AX push BX push CX push DX push ZX push X push Y
+ 24 POPR                                        -> pop Y pop X pop ZX pop DX pop CX pop BX pop AX
+ 25 ROL     reg16               imm16/null      -> reg16 << imm16 if null 1
+ 26 ROR     reg16               imm16/null      -> reg16 >> imm16 if null 1
+ 27 JER     addr                                -> PC = addr if ER = 1
+
+REGISTERS
+AX  (0b00_0000)   GP 16 bit register
+AL  (0b10_0000)   GP 8 bit register LOW
+AH  (0b01_0000)   GP 8 bit register HIGH
+BX  (0b00_0001)   GP 16 bit register
+BL  (0b10_0001)   GP 8 bit register LOW
+BH  (0b01_0001)   GP 8 bit register HIGH
+CX  (0b00_0010)   GP 16 bit register
+CL  (0b10_0010)   GP 8 bit register LOW
+CH  (0b01_0010)   GP 8 bit register HIGH
+DX  (0b00_0011)   GP 16 bit register
+DL  (0b10_0011)   GP 8 bit register LOW
+DH  (0b01_0011)   GP 8 bit register HIGH
+ZX  (0b00_0100)   GP 16 bit register
+ZL  (0b10_0100)   GP 8 bit register LOW
+ZH  (0b01_0100)   GP 8 bit register HIGH
+PC  (0b00_0101)   Program Counter   20 bit register
+SP  (0b00_0110)   Stack Pointer     20 bit register
+MB  (0b00_0111)   Memory bank       16 bit register
+X   (0b00_1000)   16 bit Index register
+XL  (0b10_1000)   8 bit Index register LOW
+XH  (0b01_1000)   8 bit Index register HIGH
+Y   (0b00_1001)   16 bit Index register
+YL  (0b10_1001)   8 bit Index register LOW
+YH  (0b01_1001)   8 bit Index register HIGH
+F   (0b00_1111)
+    0x0000  LESS        0
+    0x0001  EQUAL       1
+    0x0002  ZERO        2
+    0x0004  CARRY       3
+    0x0008  INT ENABLE  4
+    0x0010  HALT        5
+    0x0020  SIGN FLAG   6
+    0x0040  PARITY FLAG 7
+    0x0080  UNUSED      8
+    0x0100  UNUSED      9
+    0x0200  UNUSED      10
+    0x0400  UNUSED      11
+    0x0800  UNUSED      12
+    0x1000  UNUSED      13
+    0x2000  UNUSED      14
+    0x4000  UNUSED      15
+    0x8000  ERROR FLAG  16
+
+register Low and High
+all the registers can be split in to a high and an low part 
+
+Calling convention
+    Arguments pushed to stack in order from right to left
+    Registers pushed if used in func
+    Return value in Z
+    After return offset the SP with the length of the arguments using add
+
+INSTRUCTIONS LAYOUT
+XXXX_XXXX_ZZZZ_ZZZZ_0000
+X 8 bit instructions identifier
+Z 8 bit instructions argument identifier
+
+ARGUMENT IDENTIFIER
+0000    imm
+0001    addr
+0010    register
+0011    Indexed with register
+0100    Indexed with addr
+
+MEMORY LAYOUT
+the memory layout is split op into 3 banks or more
+you can used more banks but bank 0 to 2 is resuves
+for the program 
+
+BANK LAYOUT
+BANK 0
+    0x00000 - 0xFFFFF GENERAL PURPOSE ROM
+
+BANK 1
+    0x00000 - 0x001FF IO (PORTS)
+    0x00200 - 0x01FFF STACK
+    0x02000 - 0xFFFFF GENERAL PURPOSE MEMORY
+
+BANK 2
+    0x00000 - 0x0FFFF VIDEO MEMORY
+    0x10000 - 0x104FF Charse
+    0x10500 - 0x2FFFF variable Memory
+    0x30000 - 0xFFFFF UNUSED MEMORY
+
+PORTS
+PORTS are used to communicate with devices or by the BES-8 itself. See
+SPECIAL PORTS for a list of which ports are controlled by the BES-8 and not
+external devices.
+
+SPECIAL PORTS
+0x000: 
+0x001: SCREEN
+0x002: User Port1 SPI       (I/O)
+0x003: User Port2 SPI       (I/O)
+0x004: User Port3 SPI       (I/O)
+0x005: User Port4 SPI       (I/O)
+0x006: Expansion Port 1     (I/O)
+0x007: Expansion Port 2     (I/O)
+0x008: Expansion Port 3     (I/O)
+0x009: Expansion Port 4     (I/O)
+0x00A: Expansion Port 5     (I/O)
+0x00B: Expansion Port 6     (I/O)
+0x00C: Expansion Port 7     (I/O)
+0x00D: Expansion Port 8     Output only
+0x00E: Expansion Port 9     Input only Output external
+0x00F: Expansion Port 10    Input only Output external
+0x010: Disk Header
+0x011: Boot Disk            (10 sectors for the bootloader)
+0x012 - 0x01F: 13 Disk slots (more in the FileSystemSPEC.txt)
+0x013: Floppy disk Reader
+
+EXPANSION PORT
+in the Expansion port there is a way to expant the memory using the data bus and addr bus.
+you cna ues the inb and outb to communicate to a device on the 10 Expansion port,
+this can be a mouse, a Keyboard and other things for example extar RAM.
+
+VRAM LAYOUT
+XXXX_XXXX_YYYY_YYYY SS00_CCCC_CCCC_0000
+X = cursor pos X
+Y = cursor pos Y
+C = color data
+S = Layer Index
+
+SCREEN
+The screen circuit can be read/written to using INB and OUTB instructions.
+It contains 5 registers that can be read/written for the cursors and other things, 
+The screen is 192 x 144 pixles and the screen buffer is in the other part of VRAM, 
+with a 128 color palette.
+the screen can be in to different modes depending on the starting value sent to register 1
+
+BIOS interrupts
+A BIOS interrupt is a way to communicate 
+
+Micro Instructions
+
+LAYOUT
+00_00_0000_0000_00000000
+0E LH RRRR AAAA IIIIIIII
+
+E = register enable
+L = low enable
+H = high enable
+R = register identifier
+I = instruction identifier
+A = argument identifier
+
+Instructions
+00_00_0000_0_00 (00010)
+register disbaled
+argument imm
+instr MOV (Mov_Reg_16)
+
+01_00_0101_F_50 (45F50)
+register PC
+argument implied
+instr inc (inc_Reg_32)
+
+01_00_0101_F_80 (45F80)
+register PC
+argument implied
+instr out_Reg_32
+
+00_00_0000_0_FF (000FF)
+instr End instruction
+
+00_00_0000_F_EF (00FEF)
+instr 
+
+00_00_0000_0_31 (00031)
+Set_Addr_Ram
+
+00_00_0000_0_01 (00001)
+Write_Ram
+
+00_00_0000_0_61 (00061) Outb Imm
+Ports_Data_Out
+
+00_00_0000_2_61 (00261)  Outb Reg
+Ports_Data_Out
+
+00_00_0000_0_71 (00071) Inb imm
+Ports_Data_Out  
+
+00_00_0000_2_71 (00271)  Outb Reg
+Ports_Data_Out  

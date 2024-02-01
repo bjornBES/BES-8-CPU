@@ -1,0 +1,106 @@
+$CX = 32000h
+$CY = 32001h
+$LE = 32002h
+$Running = 32003h
+
+@Print %ir
+{
+    mov BL %ir
+    mov AX #0
+    int #10h
+}
+
+Reset:
+mov %CX #0
+mov %CY #0
+mov %LE #0
+mov %Running #1
+jmp [INIT_TERMINAL]
+
+EXIT:
+mov %Running #0
+jmp $
+
+INIT_TERMINAL:
+outb #1 #80FFh
+
+&Print #'/'
+
+_Main:
+call [INIT_TERMINAL]
+
+cmp BL #KW_ENT
+jme [ENTER]
+
+inc %LE
+mov X %LE
+mov [Buffer],X BL
+&Print BL
+
+jmp [_Main]
+
+ENTER:
+mov %CX #0
+inc %CY
+
+; XL is the Index
+mov XL #0
+ENTER_Loop:
+mov AL [Buffer],XL
+inc XL
+mov AH [Buffer],XL
+dec XL
+mov [Char_Buffer],XL AX
+
+inc XL
+cmp %LE XL
+jme [EXIT_LOOP]
+inc XL 
+cmp %LE XL
+jme [EXIT_LOOP]
+
+jmp [ENTER_Loop]
+EXIT_LOOP:
+mov BX #0
+mov AX #0
+mov X #0
+mov AX [Char_Buffer],XL
+mov BL [Buffer],XH
+inc XH
+mov BH [Buffer],XH
+cmp AX BX
+jme [Execute_Command]
+jmp [ERROR_CANT_FIND_INSTR]
+
+Execute_Command:
+cmp [CLS_COMMAND] AX
+jme [INIT_TERMINAL]
+
+cmp [EXIT_COMMAND] AX
+jme [EXIT]
+
+
+jmp [_Main]
+
+; return in BL
+Read_Key:
+inb #2 BL
+cmp BL NULL
+jme [Read_Key]
+rts
+
+ERROR_CANT_FIND_INSTR:
+&Print #'E'
+jmp $
+
+CLS_COMMAND:
+.str "CL"
+
+EXIT_COMMAND:
+.str "EX"
+
+Char_Buffer:
+
+
+.org $+5
+Buffer:

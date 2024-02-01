@@ -1,18 +1,21 @@
 $KB #= 2
 $Screen #= 1
+
+; At addr 0x32000 and in bank 2 the vram is at
 .org 32000h
 VRAM:
+
 .org 0
 
 _Start_BIOS:
 mov XL #FFh
-
 
 Post_Loop:
 inc XL
 push XL
 push #FEh
 call [Read]
+add SP #2
 
 mov ZX AL
 
@@ -31,7 +34,7 @@ jne [Post_Loop]
 jmp [Error_Cant_Find_An_Boot_Disk]
 
 Boot:
-; jumping to the start of the OS 
+; jumping to the start of the OS
 jmp &01000h
 
 Error_Cant_Find_An_Boot_Disk:
@@ -68,6 +71,3 @@ Boot_Disk_Error:
 .include src/asm/OS/IO
 
 .include src/asm/OS/FileTest
-
-.include src/asm/OS/BootLoader
-

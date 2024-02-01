@@ -1,6 +1,0 @@
-newfile C:\Users\bjorn\Desktop\BES-8-CPU\src\high_level_lang\Program.BEc
-func main()
-{
-byte I = 0
-exit(I)
-}

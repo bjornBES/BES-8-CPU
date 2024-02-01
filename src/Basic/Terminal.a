@@ -1,0 +1,40 @@
+00      let CX = 0 : let CY = 0
+05      let R = 1 : let Key = 0
+10      let BUFFERL = 20 : dim CharBuffer(BUFFERL)
+15      let Le = 0
+20      GOSUB 1000
+29      rem Main Loop
+30      GOSUB 1100
+35      GOTO 2000
+40      Le = Le + 1
+45      CharBuffer(CX + CY) = Key
+50      PRINT Key
+55      GOTO 30
+
+999     rem INIT_TERMINAL
+1000    POKE 2,255
+1001    REM the 255 is 0x80FF
+1010    PRINT "/"
+1020    RETURN
+
+1099    rem Read_Key
+1100    Key = PEEK(2)
+1101    REM the 2 is the srceen
+1110    IF Key = 0 THEN goto 1100
+1120    RETURN
+
+1199    REM ENTER
+1200    CX = 0
+1205    CY = CY + 1
+1209    REM In Commands.Basm
+1210    let c$ = ""
+1215    FOR I = 0 TO Le : c = c + CharBuffer(I) : NEXT
+1220    IF c$ = "CLS" THEN gosub 1000
+1225    IF c$ = "EXIT" THEN gosub 1300
+
+1300    R = 0
+1310    HOME
+1320    END
+
+2000    IF Key = 20 THEN goto 1200
+2200    GOTO 30

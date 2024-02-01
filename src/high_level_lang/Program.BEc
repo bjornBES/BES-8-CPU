@@ -1,6 +1,0 @@
-func main()
-{
-    byte I = 0
-    exit(I)  // tset
-    // testss
-}

@@ -1,0 +1,58 @@
+file system
+ Read
+ offsed by 3
+ arguments
+ 1 Disk (0 - 13)
+ 2 Page
+ 3 sector
+ Not successful the error flag will be set
+ registers used AX X
+ 
+ Write
+ offsed by 4
+ arguments
+ 1 Disk (0 - 13)
+ 2 Page
+ 3 sector
+ 4 data
+ Not successful the error flag will be set
+ registers used AX BX X
+ 
+ GetFile
+ offsed by 2
+ arguments
+ 1 Name (string with 0)
+ 2 Disk (0 - 13)
+ 3 dirs
+ return File offset in ZX
+ Error return the Error flag will be set
+ registers used AX BX X Y ZX
+ this func will use some ram (0x37000 to 0x3700F)
+ 
+ Get_Continue_Addr
+ offseted by 3
+ arguments
+ 1 Disk (0 - 13)
+ 2 File offset
+ returns using Text_Buffer
+ Error return the Error flag will be set
+ registers used AX BX X ZX
+
+Math
+ Mod
+ arguments
+ stack
+ stack
+ returns in ZX
+ registers used AX BX ZX
+
+Screen
+ COut
+ AX Char
+
+ CIn
+ return AX
+
+ PixelOut
+ AL Color data
+
