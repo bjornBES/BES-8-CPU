@@ -5,6 +5,21 @@
 		},
 		{
 			"path": "../Language/basm"
+		},
+		{
+			"path": "../Language/BEC"
+		},
+		{
+			"path": "../Assembler"
+		},
+		{
+			"path": "../Interpreter"
+		},
+		{
+			"path": "../emulator"
+		},
+		{
+			"path": "../Basic_Interpreter"
 		}
 	],
 	"settings": {

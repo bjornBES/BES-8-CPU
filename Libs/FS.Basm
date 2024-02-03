@@ -1,0 +1,38 @@
+; Disk 
+; string FS version
+; free pages count
+; directory entries 
+; Mata name
+
+; 1546 bytes
+
+; arg 1 word Disk
+.global GetDisk:
+    pushr
+
+    mov ZX SP
+
+    add SP #8
+    pop X
+
+    mov SP ZX
+
+    ; code
+    mov AX #2       ; Open Read
+    mov BX #0000    ; Starting address
+    mov CL #2048    ; Count
+    mov CH X        ; Disk
+    int #13
+
+    mov AX #5       ; Move Charsh
+    mov CL #7       ; the high address [15 - 19] 
+    mov BX #0000h   ; the low address [0 - 15] 0x70000
+    mov CH #3       ; Bank
+    int #13h
+
+    popr
+
+    rts #1
+
+.org 10000h
+Charse:

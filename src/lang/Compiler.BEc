@@ -1,0 +1,34 @@
+inc IO
+
+local word Index = 0
+
+func Main(word disk)
+{
+    Disk SrcDisk = FS.GetDisk(Disk + 1)
+
+    if (SrcDisk.Exists())
+    {
+        Print("FILE ERROR DONT NOT EXISTS")
+        Exit(-1)
+    }
+
+    FilePage page
+    GetMoreSRC(page)
+
+    word* SrcCodePointer = new ptr(0x10000, 2)
+    PageSector sector = FS.GetSector(page, 0)
+    sector.GetData() 
+
+    Build(SrcCodePointer)
+}
+
+func Build(word* Src)
+{
+    
+}
+
+func GetMoreSRC(out FilePage)
+{
+    FilePage = FS.GetPage(Index)
+    Index++
+}

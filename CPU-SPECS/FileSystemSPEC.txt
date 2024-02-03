@@ -15,7 +15,7 @@ Reading from Disk
 Write the sector you wish to read to the disk header port at 0x010 using OUTB.
 In the low part, specify the page you want to read, 
 and in the high data byte, indicate the disk.
-Read the data from memory at 0x10000 - 0x104FF in bank 2.
+Read the data from memory at 0x10000 - 0x1FFFF in bank 2.
 
 Note: The first disk always serves as the boot disk and requires special bytes 
 for proper functioning. Ensure there is a 0x55AA at the bottom 
@@ -38,6 +38,8 @@ page layout
 on the first page all the metadata is located (this is in bytes)
 [0000-0002] file system version
 [0003-0004] free pages count
+[0005-0604] root directory entries (49 entries)
+[0605-060A] Mata name
 
 [0100-06FF] root directory entries (49 entries)
 [0700-0705] Mata name

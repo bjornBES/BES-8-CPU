@@ -22,7 +22,7 @@ INSTRUCTIONS
  0F JME     addr                                -> PC = addr if E == 1
  10 HALT    imm16/null                          -> DIS
  11 CALL    addr                                -> push PC, PC = addr
- 12 RTS                                         -> pop PC
+ 12 RTS     imm8/null                           -> pop PC + imm8
  13 INC     reg16/addr                          -> reg16/mem[addr]++
  14 DEC     reg16/addr                          -> reg16/mem[addr]--
  15 OUTB    imm16/reg16           reg16/imm16   -> port[imm16/reg16] = reg16/imm16
@@ -99,9 +99,11 @@ Calling convention
     After return offset the SP with the length of the arguments using add
 
 INSTRUCTIONS LAYOUT
-XXXX_XXXX_ZZZZ_ZZZZ_0000
+XXXX_XXXX_ZZZZ_ZZZZ_SAAA
 X 8 bit instructions identifier
 Z 8 bit instructions argument identifier
+S 1 if 1 the 2 argument and if 0 the first argument 
+A 3 add to the argument depending on the S 
 
 ARGUMENT IDENTIFIER
 0000    imm
@@ -126,9 +128,10 @@ BANK 1
 
 BANK 2
     0x00000 - 0x0FFFF VIDEO MEMORY
-    0x10000 - 0x104FF Charse
-    0x10500 - 0x2FFFF variable Memory
-    0x30000 - 0xFFFFF UNUSED MEMORY
+    0x10000 - 0x1FFFF Charse
+    0x20000 - 0x4FFFF variable Memory
+    0x50000 - 0x6FFFF resuves memory
+    0x70000 - 0xFFFFF UNUSED MEMORY
 
 PORTS
 PORTS are used to communicate with devices or by the BES-8 itself. See
@@ -136,34 +139,34 @@ SPECIAL PORTS for a list of which ports are controlled by the BES-8 and not
 external devices.
 
 SPECIAL PORTS
-0x000: 
+0x000: Expansion Port 0         (I/O)
 0x001: SCREEN
-0x002: User Port1 SPI       (I/O)
-0x003: User Port2 SPI       (I/O)
-0x004: User Port3 SPI       (I/O)
-0x005: User Port4 SPI       (I/O)
-0x006: Expansion Port 1     (I/O)
-0x007: Expansion Port 2     (I/O)
-0x008: Expansion Port 3     (I/O)
-0x009: Expansion Port 4     (I/O)
-0x00A: Expansion Port 5     (I/O)
-0x00B: Expansion Port 6     (I/O)
-0x00C: Expansion Port 7     (I/O)
-0x00D: Expansion Port 8     Output only
-0x00E: Expansion Port 9     Input only Output external
-0x00F: Expansion Port 10    Input only Output external
+0x002: User Port1 SPI           (I/O)
+0x003: User Port2 SPI           (I/O)
+0x004: User Port3 SPI           (I/O)
+0x005: User Port4 SPI           (I/O)
+0x006: Expansion Port 1         (I/O)
+0x007: Expansion Port 2         (I/O)
+0x008: Expansion Port 3         (I/O)
+0x009: Expansion Port 4         (I/O)
+0x00A: Expansion Port 5         (I/O)
+0x00B: Expansion Port 6         (I/O)
+0x00C: Expansion Port 7         (I/O)
+0x00D: Expansion Port 8         Output only
+0x00E: Expansion Port 9         Input only Output external
+0x00F: Expansion Port 10        Input only Output external
 0x010: Disk Header
-0x011: Boot Disk            (10 sectors for the bootloader)
-0x012 - 0x01F: 13 Disk slots (more in the FileSystemSPEC.txt)
+0x011: Boot Disk                (10 sectors for the bootloader)
+0x012 - 0x01F: 13 Disk slots    (more in the FileSystemSPEC.txt)
 0x013: Floppy disk Reader
 
 EXPANSION PORT
 in the Expansion port there is a way to expant the memory using the data bus and addr bus.
-you cna ues the inb and outb to communicate to a device on the 10 Expansion port,
+you can use the INB and OUTB to communicate to a device on one of the 10 Expansion ports,
 this can be a mouse, a Keyboard and other things for example extar RAM.
 
 VRAM LAYOUT
-XXXX_XXXX_YYYY_YYYY SS00_CCCC_CCCC_0000
+XXXX_XXXX YYYY_YYYY CCCC_CCCC LL00-0000
 X = cursor pos X
 Y = cursor pos Y
 C = color data
