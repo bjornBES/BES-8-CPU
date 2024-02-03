@@ -1,0 +1,83 @@
+{
+	"fileTypes": [
+		"Basm"
+	],
+	"name": "Bassembly",
+	"scopeName": "testsource.basm",
+	"patterns": [
+		{
+			"include": "#statements"
+		}
+	],
+	"repository": {
+		"statements": {
+			"patterns": [
+				{
+					"include": "expressions"
+				},
+				{
+					"match": "(;.*)",
+					"name": "comment.Basm"
+				},
+				{
+					"name": "keyword.control.Basm",
+					"comment": "Basm instruction mnemonic",
+					"match": "\\b(mov|push|pop|add|sub|or|nor|cmp|jne|int|jmp|jme|halt|call|rts|inc|dec)"
+				},
+				{
+					"name": "variable.label",
+					"match": "^\\s*[\\w\\. \\$#@~\\?]+:"
+				},
+				{
+					"name": "keyword.control.directive",
+					"patterns": [
+						{
+							"name": "storage.modifier.visibility",
+							"match": "\\b(global|GLOBAL)"
+						},
+						{
+							"name": "keyword.control.directive.section",
+							"match": "\\b(sections|SECTIONS)\\b"
+						}
+					]
+				},
+				{
+					"name": "keyword.control.psuedoInstruction",
+					"match": "\\b(include|org|INCLUDE|ORG)"
+				}
+			]
+		},
+		"expressions": {
+			"patterns": [
+				{
+					"name": "variable.language.Basm",
+					"comment": "Basm register name",
+					"match": "\\b(AX|AL|AH|BX|BL|BH|CX|CL|CH|DX|DL|DH|ZX|ZL|ZH|PC|SP|MB|X|XL|XH|Y|YL|YH|EAX|EBX|F)(ax|al|ah|bx|bl|bh|cx|cl|ch|dx|dl|dh|zx|zl|zh|pc|sp|mb|x|xl|xh|y|yl|yh|eax|ebx|f)"
+				},
+				{
+					"name": "keyword.operator.size",
+					"match": "\\b(byte|word|BYTE|WORD)"
+				},
+				{
+					"name": "string.quoted",
+					"patterns": [
+						{
+							"name": "string.quoted.double",
+							"begin": "\"",
+							"end": "\""
+						},
+						{
+							"name": "string.quoted.single",
+							"begin": "'",
+							"end": "'"
+						},
+						{
+							"name": "constant.numeric",
+							"match": "(\\b(#|&)+\\b([\\da-fA-F]*[h]|[0-1]*[b]|[\\d]))"
+						}
+					]
+				}
+			]
+		}
+	}
+}

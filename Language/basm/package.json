@@ -1,0 +1,40 @@
+{
+  "name": "basm",
+  "displayName": "Basm",
+  "description": "",
+  "version": "0.0.1",
+  "main": "./src/extension.js",
+  "engines": {
+    "vscode": "^1.86.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "basm",
+        "aliases": [
+          "BES_Assembly",
+          "basm"
+        ],
+        "extensions": [
+          ".basm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "path": "./syntaxes/basm.tmLanguage.json",
+        "scopeName": "source.basm",
+        "injectTo": [
+          "source.basm"
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "vscode": "^1.1.37"
+  }
+}

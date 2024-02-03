@@ -1,0 +1,30 @@
+{
+  "name": "bes-assembly",
+  "displayName": "Bassembly",
+  "description": "",
+  "version": "0.0.1",
+  "publisher": "BjornBEs",
+  "icon": "Bassembly-Icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "basm",
+      "aliases": ["Bassembly", "bassembly"],
+      "extensions": [".Basm", ".basm"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "basm",
+      "scopeName": "testsource.Basm",
+      "path": "./syntaxes/basm.tmLanguage.json",
+      "embeddedLanguages": {
+        "meta.embedded.block.javascript": "javascript"
+      }
+    }]
+  }
+}
