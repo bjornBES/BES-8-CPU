@@ -1,4 +1,5 @@
 ﻿using emu;
+using emulator;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +35,7 @@ class Program
         */
 
         MEM = new MEM();
-        Screen.RESET();
+        Engine.RESET(new uint[0]);
         /*
         string[] src = File.ReadAllText(InputPath).Split('|');
         for (int i = 0; i < src.Length; i++)

@@ -1,0 +1,33 @@
+diskAddr{
+	Addr = 393216
+	Size = 1
+	FuncName = main
+	Settings {
+		IsArgument = True
+		IsPointer = False
+		IsLocal = True
+		IsAllocated = False
+	}
+}
+diskIndex{
+	Addr = 393217
+	Size = 1
+	FuncName = main
+	Settings {
+		IsArgument = True
+		IsPointer = False
+		IsLocal = True
+		IsAllocated = False
+	}
+}
+A{
+	Addr = 327682
+	Size = 1
+	FuncName = 
+	Settings {
+		IsArgument = False
+		IsPointer = False
+		IsLocal = True
+		IsAllocated = False
+	}
+}

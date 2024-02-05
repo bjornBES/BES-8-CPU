@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace emu
 {
-    public partial class Screen : GameWindow
+    public class Screen : GameWindow
     {
         /*
         bin databus IXXXXXXXRRRRAAAA
@@ -17,6 +17,9 @@ namespace emu
         0x00F0/R = args mode
         0x000F/A = instr
         */
+
+        public static MEM MEM;
+
         const char Pixel = '█'; // 219 dec
         const char HalvPixel = '▄'; // 220 dec
 
@@ -35,7 +38,7 @@ namespace emu
 
         public static void RESET()
         {
-            using (Screen game = new Screen(ScreenW, ScreenH, "Window"))
+            using (Screen game = new Screen(ScreenW, ScreenH, "BES-8-CPU"))
             {
                 game.Run();
             }
@@ -88,7 +91,6 @@ namespace emu
             vertices.Add(color4.G / 255);
             vertices.Add(color4.B / 255);
         }
-
         void SetPixel(int width, int height, int Layer, int Red, int Green, int Blue)
         {
             float X = width / ScreenW;
@@ -104,7 +106,6 @@ namespace emu
             vertices.Add(color4.G / 255);
             vertices.Add(color4.B / 255);
         }
-
         void SetPixel(float width, float height, int color)
         {
             Color4 color4 = Pallet[color];
@@ -145,8 +146,6 @@ namespace emu
         protected override void OnLoad()
         {
             base.OnLoad();
-
-
 
             /*
             VRAM

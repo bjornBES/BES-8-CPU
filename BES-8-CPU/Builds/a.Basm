@@ -1,185 +1,47 @@
-call [Main]
-mov AX #20h
-int #10h
-halt #0
+; word
+push #800h
+; byte
+push #0
+call [_main]
+add SP #2
 
 
-
-; func start with 0 args
-; no values beening pushed at 3
-start:
+_start:
 pushr
 
 
 
 popr
 rts
-LableJump_0:
 
-
-; func Main with 0 args
-; no values beening pushed at 8
-Main:
+_main:
 pushr
-
-
-; port.Out(1, 1)
-; Calling the Out Func from the Ports Rigth False Left False
-push #1
-push #1
-call [Func_Port_Out]
-add SP #2
-
-; Variable at 11 Name = A and the value is 100
-; allocating A at 10500 with 64
-; moving the variable to the addr 64
+mov ZX SP
+add SP #8
 push MB
 mov MB #2
-mov [10500h] #64h
+; 0 diskAddr as word is pointer False
+pop [393216] ; diskAddr
+; 1 diskIndex as byte_ is pointer False
+pop [393217] ; diskIndex
 pop MB
+mov SP ZX
 
-; Variable at 12 Name = I and the value is 255
-; allocating I at 10501 with ff
-; moving the variable to the addr ff
+; making a new variabel called A = diskIndex that is pointed False
 push MB
 mov MB #2
-mov [10501h] #ffh
+mov [327682] #393217
 pop MB
 
-; Variable at 13 Name = Port and the value is 1
-; allocating Port at 10502 with 1
-; moving the variable to the addr 1
-push MB
-mov MB #2
-mov [10502h] #1h
-pop MB
+; calling the ports
+; Calling Cout func with 1 arg
+push #'A'
+call [_cout]
+add SP #1
 
-; port.Out(Port, 10)
-; Calling the Out Func from the Ports Rigth False Left True
-push #10
-mov MB #2
-push [66818]
-mov MB #0
-call [Func_Port_Out]
-add SP #2
-
-; port.Out(1, A)
-; Calling the Out Func from the Ports Rigth True Left False
-mov MB #2
-push [66816]
-mov MB #0
-push #1
-call [Func_Port_Out]
-add SP #2
-
-; if(A == 100)
-mov AX [66816]
-mov BX #100
-cmp AX BX
-jne [LableJump_1]
+call [_start]
 
 
-; A = A + 10 * 2 expr
-; EXPR
-push AX
-push BX
-push CX
-push DX
-push X
-push Y
-mov AX #2
-pop Y
-pop X
-pop DX
-pop CX
-pop BX
-pop AX
-
-; A = A - 1 expr
-; EXPR
-push AX
-push BX
-push CX
-push DX
-push X
-push Y
-mov AX #1
-pop Y
-pop X
-pop DX
-pop CX
-pop BX
-pop AX
-
-; A = A + 1 expr
-; EXPR
-push AX
-push BX
-push CX
-push DX
-push X
-push Y
-mov AX #1
-pop Y
-pop X
-pop DX
-pop CX
-pop BX
-pop AX
-
-LableJump_1:
-
-; if (I != 0)
-mov AX [66817]
-mov BX #0
-cmp AX BX
-jme [LableJump_2]
-
-
-; A = 0 expr
-mov [66816] #0
-
-LableJump_2:
-
-; A = 255 expr
-mov [66816] #255
-
-; A = I expr
-mov [66816] [66817]
-
-; A = A expr
-mov [66816] [66816]
-
-; free(&A)
-; &A 
-mov [66816] #0
-
-
-
-
-
-
-
-; if (I > 1)
-mov AX [66817]
-mov BX #1
-cmp AX BX
-jml [LableJump_3]
-
-
-; Exit with variable I
-push MB
-mov MB #3h
-mov BX [10501h]
-pop MB
-rts
-popr
-rts
-
-LableJump_3:
 
 popr
 rts
-LableJump_4:
-
-.include Libs/Ports.Basm

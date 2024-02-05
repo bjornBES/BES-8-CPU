@@ -129,8 +129,8 @@ BANK 1
 BANK 2
     0x00000 - 0x0FFFF VIDEO MEMORY
     0x10000 - 0x1FFFF Charse
-    0x20000 - 0x4FFFF variable Memory
-    0x50000 - 0x6FFFF resuves memory
+    0x20000 - 0x6FFFF variable Memory
+    0x70000 - 0x8FFFF resuves memory
     0x70000 - 0xFFFFF UNUSED MEMORY
 
 PORTS

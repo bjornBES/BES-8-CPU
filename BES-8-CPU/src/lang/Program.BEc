@@ -1,38 +1,11 @@
 func start()
 {
-
+    word A = 0
 }
 
-func Main()
+func main(word diskAddr, byte diskIndex)
 {
-    port.Out(1, 1)
-    byte A = 100
-    byte I = 255
-    byte Port = 1
-    port.Out(Port, 10)
-    port.Out(1, A)
-    if(A == 100)
-    {
-        A = A + 10 * 2
-        A--
-        A++
-    }
-    if (I != 0)
-    {
-        A = 0
-    }
-    A = 255
-    A = I
-    A = A
-    free(&A)
-    // testss
-    /*
-    byte a = 0
-    exit(a)
-    */
-    // byte a = 0
-    if (I > 1)
-    {
-        exit(I)  // tset
-    }
+    word A = &diskIndex
+    Port.Cout('A')
+    start()
 }

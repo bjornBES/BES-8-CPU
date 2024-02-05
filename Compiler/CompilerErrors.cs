@@ -5,44 +5,30 @@
         public static void ErrorCantFindInputFile(string FilePath)
         {
         }
-        public static void ErrorSameName(string file, string[] src, int index, int linenumber, string Name)
+        public static void ErrorSameName(string file, Token token, string Name)
         {
-            Error("201230", file, linenumber);
-
-            Console.WriteLine($"{src.Length} {index + 2} {index} {index + 1}");
-
+            //Error("201230", file, token.Line);
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(src[index]);
+            Console.Write($"Systax error: ");
             Console.ResetColor();
-
-            if(src.Length > index + 1)
-                Console.WriteLine(src[index + 1]);
-            if(src.Length > index + 2)
-                Console.WriteLine(src[index + 2]);
-
-            Console.WriteLine($"names all ready ex");
+            Console.WriteLine($"at line {token.Line} A variable or function named '{Name}' is already defined");
+            Console.WriteLine("");
             Environment.Exit(1);
         }
         public static void ErrorVariableNotFound(string Name)
         {
         }
 
-        public static void SyntaxError(string file, string[] src, int index, int linenumber)
+        public static void SyntaxError(string file, Token token, TokenType expectedToken)
         {
-            Error("201230", file, linenumber);
-
-            Console.WriteLine($"{src.Length} {index} {index + 1} {index + 2} {src[index]} {src[index].Split(' ').Length}");
-
-            Console.WriteLine("A".PadLeft(src[index].Split(' ')[0].Length - 1, '-'));
+            //Error("201230", file, token.Line);
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(src[index]);
+            Console.Write($"Systax error: ");
             Console.ResetColor();
-            Console.WriteLine("".PadLeft(src[index].Length - 1, '~'));
 
-            WriteDown(src, 2, index + 1);
-
-            Console.WriteLine($"Systax error");
+            Console.WriteLine($"at line {token.Line} Expected an {Tokenization.to_string(expectedToken)}");
+            Console.WriteLine("");
             Environment.Exit(1);
         }
 

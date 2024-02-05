@@ -11,6 +11,7 @@ namespace emu
         public static IPort[] UserPorts = new IPort[4];
         public static IExpansionPort[] ExpansionPort = new IExpansionPort[10];
         public static IExpansionPort ConsolePort;
+        public static Screen Screen;
         public static void Reset()
         {
             ConsolePort = new ConsolePort();

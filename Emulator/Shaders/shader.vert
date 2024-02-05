@@ -11,7 +11,7 @@ out vec3 ourColor; // output a color to the fragment shader
 void main(void)
 {
 	// see how we directly give a vec3 to vec4's constructor
-    gl_Position = vec4(aPosition, 1.0); 
+    gl_Position = vec4(aPosition, 255); 
 
 	// We use the outColor variable to pass on the color information to the frag shader
 	ourColor = aColor;

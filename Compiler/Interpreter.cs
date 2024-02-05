@@ -21,7 +21,7 @@ namespace Compiler
 
         public bool UsingPorts = false;
 
-        List<Variables> variables = new();
+        List<Variable> variables = new();
 
         public const string Comment = "//";
 
@@ -157,7 +157,7 @@ namespace Compiler
                                     Environment.Exit(1);
                                 }
                             }
-                            variables.Add(new Variables()
+                            variables.Add(new Variable()
                             {
                                 Name = VariableName,
                                 Value = Value,
@@ -207,7 +207,7 @@ namespace Compiler
                     Value = Value.TrimEnd(')');
                 }
 
-                Variables variables = IsVariable(Value);
+                Variable variables = IsVariable(Value);
                 if (variables != null)
                 {
                     AsmSrc.Add($"; Exit with variable {variables.Name}");
@@ -253,7 +253,7 @@ namespace Compiler
                     {
                         if (i == 0) LeftUseVariabel = true;
                         if (i == 1) RightUseVariabel = true;
-                        Variables variables = IsVariable(funcArgs[i]);
+                        Variable variables = IsVariable(funcArgs[i]);
                         funcArgs[i] = "" + variables.Addr;
                     }
                     else
@@ -316,7 +316,7 @@ namespace Compiler
                 {
                     if (IsVariable(expr[0]) != null)
                     {
-                        Variables variables = IsVariable(expr[0]);
+                        Variable variables = IsVariable(expr[0]);
                         AsmSrc.Add($"mov [{variables.Addr}] #0");
                         FreeVariable(variables);
                     }
@@ -342,7 +342,7 @@ namespace Compiler
 
                 if (IsVariable(expr[0]) != null)
                 {
-                    Variables variables = IsVariable(expr[0]);
+                    Variable variables = IsVariable(expr[0]);
                     AsmSrc.Add($"mov AX [{variables.Addr}]");
                 }
                 else
@@ -352,7 +352,7 @@ namespace Compiler
 
                 if (IsVariable(expr[2]) != null)
                 {
-                    Variables variables = IsVariable(expr[2]);
+                    Variable variables = IsVariable(expr[2]);
                     AsmSrc.Add($"mov BX [{variables.Addr}]");
                 }
                 else
@@ -418,7 +418,7 @@ namespace Compiler
                 AsmSrc.Add($"; {Src[index]} expr");
 
 
-                Variables variables = IsVariable(Instr);
+                Variable variables = IsVariable(Instr);
                 if (Args[0] == "=")
                 {
                     //Console.WriteLine($"DEBUG {Src[index]} {Args.Length}");
@@ -439,7 +439,7 @@ namespace Compiler
                         // set
                         if (IsVariable(Args[1]) != null)
                         {
-                            Variables ToVar = IsVariable(Args[1]);
+                            Variable ToVar = IsVariable(Args[1]);
                             AsmSrc.Add($"mov [{variables.Addr}] [{ToVar.Addr}]");
                             NewValueVariable(variables.Name, ToVar.Value);
                         }
@@ -454,48 +454,16 @@ namespace Compiler
             else if (InComment) return;
             else
             {
-                CompilerErrors.SyntaxError("", Src.ToArray(), index, LineNumber);
+                //CompilerErrors.SyntaxError("", Src.ToArray(), index, LineNumber);
             }
         }
 
-        private void FreeVariable(Variables variable)
+        private void FreeVariable(Variable variable)
         {
             if(variables.Contains(variable))
             {
                 variables.Remove(variable);
             }
-        }
-
-        private List<Token> Tokenize(string[] expression)
-        {
-            List<Token> tokens = new List<Token>();
-
-            foreach (var element in expression)
-            {
-                if (int.TryParse(element, out _))
-                {
-                    tokens.Add(new Token(TokenType.Number, element));
-                }
-                else if (element == "+" || element == "-" || element == "*" || element == "/")
-                {
-                    tokens.Add(new Token(TokenType.Operator, element));
-                }
-                else if (element == "(")
-                {
-                    tokens.Add(new Token(TokenType.LeftParenthesis, element));
-                }
-                else if (element == ")")
-                {
-                    tokens.Add(new Token(TokenType.RightParenthesis, element));
-                }
-                else
-                {
-                    // Treat anything else as a variable
-                    tokens.Add(new Token(TokenType.Variable, element));
-                }
-            }
-
-            return tokens;
         }
 
         private void GenerateAssemblyCode(List<Token> tokens, bool debug)
@@ -509,7 +477,7 @@ namespace Compiler
                 Console.WriteLine(i + " " + token.Type + " " + token.Value);
                 switch (token.Type)
                 {
-                    case TokenType.Number:
+                    case TokenType.int_lit:
                         stack.Push($"mov AX #{token.Value}");
                         break;
 
@@ -523,10 +491,10 @@ namespace Compiler
                         {
                             Token nextToken = tokens[i + 1];
 
-                            if (nextToken.Type == TokenType.Number || nextToken.Type == TokenType.Variable)
+                            if (nextToken.Type == TokenType.int_lit || nextToken.Type == TokenType.Variable)
                             {
                                 // Push the value of the next token onto the stack
-                                stack.Push(nextToken.Type == TokenType.Number
+                                stack.Push(nextToken.Type == TokenType.int_lit
                                     ? $"mov AX #{nextToken.Value}"
                                     : $"mov AX &{(IsVariable(nextToken.Value) == null ? $"NULL" : $"{ IsVariable(nextToken.Value).Addr}")}");
                             }
@@ -589,11 +557,11 @@ namespace Compiler
                         }
                         break;
 
-                    case TokenType.LeftParenthesis:
+                    case TokenType.open_paren:
                         stack.Push("push AX");
                         break;
 
-                    case TokenType.RightParenthesis:
+                    case TokenType.close_paren:
                         if (stack.Count < 1)
                         {
                             throw new InvalidOperationException("Mismatched parentheses.");
@@ -641,8 +609,10 @@ namespace Compiler
             AsmSrc.Add("push X");
             AsmSrc.Add("push Y");
 
+            List<Token> tokens = new List<Token>();
+
             // Tokenize the expression
-            List<Token> tokens = Tokenize(expression);
+            //List<Token> tokens = Tokenize(expression);
 
             // Generate assembly code
             GenerateAssemblyCode(tokens, debug);
@@ -663,12 +633,12 @@ namespace Compiler
             {
                 if (Names[i] == name)
                 {
-                    CompilerErrors.ErrorSameName("", src, index, linenumber, name);
+                    //CompilerErrors.ErrorSameName("", src, index, linenumber, name);
                 }
             }
         }
 
-        Variables IsVariable(string Name)
+        Variable IsVariable(string Name)
         {
             for (int i = 0; i < variables.Count; i++)
             {

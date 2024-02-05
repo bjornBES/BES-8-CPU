@@ -13,7 +13,7 @@
 			"path": "../Assembler"
 		},
 		{
-			"path": "../Interpreter"
+			"path": "../Compiler"
 		},
 		{
 			"path": "../emulator"
@@ -36,5 +36,20 @@
 			13
 		],
 		"powershell.cwd": "BES-8-CPU"
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Build All",
+				"type": "PowerShell",
+				"request": "launch",
+				"script": "${workspaceFolder}/tools/Build.ps1",
+				"args": [
+					"All"
+				],
+				"cwd": "${cwd}"
+			}
+		]
 	}
 }
