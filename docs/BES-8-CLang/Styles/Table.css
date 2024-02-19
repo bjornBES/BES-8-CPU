@@ -1,0 +1,20 @@
+table
+{
+	width: 100%;
+}
+
+table, th, td{
+	font-family: Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+}
+th, td{
+	font-weight: bold;
+	padding: 5px;
+	border: 1px solid #ffffff;
+	font-size: 15px;
+}
+tr {
+	border: 1px solid #ffffff;
+	text-align: center;
+	font-size: 15px;
+}

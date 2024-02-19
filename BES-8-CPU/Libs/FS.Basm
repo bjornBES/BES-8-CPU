@@ -1,8 +1,9 @@
-; Disk 
-; string FS version
-; free pages count
-; directory entries 
-; Mata name
+; struct disk
+; short free_pages @ 0 offset 2 bytes + 0
+; entrys[30] @ 3 offset 30 * 32 = 960 bytes + 0
+; char[15] Mata Data @ 963 offset 15 bytes + 0
+; contain byte[2] 0000
+; struct End
 
 ; 1546 bytes
 

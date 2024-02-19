@@ -1,57 +1,50 @@
-; 1 Disk (0 - 13)
-; 2 Page
-; 3 sector
+; 1 byte Disk (0 - 6)
+; 2 short Page
+; 3 byte sector
 .global Read:
- push AX
- push X
+ PUSHR
 
  mov ZX SP
 
- add SP #4
+ add SP #8
 
- pop AL
- pop X
- pop AH
+ pop Ah ; sector
+ pop X  ; page
+ pop Al ; Disk
 
  mov SP ZX
 
- outb #10h X
- NOP
- outb #10h AX
- NOP
- inb #10h ZX
- mov ZX ZX
- jmz [Done]
- sef #16
- Done:
+ clf #3
+ add AL #Ah
 
- pop X
- pop AX
- rts
+ ; read sector
+ int #Ch
 
-; 1 Disk (0 - 13)
-; 2 Page
-; 3 sector
-; 4 data
+ POPR
+ ret #3
+
+; 1 byte Disk (0 - 13)
+; 2 sohrt Page
+; 3 short Address
+; 4 ushort data
 .global Write:
- push AX
- push BX
- push X
+ PUSHR
 
  mov ZX SP
 
- add SP #5
+ add SP #8
 
- pop AH
- pop X
  pop BX
- or AX BX
+ pop AL
+ pop CX
+ pop DL
 
  mov SP ZX
 
- pop X
- pop AX
- rts
+ int #Bh
+
+ POPR
+ ret #4
 
 ; offseted by size of Name + 2
 ; stack Name (string with 0)
@@ -59,14 +52,6 @@
 ; deep (1 - 255) where root is 1
 ; return Addr (ZX)
 .global GetFile:
-
- rts
-
-; offseted by 3
-; Disk (0 - 13)
-; File offset
-; returns using Text_Buffer
-.global Get_Continue_Addr:
 
  rts
 

@@ -1,0 +1,8 @@
+Input ./src/asm/basic/main.Basm
+InputDir ./src/asm/basic
+UseDebuger
+ObjFile ./Builds/ASMbasic/a.obj
+UseBinary ./Builds/ASMbasic/bin.bin
+Output ./Builds/ASMbasic/a.out
+DontBuild false
+FillTo 0x4FFF

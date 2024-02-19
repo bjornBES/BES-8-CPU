@@ -10,12 +10,9 @@ internal class Program
 
     static bool DoClear = false;
 
-    static Interpreter interpreter = new();
     static Tokenization Tokenization = new Tokenization();
     static Generation Generation = new Generation();
     public static FileInfo[] Files;
-
-    static CompilerSettings settings = new CompilerSettings();
 
     public static void Main(string[] args)
     {

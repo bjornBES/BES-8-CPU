@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "assembler": {
+      "commandName": "Project"
+    },
+    "assembler Debug": {
+      "commandName": "Project",
+      "commandLineArgs": "buildBasic.txt -D Basic/main.basm Basic"
+    }
+  }
+}

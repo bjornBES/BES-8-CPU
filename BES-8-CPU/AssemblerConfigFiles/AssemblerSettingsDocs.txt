@@ -17,5 +17,4 @@ DontBuild true/false
 FillTo Number
     this says if the rom needs to be filled and where it needs to be filled to
 
-UseSections true/false
-    if the porgram uses sections true and if not false 
+SrcFile File

@@ -1,4 +1,4 @@
-﻿namespace asm
+﻿namespace assembler
 {
     public class Lable
     {

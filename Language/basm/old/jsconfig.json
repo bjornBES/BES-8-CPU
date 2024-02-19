@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es6",
+		"outDir": "./out",
+		"allowJs": true,
+		"checkJs": true,  /* Typecheck .js files. */
+		"lib": [
+			"ES2020"
+		]
+	},
+	"include": ["**/*.js"],
+	"exclude": [
+		"node_modules",
+		"./out"
+	]
+}

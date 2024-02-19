@@ -18,7 +18,6 @@ namespace emu
         0x000F/A = instr
         */
 
-        public static MEM MEM;
 
         const char Pixel = '█'; // 219 dec
         const char HalvPixel = '▄'; // 220 dec

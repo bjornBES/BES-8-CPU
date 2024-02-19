@@ -9,7 +9,6 @@ namespace emu
     public class ConsolePort : IExpansionPort
     {
         ushort[] VRam = new ushort[0x6C00];
-        public MEM MEM { get; set; }
         public uint DataBus { get; set; }
         public uint AddrBus { get; set; }
         public bool Read { get; set; }
@@ -105,11 +104,6 @@ namespace emu
             ClearScreen();
         }
 
-        public void Con(MEM mem)
-        {
-            MEM = mem;
-        }
-
         void writeConsole(char Char, ushort CursorX, ushort CursorY, ushort TextColor)
         {
             // char = 0x48 (H)
@@ -119,7 +113,7 @@ namespace emu
             string StrData = Convert.ToString(data, 16).PadLeft(4, '0') +
                              Convert.ToString(TextColor, 16).PadLeft(1, '0');
 
-            MEM.Write((uint)(0x32000 + CursorX + CursorY), Convert.ToUInt32(StrData, 16), 1);
+            //MEM.Write((uint)(0x32000 + CursorX + CursorY), Convert.ToUInt32(StrData, 16), 1);
             Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), TextColor.ToString());
             Console.SetCursorPosition(CursorX, CursorY);
             Console.Write(Char);
@@ -137,7 +131,7 @@ namespace emu
             {
                 for (uint CY = 0; CY < 144 + 1; CY++)
                 {
-                    MEM.Write(0x32000 + (CX + CY), 0, 1);
+                    //MEM.Write(0x32000 + (CX + CY), 0, 1);
                 }
             }
         }
@@ -147,9 +141,9 @@ namespace emu
             {
                 for (uint CY = 0; CY < 144 + 1; CY++)
                 {
-                    byte[] Bytes = { (byte)MEM.Read(0x32000 + (CX + CY), 1) };
-                    char Char = Encoding.ASCII.GetString(Bytes)[0];
-                    Console.Write(Char);
+                    //byte[] Bytes = { (byte)MEM.Read(0x32000 + (CX + CY), 1) };
+                    //char Char = Encoding.ASCII.GetString(Bytes)[0];
+                    //Console.Write(Char);
                 }
             }
         }

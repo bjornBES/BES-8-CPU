@@ -1,83 +1,87 @@
 {
-	"fileTypes": [
-		"Basm"
-	],
-	"name": "Bassembly",
-	"scopeName": "testsource.basm",
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "BES_Assembly",
 	"patterns": [
 		{
-			"include": "#statements"
+			"include": "#expressions"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#directives"
 		}
 	],
 	"repository": {
-		"statements": {
+		"keywords": {
 			"patterns": [
 				{
-					"include": "expressions"
+					"name": "keyword.control.basm",
+					"match": "\\b(mov|push|pop|add|sub|or|nor|cmp|jne|int|jmp|jme|halt|call|rts|inc|dec)\\b"
 				},
 				{
-					"match": "(;.*)",
-					"name": "comment.Basm"
-				},
-				{
-					"name": "keyword.control.Basm",
-					"comment": "Basm instruction mnemonic",
-					"match": "\\b(mov|push|pop|add|sub|or|nor|cmp|jne|int|jmp|jme|halt|call|rts|inc|dec)"
-				},
-				{
-					"name": "variable.label",
+					"name": "variable.label.basm",
 					"match": "^\\s*[\\w\\. \\$#@~\\?]+:"
-				},
-				{
-					"name": "keyword.control.directive",
-					"patterns": [
-						{
-							"name": "storage.modifier.visibility",
-							"match": "\\b(global|GLOBAL)"
-						},
-						{
-							"name": "keyword.control.directive.section",
-							"match": "\\b(sections|SECTIONS)\\b"
-						}
-					]
-				},
-				{
-					"name": "keyword.control.psuedoInstruction",
-					"match": "\\b(include|org|INCLUDE|ORG)"
 				}
+			]
+		},
+		"directives": {
+			"patterns": [
+				{
+					"name": "storage.modifier.basm",
+					"begin": "\\b(global|GLOBAL)",
+					"end": ":"
+				},
+				{
+					"name": "keyword.control.basm",
+					"begin": "\\b(section|SECTION)",
+					"end": "\\b(TEXT|text|DATA|data)"
+				},
+				{
+					"name": "keyword.control.basm",
+					"match": "\\b(include|org|INCLUDE|ORG)"
+				},
+				{
+					"name": "keyword.operator.size.basm",
+					"begin": "\\b(byte|word|BYTE|WORD)",
+					"end": "[0-9]+\\b([\\da-fA-F]*[h]|[0-1]*[b]|[\\d])"
+				}
+
 			]
 		},
 		"expressions": {
 			"patterns": [
 				{
-					"name": "variable.language.Basm",
+					"name": "variable.language.basm",
 					"comment": "Basm register name",
-					"match": "\\b(AX|AL|AH|BX|BL|BH|CX|CL|CH|DX|DL|DH|ZX|ZL|ZH|PC|SP|MB|X|XL|XH|Y|YL|YH|EAX|EBX|F)(ax|al|ah|bx|bl|bh|cx|cl|ch|dx|dl|dh|zx|zl|zh|pc|sp|mb|x|xl|xh|y|yl|yh|eax|ebx|f)"
+					"match": "\\b(AX|AL|AH|BX|BL|BH|CX|CL|CH|DX|DL|DH|ZX|ZL|ZH|PC|SP|MB|X|XL|XH|Y|YL|YH|F)(ax|al|ah|bx|bl|bh|cx|cl|ch|dx|dl|dh|zx|zl|zh|pc|sp|mb|x|xl|xh|y|yl|yh|f)"
 				},
 				{
-					"name": "keyword.operator.size",
-					"match": "\\b(byte|word|BYTE|WORD)"
-				},
-				{
-					"name": "string.quoted",
+					"name": "string.quoted.basm",
 					"patterns": [
 						{
-							"name": "string.quoted.double",
+							"name": "string.quoted.double.basm",
 							"begin": "\"",
 							"end": "\""
 						},
 						{
-							"name": "string.quoted.single",
+							"name": "string.quoted.single.basm",
 							"begin": "'",
 							"end": "'"
 						},
 						{
-							"name": "constant.numeric",
-							"match": "(\\b(#|&)+\\b([\\da-fA-F]*[h]|[0-1]*[b]|[\\d]))"
+							"name": "constant.numeric.basm",
+							"match": "(\\b(#)+\\b([\\da-fA-F]*[h]|[0-1]*[b]|[\\d]))"
+						},
+						{
+							"name": "constant.numeric.basm",
+							"begin": "[",
+							"end": "]"
 						}
 					]
 				}
 			]
 		}
-	}
+	},
+	"scopeName": "source.basm"
 }

@@ -22,7 +22,6 @@ namespace emulator
         const int ScreenH = 144;
 
         static CPU CPU = new CPU();
-        static MEM MEM = new MEM();
 
         public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = (width, height), Title = title })
         {

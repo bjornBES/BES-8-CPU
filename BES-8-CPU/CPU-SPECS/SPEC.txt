@@ -10,7 +10,7 @@ INSTRUCTIONS
  03 PUSH    reg16/imm16                         -> mem[SP] = reg16/imm16 SP--
  04 POP     reg16/addr                          -> SP++ reg16/addr = mem[SP]
  05 ADD     reg16,              reg16/imm       -> reg16 = reg16 + reg16/imm16 + C
- 06 
+ 06 RET     imm16                               -> pop PC + imm16
  07 SUB     reg16,              reg16/imm       -> reg16 = reg16 - reg16/imm16 - C
  08 AND     reg16,              reg16/imm       -> reg16 = reg16 & reg16/imm16
  09 OR      reg16,              reg16/imm       -> reg16 = reg16 | reg16/imm16
@@ -22,7 +22,7 @@ INSTRUCTIONS
  0F JME     addr                                -> PC = addr if E == 1
  10 HALT    imm16/null                          -> DIS
  11 CALL    addr                                -> push PC, PC = addr
- 12 RTS     imm8/null                           -> pop PC + imm8
+ 12 RTS                                         -> pop PC
  13 INC     reg16/addr                          -> reg16/mem[addr]++
  14 DEC     reg16/addr                          -> reg16/mem[addr]--
  15 OUTB    imm16/reg16           reg16/imm16   -> port[imm16/reg16] = reg16/imm16
@@ -99,11 +99,9 @@ Calling convention
     After return offset the SP with the length of the arguments using add
 
 INSTRUCTIONS LAYOUT
-XXXX_XXXX_ZZZZ_ZZZZ_SAAA
+XXXX_XXXX_ZZZZ_ZZZZ
 X 8 bit instructions identifier
 Z 8 bit instructions argument identifier
-S 1 if 1 the 2 argument and if 0 the first argument 
-A 3 add to the argument depending on the S 
 
 ARGUMENT IDENTIFIER
 0000    imm
@@ -158,7 +156,7 @@ SPECIAL PORTS
 0x010: Disk Header
 0x011: Boot Disk                (10 sectors for the bootloader)
 0x012 - 0x01F: 13 Disk slots    (more in the FileSystemSPEC.txt)
-0x013: Floppy disk Reader
+0x020: Floppy disk Reader
 
 EXPANSION PORT
 in the Expansion port there is a way to expant the memory using the data bus and addr bus.
@@ -166,11 +164,12 @@ you can use the INB and OUTB to communicate to a device on one of the 10 Expansi
 this can be a mouse, a Keyboard and other things for example extar RAM.
 
 VRAM LAYOUT
-XXXX_XXXX YYYY_YYYY CCCC_CCCC LL00-0000
+XXXX_XXXX YYYY_YYYY CCCC_CCCC SS0T-0000
 X = cursor pos X
 Y = cursor pos Y
 C = color data
 S = Layer Index
+T = type 1 = char else 0 = pixle
 
 SCREEN
 The screen circuit can be read/written to using INB and OUTB instructions.

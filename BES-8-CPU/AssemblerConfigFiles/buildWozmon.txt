@@ -1,0 +1,7 @@
+Input ./src/asm/wozmon/wozmon.Basm
+UseDebuger
+ObjFile ./Builds/wozmon/a.obj
+UseBinary ./Builds/wozmon/bin.bin
+Output ./Builds/wozmon/a.out
+DontBuild false
+FillTo 0x00500

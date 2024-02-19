@@ -1,10 +1,11 @@
-﻿using asm;
+﻿using assembler;
 using System.Security.AccessControl;
 using System.Text;
 
 public class Program
 {
     static string InputFile = "\0\0";
+    static string SrcCopyFile = "";
     static string ObjFile = "";
     static string OutputFile = "";
     static string BinFile = "";
@@ -12,11 +13,12 @@ public class Program
     static string OutputSrcFile = "";
     public static string ProgramPath = "";
     public static string OGPorgramPath = "";
+    public static string LibsPath = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU\\Libs";
+    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU";
 
     static bool Build = true;
     static bool DoClear = false;
 
-    static readonly Assembler assembler = new();
     static bool UseDebuger = false;
     static bool WriteBin = false;
     public static List<FileInfo> Files = new List<FileInfo>();
@@ -26,15 +28,48 @@ public class Program
 
     public static void Main(string[] args)
     {
+        if (args.Length > 2)
+        {
+            if (args[1] == "-D")
+            {
+                if (args.Length == 4)
+                {
+                    DecodeArguments((
+                        $"Input ./src/asm/{args[2]}\r\n" +
+                        $"InputDir ./src/asm/{args[3]}\r\n" +
+                        "UseDebuger\r\n" +
+                        "ObjFile ./Builds/DebugASM/a.obj\r\n" +
+                        "UseBinary ./Builds/DebugASM/bin.bin\r\n" +
+                        "Output ./Builds/DebugASM/a.out\r\n" +
+                        "UseSections false\r\n" +
+                        "DontBuild false\r\n" +
+                        "SrcFile ./Builds/DebugASM/src.out\r\n" +
+                        "FillTo 0x05000").Split("\r\n"));
+                }
+                else if (args.Length == 3)
+                {
+                    DecodeArguments((
+                        $"Input ./src/asm/{args[2]}\r\n" +
+                        "UseDebuger\r\n" +
+                        "ObjFile ./Builds/DebugASM/a.obj\r\n" +
+                        "UseBinary ./Builds/DebugASM/bin.bin\r\n" +
+                        "Output ./Builds/DebugASM/a.out\r\n" +
+                        "UseSections false\r\n" +
+                        "DontBuild false\r\n" +
+                        "SrcFile ./Builds/DebugASM/src.out\r\n" +
+                        "FillTo 0x05000").Split("\r\n"));
+                }
+            }
+        }
+        else
+        {
+            string SettingsFile = args[0];
+            Conv(ref SettingsFile);
+            DecodeArguments(File.ReadAllText(SettingsFile).Split("\r\n"));
+        }
         Console.CursorVisible = false;
 
-        string SettingsFile = args[0];
-        Conv(ref SettingsFile);
-
-        DecodeArguments(File.ReadAllText(SettingsFile).Split("\r\n"));
-
-        //Environment.Exit(0);
-        if (InputFile == "\0\0") Exit(1);
+        if (InputFile == "\0\0") Assembler.AssemblerErrors.ErrorCantFindInputFile("");
         if (OutputFile == "")
         {
             OutputFile = "./a.out";
@@ -47,6 +82,10 @@ public class Program
         if (TokenFile != "")
         {
             Conv(ref TokenFile);
+        }
+        if (SrcCopyFile != "")
+        {
+            Conv(ref SrcCopyFile);
         }
         if (ProgramPath != "")
         {
@@ -74,17 +113,15 @@ public class Program
         Console.WriteLine("ProgramPath " + ProgramPath);
         Console.WriteLine("Input File " + Input);
 
-        if (File.Exists(Input) == false) assembler.ErrorCantFindInputFile(InputFile);
+        if (File.Exists(Input) == false) Assembler.AssemblerErrors.ErrorCantFindInputFile(InputFile);
         if (File.Exists(OutputFile) == false) File.Create(OutputFile, 100).Close();
-
+        string src;
         // go in to the assembler
-
         if (Directory.Exists(ProgramPath))
         {
             DirectoryInfo Programdirectory = new DirectoryInfo(ProgramPath);
             Files = Programdirectory.GetFiles("*.Basm").ToList();
             List<FileInfo> FilesCopy = Files;
-            string src;
             src = ".newfile " + Input + "\r\n";
             src += File.ReadAllText(Input) + "\r\n";
             Includes(ref src, true, FilesCopy);
@@ -97,29 +134,25 @@ public class Program
                     src += File.ReadAllText(FilesCopy[f].FullName) + "\r\n";
                 }
             }
-
-            assembler.Build(src.Split("\r\n"));
         }
         else
         {
-            string src = File.ReadAllText(Input);
+            src = File.ReadAllText(Input);
             src = ".newfile " + Input + "\r\n" + src;
 
             src = src.Replace("\n", "\r\n");
             Includes(ref src, false);
             src = src.Replace("\n", "\r\n");
-
-
-            assembler.Build(src.Split("\r\n"));
         }
+        Assembler.Build(src.Split("\r\n"));
 
         if (UseDebuger)
         {
-            File.WriteAllLines(TokenFile, assembler.Tokens.ToArray());
-            File.WriteAllLines(OutputSrcFile, assembler.OrgSrc);
+            File.WriteAllLines(TokenFile, Assembler.AssemblerLists.Tokens.ToArray());
+            File.WriteAllLines(OutputSrcFile, Assembler.OrgSrc);
         }
 
-        if(assembler.HasError)
+        if (Assembler.HasError)
             Environment.Exit(0);
 
         Console.WriteLine("starter");
@@ -135,8 +168,8 @@ public class Program
 
         if (Max_Length > 0xFFFFF + 1) Max_Length = 0x100000;
 
+        Console.Clear();
         Console.WriteLine("Writing");
-        Console.WriteLine("");
         Thread BinThread = new Thread(new ThreadStart(WriteOutBin));
         if (WriteBin == true)
         {
@@ -147,45 +180,29 @@ public class Program
         string outputString = "";
 
         // main
-        if(ObjFile != "")
+        if (ObjFile != "")
         {
-            bool InLable = false;
-            string buffer = "";
-            List<byte> bytes = new List<byte>();
-            bytes.InsertRange(bytes.Count, Encoding.ASCII.GetBytes("BESASMOBJ"));
-            for (int i = 8; i < assembler.OBJBuffer.Length; i++)
+            string formated = "";
+
+            for (int i = 0; i < Assembler.AssemblerObj.OBJString.Count; i++)
             {
-                if(assembler.OBJBuffer[i] == '*' || assembler.OBJBuffer[i] == '#')
-                {
-                    InLable = false;
-                    bytes.InsertRange(bytes.Count, Encoding.ASCII.GetBytes(buffer));
-                    continue;
-                }
-                if(assembler.OBJBuffer[i] == '|')
-                {
-                    bytes.InsertRange(bytes.Count, Encoding.ASCII.GetBytes(buffer));
-                }
-                if (assembler.OBJBuffer[i] == ':')
-                {
-                    InLable = true;
-                }
-                if (InLable == true)
-                {
-                    buffer += assembler.OBJBuffer[i];
-                    continue;
-                }
-                char C = assembler.OBJBuffer[i];
-                bytes.Add(Convert.ToByte(C));
+                formated += Assembler.AssemblerObj.OBJString[i];
             }
-            File.WriteAllBytes(ObjFile, bytes.ToArray());
+
+            File.WriteAllText(ObjFile, formated);
+        }
+        if (SrcCopyFile != "")
+        {
+            File.WriteAllLines(SrcCopyFile, Assembler.OutSrc);
         }
         for (int i = 0; i < Max_Length; i++)
         {
-            if (i > assembler.MaxPC) break;
-            if (string.IsNullOrEmpty(assembler.MCcode[i]) == false)
+            if (i > Assembler.MaxPC) break;
+            if (!(i < Assembler.AssemblerLists.MCcode.Length)) break;
+            if (string.IsNullOrEmpty(Assembler.AssemblerLists.MCcode[i]) == false)
             {
                 //Console.WriteLine("data " + assembler.MCcode[i]);
-                string Value = assembler.MCcode[i].Trim().ToUpper();
+                string Value = Assembler.AssemblerLists.MCcode[i].Trim().ToUpper();
                 outputString += Value.PadLeft(Pading_Length, '0') + "|";
                 // info
 
@@ -222,7 +239,12 @@ public class Program
             if (src.Split("\r\n")[i].Contains(".include"))
             {
                 string FileName = src.Split("\r\n")[i].Split(' ')[1];
-                string file = Path.Combine(Environment.CurrentDirectory, FileName);
+                string file = Path.Combine(CurrentDirectory, FileName);
+                if (FileName == "BIOS")
+                {
+                    file = LibsPath + "\\BIOS.basm";
+                }
+
 
                 // Check if the file path is relative, and if so, combine it with the current directory
                 if (!Path.IsPathRooted(file))
@@ -278,12 +300,13 @@ public class Program
         string outputString = "";
         for (int i = 0; i < Max_Length; i++)
         {
-            if (string.IsNullOrEmpty(assembler.MCcode[i]) == false)
+            if (!(i < Assembler.AssemblerLists.MCcode.Length)) break;
+            if (string.IsNullOrEmpty(Assembler.AssemblerLists.MCcode[i]) == false)
             {
                 if (i >= 0x30000 && i <= 0x30FFF) continue;
                 if (i >= 0x37000 && i <= 0xFFFF9) continue;
                 //Console.WriteLine("data " + assembler.MCcode[i]);
-                string Value = assembler.MCcode[i].Trim().ToUpper();
+                string Value = Assembler.AssemblerLists.MCcode[i].Trim().ToUpper();
                 if (i % 16 == 0)
                 {
                     if (i == 0)
@@ -304,8 +327,8 @@ public class Program
         }
         else
         {
-            Console.WriteLine("Can't find the bin file");
-            Exit();
+            File.Create(BinFile).Close();
+            File.WriteAllText(BinFile, outputString);
         }
     }
     private static void Exit(int exitCode = 0)
@@ -321,10 +344,10 @@ public class Program
         DecodeInstr(text, "ObjFile", ref ObjFile);
         DecodeInstr(text, "DontBuild", ref Build, "false", "true");
         DecodeInstr(text, "Silent", ref DoClear, true);
-        DecodeInstr(text, "UseSections", ref assembler.UseSections);
         DecodeInstr(text, "FillTo", ref Max_Length);
         DecodeInstr(text, "UseBinary", useBinFiles);
         DecodeInstr(text, "UseDebuger", useDebug);
+        DecodeInstr(text, "SrcFile", ref SrcCopyFile);
     }
 
     static void DecodeInstr(string[] args, string instr, ref string Result)
@@ -411,7 +434,7 @@ public class Program
                 {
                     if (instrs[a].Contains("0x"))
                     {
-                        Result = Convert.ToUInt32(instrs[a].Remove(0,2), 16);
+                        Result = Convert.ToUInt32(instrs[a].Remove(0, 2), 16);
                     }
                     else if (instrs[a].Contains("0b"))
                     {
@@ -456,8 +479,8 @@ public class Program
     }
     static void Conv(ref string file)
     {
-        file = file.Replace(".\\", Environment.CurrentDirectory + "\\");
-        file = file.Replace("./", Environment.CurrentDirectory + "\\");
+        file = file.Replace(".\\", CurrentDirectory + "\\");
+        file = file.Replace("./", CurrentDirectory + "\\");
         file = file.Replace("/", "\\");
         return;
     }

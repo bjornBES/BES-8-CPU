@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "emulator": {
+      "commandName": "Project"
+    },
+    "emulator Debug": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU",
+      "commandLineArgs": "./EmulatorConfigFiles/EmulatorConfig.txt "
+    }
+  }
+}

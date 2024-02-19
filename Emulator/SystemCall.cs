@@ -2,33 +2,33 @@
 {
     public class SystemCall
     {
-        public static void Call(ushort imm16, ushort AX, ushort BX, ushort CX, ushort DX, ref MEM mem)
+        public static void Call(ushort imm16, ushort AX, ushort BX, ushort CX, ushort DX)
         {
             switch (imm16)
             {
                 case 0x10:
-                    Int10h(AX, BX, CX, DX, ref mem);
+                    Int10h(AX, BX, CX, DX);
                     break;
             }
         }
-        static void Int10h(ushort AX, ushort BX, ushort CX, ushort DX, ref MEM mem)
+        static void Int10h(ushort AX, ushort BX, ushort CX, ushort DX)
         {
             switch (AX)
             {
                 case 1:
-                    Ports.Write(1, 0x800F);
-                    Ports.TICK(1, ref mem);
-                    uint data = Ports.Read(1);
-                    if(data == 1)
-                    {
+                    //Ports.Write(1, 0x800F);
+                    //Ports.TICK(1, ref mem);
+                    //uint data = Ports.Read(1);
+                    //if(data == 1)
+                    //{
                         // do shit
-                        Ports.Write(1, 0x8018);
-                        Ports.TICK(1, ref mem);
-                        Ports.Write(1, BX);
-                        Ports.TICK(1, ref mem);
-                        Ports.Write(1, 0x8001);
-                        Ports.TICK(1, ref mem);
-                    }
+                        //Ports.Write(1, 0x8018);
+                        //Ports.TICK(1, ref mem);
+                        //Ports.Write(1, BX);
+                        //Ports.TICK(1, ref mem);
+                        //Ports.Write(1, 0x8001);
+                        //Ports.TICK(1, ref mem);
+                   // 
                     break;
                 default:
                     break;

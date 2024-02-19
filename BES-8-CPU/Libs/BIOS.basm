@@ -1,0 +1,23 @@
+; input some data from the Keyboard
+; return ZX
+input:
+    in      #4, ZX
+    rts 
+
+; output a char to the screen
+; argument
+; char a stack
+output:
+    PUSHR
+
+    mov     ZX, SP
+    add     SP, #7
+
+    pop     AX
+    mov     SP, ZX
+
+    out     #5h, AX
+
+    POPR
+
+    ret     #1

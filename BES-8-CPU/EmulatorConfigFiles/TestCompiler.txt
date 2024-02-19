@@ -1,0 +1,8 @@
+Input ./Builds/a.Basm
+UseDebuger
+ObjFile ./Builds/a.obj
+UseBinary ./Builds/bin.bin
+Output ./Builds/a.out
+UseSections false
+DontBuild false
+FillTo 0x00FFF

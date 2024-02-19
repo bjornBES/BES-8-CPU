@@ -20,22 +20,30 @@
 		},
 		{
 			"path": "../Basic_Interpreter"
+		},
+		{
+			"path": "../BEASM_SRC"
+		},
+		{
+			"path": "../docs"
 		}
 	],
 	"settings": {
 		"files.associations": {
 			"*.ps1": "powershell",
 			"*.BE": "plaintext",
-			"*.Basm": "Bassembly",
 			"*.bin": "code-text-binary",
 			"*.ino": "arduino",
-			"variant": "cpp"
+			"*.s": "ca65",
+			"*.vim": "Vimscript",
+			"*.Basm": "Bassembly",
 		},
 		"applesoft.detokenizer.escapes": [
 			10,
 			13
 		],
-		"powershell.cwd": "BES-8-CPU"
+		"powershell.cwd": "BES-8-CPU",
+		"liveServer.settings.multiRootWorkspaceName": "docs",
 	},
 	"launch": {
 		"version": "0.2.0",

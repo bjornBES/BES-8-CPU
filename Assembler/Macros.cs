@@ -1,4 +1,4 @@
-﻿namespace asm
+﻿namespace assembler
 {
     public class Macros
     {
@@ -78,9 +78,9 @@
 
             SRC = PreSrc.ToArray();
 
-            File.WriteAllLines(Environment.CurrentDirectory + "/a.txt", PreSrc);
-            File.WriteAllLines(Environment.CurrentDirectory + "/b.txt", Rest);
-            File.WriteAllLines(Environment.CurrentDirectory + "/c.txt", Args);
+            File.WriteAllLines(Program.CurrentDirectory + "/a.txt", PreSrc);
+            File.WriteAllLines(Program.CurrentDirectory + "/b.txt", Rest);
+            File.WriteAllLines(Program.CurrentDirectory + "/c.txt", Args);
             PC = 0;
         }
     }

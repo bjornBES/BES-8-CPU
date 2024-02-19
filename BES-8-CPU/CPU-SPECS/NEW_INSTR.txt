@@ -1,0 +1,21 @@
+000_0_0     MOV     reg1,   imm2                    ->  reg1 = imm2
+001_1_0     MOV     reg1,   addr2                   ->  reg1 = mem[addr2]
+001_2_0     MOV     reg1,   addr2 index X           ->  reg1 = mem[addr2,X]
+001_3_0     MOV     reg1,   addr2 index Y           ->  reg1 = mem[addr2,Y]
+001_F_0     MOV     reg1,   addr2 index,    imm3    ->  reg1 = mem[addr2,imm3]
+003_4_0     MOV     reg1,   reg2                    ->  reg1 = reg2
+004_0_0     MOV     addr1,  imm2                    ->  mem[addr1] = imm2
+005_1_0     MOV     addr1,  addr2                   ->  mem[addr1] = mem[addr2]
+006_4_0     MOV     addr1,  reg2                    ->  mem[addr1] = reg2
+007_2_0     MOV     addr1 index X,  reg2,           ->  mem[addr1,X] = reg2
+007_3_0     MOV     addr1 index Y,  reg2,           ->  mem[addr1,Y] = reg2
+007_F_0     MOV     addr1 index     reg2,   imm3    ->  mem[addr1,imm3] = reg2
+
+010_0_0     PUSH    reg1                            -> mem[SP] = reg1 SP--
+011_0_0     PUSH    imm1                            -> mem[SP] = imm1 SP--
+
+020_0_0     POP     reg1                            -> SP++ reg1 = mem[SP]
+020_0_0     POP     addr1                           -> SP++ mem[addr1] = mem[SP]
+
+030_0_0     ADD     reg1,               reg2        -> reg1 = reg1 + reg2 + F_C
+

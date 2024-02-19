@@ -12,9 +12,8 @@ and in the high data byte, indicate the disk.
 Write the data to one of the 14 disks using `outb`.
 
 Reading from Disk
-Write the sector you wish to read to the disk header port at 0x010 using OUTB.
-In the low part, specify the page you want to read, 
-and in the high data byte, indicate the disk.
+Write the page you wish to read to the disk header port at 0x010 using OUTB.
+In the low part, specify the sector you want to read into one of the disks.
 Read the data from memory at 0x10000 - 0x1FFFF in bank 2.
 
 Note: The first disk always serves as the boot disk and requires special bytes 
@@ -38,11 +37,12 @@ page layout
 on the first page all the metadata is located (this is in bytes)
 [0000-0002] file system version
 [0003-0004] free pages count
-[0005-0604] root directory entries (49 entries)
-[0605-060A] Mata name
+[0005-0203] fat 
+[0300-06FF] root directory entries (20 entries)
+[0700-070F] Mata name
 
-[0100-06FF] root directory entries (49 entries)
-[0700-0705] Mata name
+[0200-05FF] root directory entries (49 entries)
+[0605-060A] Mata name
 
 Pages
 page 0 is the metadata/file system data 
@@ -52,7 +52,7 @@ page 1 - 510 is user defind
 Flags
 bits
     0   file or directory (1 == directory and 0 == a file)
-    1   occupied
+    1   active
     2   
     3
     4

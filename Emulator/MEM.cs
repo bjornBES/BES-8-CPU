@@ -2,78 +2,121 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace emu
 {
-    public class MEM
+    public static class MEM
     {
-        public const uint MAX_MEM = 16384 * 64;
-        public const int MEM_BANK = 0x3FFF + 1;
-        public uint[] mem = new uint[MAX_MEM];
+        public const uint MAX_MEM = 16384 * 64; // == 0x100000
+        public static List<uint[]> mem = new List<uint[]>();
+        public static uint BankCount = 3;
 
-        public List<uint[]> banks = new List<uint[]>();
-
-        public void Reset(uint[] program)
+        public static void Reset(uint[] program)
         {
             ResetBanks();
-            mem.Initialize();
-            banks[0].Initialize();
             Console.WriteLine(program.Length);
-            for (int i = 0; i < program.Length; i++)
+            for (uint i = 0; i < program.Length; i++)
             {
-                Write((uint)i, program[i], 0);
+                Write(i, program[i], 0);
             }
         }
-        const ushort Bank_addr_MIN = 0xA000;
-        const ushort Bank_addr_MAX = 0xCFFF;
-        public uint Read(uint addr, ushort MB)
+        public static uint[] ReadCount(uint MB, uint StartAddr, uint Count)
         {
-            if(addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
+            List<uint> Buffer = new List<uint>();
+            for (uint i = StartAddr; i < Count + StartAddr; i++)
             {
-                return banks[MB][addr - Bank_addr_MIN];
+                Buffer.Add(Read(MB, i));
             }
-            else
-            {
-                return mem[addr];
-            }
+            return Buffer.ToArray();
         }
-        public ushort Read(ushort addr, ushort MB)
+        public static uint[] ReadCount(uint MB, uint StartAddr,int Count)
         {
-            if (addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
+            List<uint> Buffer = new List<uint>();
+            for (uint i = StartAddr; i < (uint)Count + StartAddr; i++)
             {
-                return (ushort)banks[MB][addr - Bank_addr_MIN];
+                Buffer.Add(Read(MB, i));
             }
-            else
-            {
-                return (ushort)mem[addr];
-            }
+            return Buffer.ToArray();
         }
-        public void Write(uint addr, uint data, ushort MB)
+        public static uint Read(uint MB, uint Addr)
         {
-            if (addr >= Bank_addr_MIN && addr <= Bank_addr_MAX)
-            {
-                banks[MB][addr - Bank_addr_MIN] = data;
-            }
-            else
-            {
-                mem[addr] = data;
-            }
+            return mem[(int)MB][Addr];
+        }
+        public static uint Read(Register MB, uint Addr)
+        {
+            return mem[(int)MB][Addr];
+        }
+        public static uint Read(uint MB, Register Addr)
+        {
+            return mem[(int)MB][(int)Addr];
+        }
+        public static uint Read(Register MB, Register Addr)
+        {
+            return mem[(int)MB][(int)Addr];
         }
 
-        void ResetBanks()
+        public static void WriteCount(uint MB, uint StartAddr, uint[] Data, uint Count)
         {
-            banks.Clear();
-            AddBank(2);
+            for (uint i = StartAddr; i < Count + StartAddr; i++)
+            {
+                Write(MB, i, Data[i - StartAddr]);
+            }
         }
-        public void AddBank(ushort count = 1)
+        public static void WriteCount(uint MB, uint StartAddr, uint[] Data, int Count)
         {
-            uint[] BankArray = new uint[MEM_BANK];
+            for (uint i = StartAddr; i < (uint)Count + StartAddr; i++)
+            {
+                Write(MB, i, Data[i - StartAddr]);
+            }
+        }
+        public static void WriteCount(uint MB, uint StartAddr, uint[] Data)
+        {
+            WriteCount(MB, StartAddr, Data, Data.Length);
+        }
+
+        public static void Write(uint MB, uint Addr, uint Data)
+        {
+            mem[(int)MB][Addr] = Data;
+        }
+        public static void Write(Register MB, uint Addr, uint Data)
+        {
+            mem[(int)MB][Addr] = Data;
+        }
+        public static void Write(uint MB, Register Addr, uint Data)
+        {
+            mem[(int)MB][(int)Addr] = Data;
+        }
+        public static void Write(uint MB, uint Addr, Register Data)
+        {
+            mem[(int)MB][(int)Addr] = Data.m_value;
+        }
+        public static void Write(Register MB, Register Addr, uint Data)
+        {
+            mem[(int)MB][(int)Addr] = Data;
+        }
+        public static void Write(uint MB, Register Addr, Register Data)
+        {
+            mem[(int)MB][(int)Addr] = Data.m_value;
+        }
+        public static void Write(Register MB, Register Addr, Register Data)
+        {
+            mem[(int)MB][(int)Addr] = Data.m_value;
+        }
+
+        static void ResetBanks()
+        {
+            AddBank(BankCount);
+        }
+        public static void AddBank(uint count = 1)
+        {
+            uint[] BankArray = new uint[MAX_MEM];
             BankArray.Initialize();
             for (int i = 0; i < count; i++)
             {
-                banks.Add(BankArray);
+                mem.Add(BankArray);
             }
         }
     }

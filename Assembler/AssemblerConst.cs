@@ -4,17 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace asm
+namespace assembler
 {
-    public class AssemblerConst : AssemblerErrors
+    public partial class Assembler
     {
-        public const string Assembler_Keyword_CodeSection = "TEXT";
-        public const string Assembler_Keyword_DataSection = "DATA";
+        public static class AssemblerConst
+        {
+            public const string Assembler_Lable_Ident = "L:";
 
-        public const string Assembler_Keyword_long = "long";
-        public const string Assembler_Keyword_far = "far";
+            public const string Assembler_Keyword_long = "long";
+            public const string Assembler_Keyword_far = "far";
 
-        public const uint far_Offset = 0x10000;  
-        public const uint long_Offset = 0x20000;  
+            public const uint far_Offset = 0x10000;
+            public const uint long_Offset = 0x20000;
+        }
     }
 }

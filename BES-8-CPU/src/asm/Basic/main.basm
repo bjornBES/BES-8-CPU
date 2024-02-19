@@ -1,0 +1,44 @@
+_main:
+mov         MB, #1
+; cheaking the Expansion ports for if there is an Keyboard
+
+Reset:
+call        [GetKey]
+
+mov         [AX]&1, #10
+mov         [AX]&BX, AX
+mov         [AX]&BX, [BX]
+
+mov         AX, [BX]
+mov     	[BX], AX
+
+mov         AX, SP
+
+mov         AX, [FF000h]&1
+mov         AX, [100FFh]&BX
+
+
+mov         [FF000h]&1,AX
+mov         [100FFh]&BX,AX
+
+mov         AX, #FFF00h
+mov         [FFF00h], AX
+mov         [AX], #FF000h
+
+jmp $
+
+
+; return in ZX
+GetKey:
+call        [input]
+rts
+
+; .word 5501h 1002h
+
+.include BIOS
+.org        4F00h
+
+; this buffer will have 256 bytes of data in it
+; this will be in bank 1
+Char_Buffer:
+.repeat     256 .word FFFFFh

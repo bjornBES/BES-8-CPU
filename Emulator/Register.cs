@@ -1,23 +1,186 @@
-﻿namespace emu
+﻿using System.Globalization;
+using System;
+using System.Runtime;
+using System.Runtime.InteropServices;
+using System.Diagnostics.Contracts;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Win32;
+
+namespace emu
 {
-    public enum Register
+    [Serializable]
+    [ComVisible(true)]
+    public struct Register
     {
-        AX  = 0b00_0000, AL = 0b10_0000, AH = 0b01_0000,
-        BX  = 0b00_0001, BL = 0b10_0001, BH = 0b01_0001,
-        CX  = 0b00_0010, CL = 0b10_0010, CH = 0b01_0010,
-        DX  = 0b00_0011, DL = 0b10_0011, DH = 0b01_0011,
-        ZX  = 0b00_0100, ZL = 0b10_0100, ZH = 0b01_0100,
+        public uint m_value;
 
-        PC  = 0b00_0101,
-        SP  = 0b00_0110,
-        MB  = 0b00_0111,
+        public Register()
+        {
+            m_value = 0;
+        }
 
-        X   = 0b00_1000, XL = 0b10_1000, XH = 0b01_1000,
-        Y   = 0b00_1001, YL = 0b10_1001, YH = 0b01_1001,
+        public Register(uint value)
+        {
+            m_value = value;
+        }
+        public Register(int value)
+        {
+            m_value = (uint)value;
+        }
 
-        EAX = 0b11_1010,
-        EBX = 0b11_1011,
+        public Register this[int index]
+        {
+            get
+            {
+                if (index == 0)
+                {
+                    return GetLowByte();
+                }
+                else return GetHighByte();
+            }
 
-        F   = 0b00_1111,
+            set
+            {
+                if (index == 0)
+                {
+                    SetLowByte(value.m_value);
+                }
+                else SetHighByte(value.m_value);
+            }
+        }
+
+        public Register GetHighByte()
+        {
+            return new Register((m_value & 0xFFFF0000));
+        }
+        public Register GetLowByte()
+        {
+            return new Register((m_value & 0x0000FFFF));
+        }
+        public void SetHighByte(uint value)
+        {
+            m_value = (m_value & 0x0000FFFF) | ((uint)value << 8);
+        }
+        public void SetLowByte(uint value)
+        {
+            m_value = (m_value & 0xFFFF0000) | value;
+        }
+
+        public void SetHighByte(ushort value)
+        {
+            m_value = (m_value & 0x00FF) | ((uint)value << 8);
+        }
+        public void SetLowByte(ushort value)
+        {
+            m_value = (m_value & 0xFF00) | value;
+        }
+
+        public static bool operator ==(Register left, Register right)
+        {
+            return left.m_value == right.m_value;
+        }
+
+        public static bool operator !=(Register left, Register right)
+        {
+            return left.m_value != right.m_value;
+        }
+
+        public static bool operator <(Register left, Register right)
+        {
+            return left.m_value < right.m_value;
+        }
+
+        public static bool operator <=(Register left, Register right)
+        {
+            return left.m_value <= right.m_value;
+        }
+
+        public static bool operator >(Register left, Register right)
+        {
+            return left.m_value > right.m_value;
+        }
+
+        public static bool operator >=(Register left, Register right) => left.m_value >= right.m_value;
+
+        public static bool operator ==(Register left, int right)
+        {
+            return left.m_value == right;
+        }
+
+        public static bool operator !=(Register left, int right)
+        {
+            return left.m_value != right;
+        }
+
+        public static bool operator <(Register left, int right)
+        {
+            return left.m_value < right;
+        }
+
+        public static bool operator <=(Register left, int right)
+        {
+            return left.m_value <= right;
+        }
+
+        public static bool operator >(Register left, int right)
+        {
+            return left.m_value > right;
+        }
+
+        public static bool operator >=(Register left, int right)
+        {
+            return left.m_value >= right;
+        }
+
+        public static Register operator ++(Register r)
+        {
+            return r.m_value++;
+        }
+
+        public static Register operator --(Register r)
+        {
+            return r.m_value--;
+        }
+        public static Register operator <<(Register register, int shift)
+        {
+            return new Register(register.m_value << shift);
+        }
+
+        public static Register operator >>(Register register, int shift)
+        {
+            return new Register(register.m_value >> shift);
+        }
+
+        public static implicit operator Register(int v)
+        {
+            return new Register(v);
+        }
+        public static implicit operator Register(uint v)
+        {
+            return new Register(v);
+        }
+        public static implicit operator Register(ushort v)
+        {
+            return new Register(v);
+        }
+
+        public static explicit operator int(Register v)
+        {
+            return (int)v.m_value;
+        }
+        public static explicit operator uint(Register v)
+        {
+            return v.m_value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

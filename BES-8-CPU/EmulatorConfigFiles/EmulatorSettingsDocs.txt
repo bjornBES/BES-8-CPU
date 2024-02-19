@@ -1,0 +1,10 @@
+Input File
+        to get the input File
+Disk_Pos_[1-4] File
+        WIP
+mem_layout File
+        WIP
+Floppy_Disk_Path File
+        WIP
+Banks Number default 3
+        WIP

@@ -55,7 +55,7 @@ mov [Char_Buffer],XL AX
 inc XL
 cmp %LE XL
 jme [EXIT_LOOP]
-inc XL 
+inc XL
 cmp %LE XL
 jme [EXIT_LOOP]
 
@@ -82,10 +82,10 @@ jme [EXIT]
 
 jmp [_Main]
 
-; return in BL
+; return char in BL
 Read_Key:
 inb #2 BL
-cmp BL NULL
+cmp BL #NULL
 jme [Read_Key]
 rts
 
