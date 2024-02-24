@@ -7,7 +7,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Mathematics;
 using System.Collections.Generic;
 
-namespace emu
+namespace emulator
 {
     public class Screen : GameWindow
     {

@@ -1,47 +1,109 @@
-; word
-push #800h
-; byte
-push #0
-call [_main]
-add SP #2
+push #30
+push #20
+push #10
+call [Func_main]
+add SP, #3
 
+; public type Var_HELLO = [SP]
+mov [12000h], #0
 
-_start:
+; public type Var_hello = [SP]
+mov [12001h], #0
+
+; global type Var_etst = [SP]
+mov [12002h], #10
+
+; func return type is `func`
+Func_main:
 pushr
+mov ZX, SP
+add SP, #8
 
+; local type Var_A = [SP]
+inc SP
+mov [11000h], [SP]
 
+; local type Var_B = [SP]
+inc SP
+mov [11001h], [SP]
 
+; local type Var_C = [SP]
+inc SP
+mov [11002h], [SP]
+mov SP, ZX
+
+; local type Var_ABC = [SP]
+mov [12003h], #0
+mov [73731], [69632]
+
+mov 73731, #0
+push #20
+push #10
+call [Func_add]
+push ZX
+
+; local type Var_ABC = [SP]
+inc SP
+mov [12003h], [SP]
+
+; Exit
+mov AX, [69632]
+int #0
+
+mov 69632, #0
+
+mov 69633, #0
+
+mov 69634, #0
+
+mov 73731, #0
+
+; close_curly
 popr
-rts
+ret #3
 
-_main:
+; func return type is `word`
+Func_add:
 pushr
-mov ZX SP
-add SP #8
-push MB
-mov MB #2
-; 0 diskAddr as word is pointer False
-pop [393216] ; diskAddr
-; 1 diskIndex as byte_ is pointer False
-pop [393217] ; diskIndex
-pop MB
-mov SP ZX
+mov ZX, SP
+add SP, #8
 
-; making a new variabel called A = diskIndex that is pointed False
-push MB
-mov MB #2
-mov [327682] #393217
-pop MB
+; local type Var_NumberA = [SP]
+inc SP
+mov [11003h], [SP]
 
-; calling the ports
-; Calling Cout func with 1 arg
-push #'A'
-call [_cout]
-add SP #1
+; local type Var_NumberB = [SP]
+inc SP
+mov [11004h], [SP]
+mov SP, ZX
 
-call [_start]
+push ZX
+push AX
+push #0 ; result buffer
+push [69635]
+push [69636]
+pop AX
+pop ZX
+add ZX, AX
+add [SP], ZX
+pop R0 ; result buffer
+pop AX
+pop ZX
+push R0
 
+; local type Var_Result = [SP]
+inc SP
+mov [12000h], [SP]
 
+mov R0, [73728]
 
+mov 69635, #0
+
+mov 69636, #0
+
+mov 73728, #0
+
+; close_curly
 popr
-rts
+mov ZX R0
+ret #2

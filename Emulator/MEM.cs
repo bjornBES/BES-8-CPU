@@ -6,7 +6,7 @@ using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace emu
+namespace emulator
 {
     public static class MEM
     {
@@ -20,7 +20,7 @@ namespace emu
             Console.WriteLine(program.Length);
             for (uint i = 0; i < program.Length; i++)
             {
-                Write(i, program[i], 0);
+                Write(0, i, program[i]);
             }
         }
         public static uint[] ReadCount(uint MB, uint StartAddr, uint Count)
@@ -112,10 +112,10 @@ namespace emu
         }
         public static void AddBank(uint count = 1)
         {
-            uint[] BankArray = new uint[MAX_MEM];
-            BankArray.Initialize();
             for (int i = 0; i < count; i++)
             {
+                uint[] BankArray = new uint[MAX_MEM];
+                BankArray.Initialize();
                 mem.Add(BankArray);
             }
         }

@@ -6,7 +6,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Mathematics;
 using System.Collections.Generic;
-using emu;
+using emulator;
 
 namespace emulator
 {

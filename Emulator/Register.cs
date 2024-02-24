@@ -6,7 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Win32;
 
-namespace emu
+namespace emulator
 {
     [Serializable]
     [ComVisible(true)]
@@ -51,19 +51,19 @@ namespace emu
 
         public Register GetHighByte()
         {
-            return new Register((m_value & 0xFFFF0000));
+            return new Register((m_value & 0x000FF800));
         }
         public Register GetLowByte()
         {
-            return new Register((m_value & 0x0000FFFF));
+            return new Register((m_value & 0x000007FF));
         }
         public void SetHighByte(uint value)
         {
-            m_value = (m_value & 0x0000FFFF) | ((uint)value << 8);
+            m_value = (m_value & 0x000FF800) | ((uint)value << 8);
         }
         public void SetLowByte(uint value)
         {
-            m_value = (m_value & 0xFFFF0000) | value;
+            m_value = (m_value & 0x00008FF) | value;
         }
 
         public void SetHighByte(ushort value)
@@ -134,12 +134,19 @@ namespace emu
 
         public static Register operator ++(Register r)
         {
-            return r.m_value++;
+            r.m_value += 1;
+            return r;
+        }
+
+        public static Register operator +(Register left, Register right)
+        {
+            return left + right;
         }
 
         public static Register operator --(Register r)
         {
-            return r.m_value--;
+            r.m_value -= 1;
+            return r;
         }
         public static Register operator <<(Register register, int shift)
         {

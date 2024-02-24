@@ -1,4 +1,4 @@
-﻿namespace emu
+﻿namespace emulator
 {
     public enum Registers
     {

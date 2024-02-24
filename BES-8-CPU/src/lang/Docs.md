@@ -313,7 +313,7 @@ Certainly! Here's the additional content for the provided document:
 
 Statements are executable units of code that perform actions. They are the building blocks for constructing programs in this language.
 
-### if, else if, else
+### if, elif, else
 
 Conditional statements that allow the execution of different blocks of code based on specified conditions.
 
@@ -323,14 +323,14 @@ int condition = /* some value */;
 
 if (condition == 0) {
     // Code block executed if 'condition' is equal to 0
-} else if (condition == 1) {
+} elif (condition == 1) {
     // Code block executed if 'condition' is equal to 1
 } else {
     // Code block executed if 'condition' is neither 0 nor 1
 }
 ```
 
-### free (ptr)
+### free (address)
 
 The `free` function deallocates memory associated with a pointer variable, preventing memory leaks and optimizing resource utilization.
 
@@ -355,6 +355,11 @@ The `free` function releases the memory associated with the specified pointer va
 ptr MemoryPointer = &someVariable; // Initializing a pointer to the address of someVariable
 // Perform operations with MemoryPointer
 free(MemoryPointer); // Freeing the associated memory
+```
+<br>
+``` BEc
+// Perform operations with MemoryPointer
+free(&someVariable); // Freeing the associated memory
 ```
 
 In this example, the `free` function is used to release the memory pointed to by `MemoryPointer`, which was initialized with the address of `someVariable`. After calling `free`, the pointer is set to `nullptr`, indicating that the memory is now available for reuse.

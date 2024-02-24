@@ -1,4 +1,4 @@
-﻿namespace emu
+﻿namespace emulator
 {
     public enum Instructions
     {
@@ -44,7 +44,7 @@
         JMS,
         JNS,
         SHL,
-        SHR
+        SHR,
     }
     public enum ArgumentIdent
     {
@@ -54,5 +54,9 @@
         RegAddr,
         IndexReg,
         IndexImm,
+        IndexRegAddrReg,
+        IndexRegAddrImm,
+
+        none,
     }
 }

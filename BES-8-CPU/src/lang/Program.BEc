@@ -1,11 +1,19 @@
-func start()
+public word HELLO = 0
+ptr word hello = 0
+global word etst = 10
+
+func main(byte A, byte B, int C)
 {
-    word A = 0
+    word ABC = 0
+    ABC = A
+    free(&ABC)
+    word ABC = add(10, 20)
+    exit(A)
 }
 
-func main(word diskAddr, byte diskIndex)
+word add(word NumberA, word NumberB)
 {
-    word A = &diskIndex
-    Port.Cout('A')
-    start()
+    word Result = {NumberA + NumberB}
+    return Result
 }
+

@@ -13,6 +13,10 @@ REGISTERS:
     ZX: 16 bits (can be split into ZL and ZH - 8 bits each)
     X:  16 bits (can be split into XL and XH - 8 bits each)
     Y:  16 bits (can be split into YL and YH - 8 bits each)
+    R1: 16 bits (can be split into R1L and R1H - 8 bits each)
+    R2: 16 bits (can be split into R2L and R2H - 8 bits each)
+    R3: 16 bits (can be split into R3L and R3H - 8 bits each)
+    R4: 16 bits (can be split into R4L and R4H - 8 bits each)
     MB: 16 bits
 
     Stack Pointer (SP): 20 bits
@@ -27,7 +31,7 @@ REGISTERS:
         2. LESS
         3. CARRY
         4. HALT
-        5. SING
+        5. SIGN
         6. PARITY
         7. ERROR
 CACHE:
@@ -38,19 +42,21 @@ CACHE:
 
 MEMORY LAYOUT:
   Bank 0: 
-    ROM Range:                      0x00000 to 0xFFFFF
+    ROM Range static:               0x00000 to 0xFFFFF
 
   Bank 1:
-    IO Range:                       0x00000 to 0x001FF
-    Stack Range:                    0x00200 to 0x01FFF
+    IO Range static:                0x00000 to 0x001FF
+    Stack Range static:             0x00200 to 0x01FFF
     General Purpose Memory Range:   0x02000 to 0xFFFFF
 
   Bank 2:
-    Video Memory Range:             0x00000 to 0x0FFFF
-    Cache1 Range:                   0x10000 to 0x10FFF
-    Variable Memory Range:          0x11000 to 0x6FFFF
-    Resuves Memory Range:           0x70000 to 0x8FFFF
+    Video Memory Range static:      0x00000 to 0x0D800
+    Unused:                         0x0D801 to 0x0FFFF
+    Cache1 Range static:            0x10000 to 0x10FFF
+    Variable Memory Range static:   0x11000 to 0x6FFFF
+    Resuves Memory Range static:    0x70000 to 0x8FFFF
     Unused Memory Range:            0x90000 to 0xFFFFF
+  
 
 PORTS
   0x000         Expansion slot 0
@@ -73,17 +79,17 @@ PORTS
 
 INSTRUCTION SET:
     0x00    NOP                             No Operation
-    0x01    MOV     source, destination     Move the value from source to destination (destination can be an address or a register)
+    0x01    MOV     destination, source     Move the value from source to destination (destination can be an address or a register)
     0x02    PUSH    source                  Push the value from source onto the stack and decrease the stack pointer
-    0x03    POP     destination             Pop a value off the stack into the destination and increase the stack pointer
-    0x04    ADD     source, destination     Add the value from the source to the destination and store the result in the destination
-    0x05    SUB     source, destination     Subtract the value from the source from the destination and store the result in the destination
-    0x06    MUL     source, destination     Multiply the value in source by the value in destination and store the result in destination
-    0x07    DIV     source, destination     Divide the value in source by the value in destination, storing the quotient in destination and the remainder in source
-    0x08    AND     source, destination     Bitwise AND operation between the values in source and destination, storing the result in destination
-    0x09    OR      source, destination     Bitwise OR operation between the values in source and destination, storing the result in destination
-    0x0A    NOT     source                  Bitwise NOT operation on the value in source, storing the result in source
-    0x0B    NOR     source, destination     Bitwise NOR operation between the values in source and destination, storing the result in destination
+    0x03    POP     destination             Increase the stack pointer and pop a value off the stack into the destination
+    0x04    ADD     destination, source     Add the value from the source to the destination and store the result in the destination
+    0x05    SUB     destination, source     Subtract the value from the source from the destination and store the result in the destination
+    0x06    MUL     destination, source     Multiply the value in source by the value in destination and store the result in destination
+    0x07    DIV     destination, source     Divide the value in source by the value in destination, storing the quotient in destination and the remainder in source
+    0x08    AND     destination, source     Bitwise AND operation between the values in source and destination, storing the result in destination
+    0x09    OR      destination, source     Bitwise OR operation between the values in source and destination, storing the result in destination
+    0x0A    NOT     destination             Bitwise NOT operation on the value in destination, storing the result in destination
+    0x0B    NOR     destination, source     Bitwise NOR operation between the values in source and destination, storing the result in destination
     0x0C    ROL     source, operand1        Rotate the bits in the destination right by the number of positions specified in operand1. The CARRY flag is used in the rotation.
     0x0D    ROR     source, operand1        Rotate the bits in the destination left by the number of positions specified in operand1. The CARRY flag is used in the rotation.
     0x0E    JMP     address                 Jump to the specified address
@@ -110,8 +116,9 @@ INSTRUCTION SET:
     0x23    OUT     port, operand           Output the value in the operand to the specified port
     0x24    CLF     flag                    Clear the specified flag in the Flags Register
     0x25    SEF     flag                    Set the specified flag in the Flags Register
-    0x26    XOR     source, destination     Bitwise XOR operation between the values in source and destination, storing the result in destination
-    0x27    JMS     address                 Jump to the specified address if the SING flag is set
-    0x28    JNS     address                 Jump to the specified address if the SING flag is not set
+    0x26    XOR     destination, source     Bitwise XOR operation between the values in source and destination, storing the result in destination
+    0x27    JMS     address                 Jump to the specified address if the SIGN flag is set
+    0x28    JNS     address                 Jump to the specified address if the SIGN flag is not set
     0x29    SHL     source, operand1        Shift the bits in the destination left by the number of positions specified in operand1. The CARRY flag receives the overflowed bit, and a zero bit is shifted in from the right.
     0x2A    SHR     source, operand1        Shift the bits in the destination right by the number of positions specified in operand1. The CARRY flag receives the overflowed bit, and a zero bit is shifted in from the left.
+    0x2B    HALT                            Sets the HALT flag

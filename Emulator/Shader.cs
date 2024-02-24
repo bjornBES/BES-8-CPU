@@ -4,7 +4,7 @@ using System.IO;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace emu
+namespace emulator
 {
     // A simple class meant to help create shaders.
     public class Shader

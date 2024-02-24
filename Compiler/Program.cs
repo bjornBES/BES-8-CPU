@@ -14,6 +14,8 @@ internal class Program
     static Generation Generation = new Generation();
     public static FileInfo[] Files;
 
+    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU";
+
     public static void Main(string[] args)
     {
         Console.CursorVisible = false;
@@ -64,12 +66,6 @@ internal class Program
             //src = "newfile " + Input + "\r\n" + src;
         }
 
-        /*
-        for (int i = 0; i < src.Split(Environment.NewLine).Length; i++)
-        {
-            Tokenization.Build(src.Split(Environment.NewLine)[i]);
-        }
-        */
         Tokenization.Build(src);
         Console.WriteLine("TOKEN DONE");
         Generation.Build(Tokenization);
@@ -93,7 +89,7 @@ internal class Program
             TokenFormatOutput += $"Token = {{{token.Type}, {Value} at line {token.Line}}}\n";
         }
 
-        File.WriteAllText($"{Environment.CurrentDirectory}/tokens.txt", TokenFormatOutput);
+        File.WriteAllText($"{CurrentDirectory}/tokens.txt", TokenFormatOutput);
 
         string jsonVariablesFormat = "";
 
@@ -102,25 +98,24 @@ internal class Program
             Variable variable = Generation.Variables[i];
             jsonVariablesFormat += 
                 $"{variable.Name}{{\n" +
-                $"\t" + $"Addr = {variable.Addr}" + "\n" +
+                $"\t" + $"Addr = {variable.Address}" + "\n" +
                 $"\t" + $"Size = {variable.Size}" + "\n" +
                 $"\t" + $"FuncName = {variable.FuncName}" + "\n" +
                 $"\t" + $"Settings {{" + "\n" +
-                $"\t\t" + $"IsArgument = {variable.IsArgument}" + "\n" +
-                $"\t\t" + $"IsPointer = {variable.IsPointer}" + "\n" +
+                //$"\t\t" + $"IsArgument = {variable.IsArgument}" + "\n" +
+                //$"\t\t" + $"IsPointer = {variable.IsPointer}" + "\n" +
                 $"\t\t" + $"IsLocal = {variable.IsLocal}" + "\n" +
-                $"\t\t" + $"IsAllocated = {variable.IsAllocated}" + "\n" +
                 "\t}\n" +
                 "}\n";
         }
 
-        File.WriteAllText($"{Environment.CurrentDirectory}/Variables.txt", jsonVariablesFormat);
+        File.WriteAllText($"{CurrentDirectory}/Variables.txt", jsonVariablesFormat);
 
-        string jsonFunctionsFormat = JsonSerializer.Serialize(Generation.functions, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText($"{Environment.CurrentDirectory}/Functions.json", jsonFunctionsFormat);
+        //string jsonFunctionsFormat = JsonSerializer.Serialize(Generation.functions, new JsonSerializerOptions { WriteIndented = true });
+        //File.WriteAllText($"{CurrentDirectory}/Functions.json", jsonFunctionsFormat);
 
-        File.WriteAllText($"{Environment.CurrentDirectory}/tokens.txt", TokenFormatOutput);
-        File.WriteAllLines(OutputFile, Generation.AsmSrc);
+        File.WriteAllText($"{CurrentDirectory}/tokens.txt", TokenFormatOutput);
+        File.WriteAllLines(OutputFile, Generation.Assembly_Src);
     }
     private static void Exit(int exitCode = 0)
     {
@@ -215,8 +210,8 @@ internal class Program
 
     static void Conv(ref string file)
     {
-        file = file.Replace(".\\", Environment.CurrentDirectory + "\\");
-        file = file.Replace("./", Environment.CurrentDirectory + "\\");
+        file = file.Replace(".\\", CurrentDirectory + "\\");
+        file = file.Replace("./", CurrentDirectory + "\\");
         file = file.Replace("/", "\\");
         return;
     }

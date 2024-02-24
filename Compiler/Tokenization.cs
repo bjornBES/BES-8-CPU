@@ -63,7 +63,7 @@ namespace Compiler
             return "NULL";
         }
 
-        public int bin_prec(TokenType type)
+        public static int bin_prec(TokenType type)
         {
             switch (type)
             {
@@ -114,15 +114,24 @@ namespace Compiler
                     {
                         // func keywords
                         case "exit": tokens.Add(new Token() { Type = TokenType.exit, Line = line_count }); break;
-
-                        // keywords
-                        case "func": tokens.Add(new Token() { Type = TokenType.func, Line = line_count }); break;
-                        case "class": tokens.Add(new Token() { Type = TokenType.class_, Line = line_count }); break;
-                        case "ptr": tokens.Add(new Token() { Type = TokenType.ptr, Line = line_count }); break;
-                        case "inc": tokens.Add(new Token() { Type = TokenType.inc, Line = line_count }); break;
+                        case "free": tokens.Add(new Token() { Type = TokenType.free, Line = line_count }); break;
+                        
+                        case "global": tokens.Add(new Token() { Type = TokenType.global, Line = line_count }); break;
+                        case "public": tokens.Add(new Token() { Type = TokenType.public_, Line = line_count }); break;
+                        case "local": tokens.Add(new Token() { Type = TokenType.local, Line = line_count }); break;
+                        
+                        // types
                         case "byte": tokens.Add(new Token() { Type = TokenType.byte_, Line = line_count }); break;
                         case "word": tokens.Add(new Token() { Type = TokenType.word, Line = line_count }); break;
                         case "let": tokens.Add(new Token() { Type = TokenType.word, Line = line_count }); break;
+                        case "int": tokens.Add(new Token() { Type = TokenType.int_, Line = line_count }); break;
+                        case "ptr": tokens.Add(new Token() { Type = TokenType.ptr, Line = line_count }); break;
+
+                        // keywords
+                        case "return": tokens.Add(new Token() { Type = TokenType.return_, Line = line_count }); break;
+                        case "func": tokens.Add(new Token() { Type = TokenType.func, Line = line_count }); break;
+                        case "class": tokens.Add(new Token() { Type = TokenType.class_, Line = line_count }); break;
+                        case "inc": tokens.Add(new Token() { Type = TokenType.inc, Line = line_count }); break;
                         case "if": tokens.Add(new Token() { Type = TokenType.if_, Line = line_count }); break;
                         case "elif": tokens.Add(new Token() { Type = TokenType.elif, Line = line_count }); break;
                         case "else": tokens.Add(new Token() { Type = TokenType.else_, Line = line_count }); break;

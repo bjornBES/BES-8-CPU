@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Compiler": {
+      "commandName": "Project"
+    },
+    "Compiler Tests": {
+      "commandName": "Project",
+      "commandLineArgs": "-i ./src/lang/Program.BEc -o ./builds/a.Basm -D"
+    }
+  }
+}

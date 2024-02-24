@@ -1,33 +1,24 @@
-diskAddr{
-	Addr = 393216
-	Size = 1
-	FuncName = main
-	Settings {
-		IsArgument = True
-		IsPointer = False
-		IsLocal = True
-		IsAllocated = False
-	}
-}
-diskIndex{
-	Addr = 393217
-	Size = 1
-	FuncName = main
-	Settings {
-		IsArgument = True
-		IsPointer = False
-		IsLocal = True
-		IsAllocated = False
-	}
-}
-A{
-	Addr = 327682
+Var_HELLO{
+	Addr = 73728
 	Size = 1
 	FuncName = 
 	Settings {
-		IsArgument = False
-		IsPointer = False
-		IsLocal = True
-		IsAllocated = False
+		IsLocal = False
+	}
+}
+Var_hello{
+	Addr = 73729
+	Size = 1
+	FuncName = 
+	Settings {
+		IsLocal = False
+	}
+}
+Var_etst{
+	Addr = 73730
+	Size = 1
+	FuncName = 
+	Settings {
+		IsLocal = False
 	}
 }

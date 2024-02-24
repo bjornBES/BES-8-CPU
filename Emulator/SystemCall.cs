@@ -1,36 +1,17 @@
-﻿namespace emu
+﻿namespace emulator
 {
     public class SystemCall
     {
-        public static void Call(ushort imm16, ushort AX, ushort BX, ushort CX, ushort DX)
+        public static void Call(uint imm16, Register AX, Register BX, Register CX, Register DX, Register ZX, Register X, Register Y)
         {
             switch (imm16)
             {
-                case 0x10:
-                    Int10h(AX, BX, CX, DX);
-                    break;
-            }
-        }
-        static void Int10h(ushort AX, ushort BX, ushort CX, ushort DX)
-        {
-            switch (AX)
-            {
-                case 1:
-                    //Ports.Write(1, 0x800F);
-                    //Ports.TICK(1, ref mem);
-                    //uint data = Ports.Read(1);
-                    //if(data == 1)
-                    //{
-                        // do shit
-                        //Ports.Write(1, 0x8018);
-                        //Ports.TICK(1, ref mem);
-                        //Ports.Write(1, BX);
-                        //Ports.TICK(1, ref mem);
-                        //Ports.Write(1, 0x8001);
-                        //Ports.TICK(1, ref mem);
-                   // 
-                    break;
-                default:
+                    // int #00h
+                    // instr Exit
+                case 0x00:  
+                    CPU.Running = false;
+                    MEM.Write(0, 0x0000, AX);
+                    Program.CPU.PC = 0x0000;
                     break;
             }
         }

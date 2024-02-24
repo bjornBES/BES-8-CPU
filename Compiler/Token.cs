@@ -1,4 +1,6 @@
-﻿public class Token
+﻿using Compiler;
+
+public class Token
 {
     public TokenType Type;
     public int Line;

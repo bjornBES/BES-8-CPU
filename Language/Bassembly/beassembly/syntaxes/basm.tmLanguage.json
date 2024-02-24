@@ -1,0 +1,116 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "BEs-Assembly",
+    "patterns": [
+        {
+            "include": "#statements"
+        }
+    ],
+    "repository": {
+        "statements": {
+            "patterns": [
+                {
+                    "include": "#expressions"
+                },
+                {
+                    "name": "keyword.control.beassembly",
+                    "comment": "basm instruction mnemonic",
+                    "match": "\\b(\\s*|)\\b(NOP|MOV|PUSH|POP|ADD|SUB|MUL|DIV|AND|OR|NOT|NOR|ROL|ROR|JMP|CMP|JLE|JE|JGE|JG|JNE|JL|JER|JMC|JMZ|JNC|INT|CALL|RTS|RET|PUSHR|POPR|INC|DEC|IN|OUT|CLF|SEF|XOR|JMS|JNS|SHL|SHR|HALT|nop|mov|push|pop|add|sub|mul|div|and|or|not|nor|rol|ror|jmp|cmp|jle|je|jge|jg|jne|jl|jer|jmc|jmz|jnc|int|call|rts|ret|pushr|popr|inc|dec|in|out|clf|sef|xor|jms|jns|shl|shr|halt)\\b"
+                },
+                {
+                    "name": "comment.line.semicolon",
+                    "match": ";.*"
+                },
+                {
+                    "name": "variable.label.beassembly",
+                    "match": "^\\b(\\s*|)[A-Za-z_]*:"
+                },
+                {
+                    "name": "keyword.control.directive",
+                    "patterns": [
+                        {
+                            "name": "storage.modifier.visibility",
+                            "match": "^[\\s]*\\.\\b(global|extern|GLOBAL|EXTERN)[\\s]*[A-Za-z_][A-Za-z_]*\\:"
+                        },
+                        {
+                            "name": "keyword.control.directive.bits",
+                            "match": "^[\\s]*\\.\\b((bits|BITS)(\\s+(8|16)))\\b"
+                        },
+                        {
+                            "name": "keyword.control.directive.section",
+                            "match": "^[\\s]*\\.\\b(section|SECTION)\\b"
+                        }
+                    ]
+                },
+                {
+                    "name": "variable.name",
+                    "match": "^\\$[A-Za-z_][A-Za-z_]*"
+                },
+                {
+                    "name": "variable.parameter",
+                    "match": "[\\s]*[,]\\%[A-Za-z_][A-Za-z_]*"
+                },
+                {
+                    "name": "keyword.control.psuedoInstruction",
+                    "match": "[\\s]*\\.\\b(include|repeat|org)|(INCLUDE|REPEAT|ORG)\\b"
+                },
+                {
+                    "name": "keyword.operator",
+                    "match": "(==?|!=|<=?>|<=?|>=?|\\|\\|?|\\^\\^?|&&?|<<<?|>>>?|~|!|\\+|-|\\*|//?|%%?|\\s=|\\s#=|\\s*=)|"
+                }
+            ]
+        },
+        "expressions": {
+            "patterns": [
+                {
+                    "name": "variable.language.beassembly",
+                    "comment": "beassembly register name",
+                    "match": "[,&\\s]*\\b(ax|ah|al|bx|bh|bl|cx|ch|cl|dx|dh|dl|zx|zh|zl|x|xh|xl|y|yh|yl|mb|pc|sp|f|AX|AH|AL|BX|BH|BL|CX|CH|CL|DX|DH|DL|ZX|ZH|ZL|X|XH|XL|Y|YH|YL|MB|PC|SP|F)\\b"
+                },
+                {
+                    "name": "constant.character",
+                    "match": "\\b(,|)[\\s]*\\./[A-Za-z/]*"
+                },
+                {
+                    "name": "keyword.control.beassembly",
+                    "match": "[\\s]*\\.\\b(byte|word|db|dw|str|strz|BYTE|WORD|DB|DW|STR|STRZ)\\b"
+                },
+                {
+					"name": "string.quoted.double.beassembly",
+					"begin": "\\b(,|)[\\s]*\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape.beassembly",
+							"match": "\\\\."
+						}
+					]
+				},
+				{
+					"name": "string.quoted.single.beassembly",
+					"begin": "\\b(,|)[\\s]*\\'",
+					"end": "\\'",
+					"patterns": [
+						{
+							"name": "constant.character.escape.beassembly",
+							"match": "\\\\."
+						}
+					]
+				},
+                {
+                    "name": "variable.parameter",
+                    "match": "\\b(,|)[\\s]*\\[\\b([A-Za-z_][A-Za-z_]*|[\\da-fA-F][\\da-fA-F_]*h)\\]"
+                },
+                {
+                    "name": "variable.parameter",
+                    "match": "\\b(,|)[\\s]*\\$"
+                },
+                {
+                    "name": "constant.numeric",
+                    "match": "\\b(,|)[\\s]*.([\\da-fA-F][\\da-fA-F_]*h|[01][01_]*b|\\d[\\d_]*?)"
+                }
+            ]
+        }
+    },
+    "scopeName": "soruce.asm"
+}

@@ -3,27 +3,23 @@ mov         MB, #1
 ; cheaking the Expansion ports for if there is an Keyboard
 
 Reset:
-call        [GetKey]
+call      [GetKey]
 
-mov         [AX]&1, #10
-mov         [AX]&BX, AX
-mov         [AX]&BX, [BX]
+mov         AX, #FFFFFh
+mov         BX, AX
+mov         [02000h], AX
+mov         CX, [02000h]
+mov         AX, [AX]
 
-mov         AX, [BX]
-mov     	[BX], AX
+push        #10
+push        [AX]
+push        [FF000h]
+push        AX
 
-mov         AX, SP
-
-mov         AX, [FF000h]&1
-mov         AX, [100FFh]&BX
-
-
-mov         [FF000h]&1,AX
-mov         [100FFh]&BX,AX
-
-mov         AX, #FFF00h
-mov         [FFF00h], AX
-mov         [AX], #FF000h
+pop         DX
+pop         DL
+pop         [02000h]
+pop         AL
 
 jmp $
 

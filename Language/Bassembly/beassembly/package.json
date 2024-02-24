@@ -1,0 +1,70 @@
+{
+  "name": "beassembly",
+  "displayName": "BEassembly",
+  "description": "",
+  "publisher": "BjornBEs",
+  "version": "0.0.1",
+  "license":"MIT",
+  "engines": {
+    "vscode": "^1.86.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./src/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bjornBES/BES-8-CPU.git"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "beassembly.Hello",
+        "title": "Hello"
+      }
+    ],
+    "languages": [
+      {
+        "id": "basm",
+        "aliases": [
+          "BEs-Assembly",
+          "basm"
+        ],
+        "extensions": [
+          ".basm",
+          ".asm",
+          "assembly"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "basm",
+        "scopeName": "soruce.asm",
+        "path": "./syntaxes/basm.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^16.11.7",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "@vscode/test-electron": "^2.3.8",
+    "esbuild": "^0.17.19",
+    "eslint": "^8.41.0",
+    "glob": "^10.2.6",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.1",
+    "run-script-os": "^1.1.6",
+    "typescript": "^4.3.5",
+    "vscode-test": "^1.5.1"
+  }
+}

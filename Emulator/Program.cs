@@ -1,30 +1,25 @@
-﻿using emu;
-using emulator;
+﻿using emulator;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 class Program
 {
-    CPU CPU = new CPU();
+    public static CPU CPU = new CPU();
 
-    string InputFile = "\0\0";
+    static string InputFile = "\0\0";
     static void Main(string[] args)
     {
         //Console.SetWindowSize(192, 60);
         //Console.SetBufferSize(192, 60);
-        new Program(args);
-    }
-    Program(string[] args)
-    {
         //MEM = new MEM();
         //Engine.RESET(new uint[0]);
 
         //Environment.Exit(0);
         string ConfigFile = Environment.CurrentDirectory + "\\" + args[0];
-        
+
         DecodeArguments(File.ReadAllText(ConfigFile).Split("\r\n"));
-        if (InputFile == "\0\0") { Console.WriteLine("Can't Find the file");  Exit(1); }
+        if (InputFile == "\0\0") { Console.WriteLine("Can't Find the file"); Exit(1); }
 
         InputFile = InputFile.Replace(".\\", "");
         InputFile = InputFile.Replace("./", "");
@@ -60,39 +55,57 @@ class Program
         {
             ConsoleKeyInfo keyInfo = Console.ReadKey();
 
-            if(keyInfo.Key == ConsoleKey.L)
+            if (keyInfo.Key == ConsoleKey.L)
             {
                 Console.Clear();
 
                 Console.WriteLine("Write an addr\nXXXXh for hex\nXXXXXXXXXXXXXXXXb for bin\nXXXXXX for dec");
                 string StrAddr = Console.ReadLine();
 
-                ushort addr;
+                uint addr;
 
-                if(StrAddr.EndsWith('h'))
+                if (StrAddr.EndsWith('h'))
                 {
-                    addr = Convert.ToUInt16(StrAddr.TrimEnd('h'), 16);
+                    addr = Convert.ToUInt32(StrAddr.TrimEnd('h'), 16);
                 }
                 else if (StrAddr.EndsWith('b'))
                 {
-                    addr = Convert.ToUInt16(StrAddr.TrimEnd('b'), 2);
+                    addr = Convert.ToUInt32(StrAddr.TrimEnd('b'), 2);
                 }
                 else
                 {
-                    addr = ushort.Parse(StrAddr);
+                    addr = uint.Parse(StrAddr);
+                }
+
+                Console.WriteLine("Write the bank");
+                string Str_Bank = Console.ReadLine();
+
+                uint Bank;
+
+                if (Str_Bank.EndsWith('h'))
+                {
+                    Bank = Convert.ToUInt32(Str_Bank.TrimEnd('h'), 16);
+                }
+                else if (Str_Bank.EndsWith('b'))
+                {
+                    Bank = Convert.ToUInt32(Str_Bank.TrimEnd('b'), 2);
+                }
+                else
+                {
+                    Bank = uint.Parse(Str_Bank);
                 }
 
                 Console.Clear();
-                //Console.WriteLine("At " + StrAddr.TrimEnd('h') + " in MEM " + ToHex(MEM.Read(addr, 0)));
+                Console.WriteLine("At " + StrAddr.TrimEnd('h') + " in MEM " + ToHex(MEM.Read(Bank, addr)));
             }
-            else if(keyInfo.Key == ConsoleKey.T)
+            else if (keyInfo.Key == ConsoleKey.T)
             {
                 Console.Clear();
 
                 CPU.TICK();
                 WriteInfo();
             }
-            else if(keyInfo.Key == ConsoleKey.Escape)
+            else if (keyInfo.Key == ConsoleKey.Escape)
             {
                 break;
             }
@@ -105,17 +118,17 @@ class Program
 
         } while (CPU.Getflag(CPU.Flag_Halt) == 0);
     }
-    void WriteInfo()
+    static void WriteInfo()
     {
         Console.WriteLine("Registers");
-        Console.WriteLine("AX:" + ToHex(CPU.AX) + "\t\tAH:" + ToHexByte(CPU.GetHigh(CPU.AX)) + "\t\tAL:" + ToHexByte(CPU.GetLow(CPU.AX)));
-        Console.WriteLine("BX:" + ToHex(CPU.BX) + "\t\tBH:" + ToHexByte(CPU.GetHigh(CPU.BX)) + "\t\tBL:" + ToHexByte(CPU.GetLow(CPU.BX)));
-        Console.WriteLine("CX:" + ToHex(CPU.CX) + "\t\tCH:" + ToHexByte(CPU.GetHigh(CPU.CX)) + "\t\tCL:" + ToHexByte(CPU.GetLow(CPU.CX)));
-        Console.WriteLine("DX:" + ToHex(CPU.DX) + "\t\tDH:" + ToHexByte(CPU.GetHigh(CPU.DX)) + "\t\tDL:" + ToHexByte(CPU.GetLow(CPU.DX)));
-        Console.WriteLine("ZX:" + ToHex(CPU.ZX) + "\t\tZH:" + ToHexByte(CPU.GetHigh(CPU.ZX)) + "\t\tZL:" + ToHexByte(CPU.GetLow(CPU.ZX)));
-        Console.WriteLine("X:" + ToHex(CPU.X)+ " Y:" + ToHex(CPU.Y) + " SP:" + ToHex(CPU.SP) + " MB:" + ToHex(CPU.MB));
-        Console.WriteLine("PC:" + ToHex(CPU.PC));
-        Console.WriteLine("F:" + Convert.ToString(CPU.F.m_value, 2).PadLeft(16, '0'));
+        Console.WriteLine($"AX:{ToHex20(CPU.AX)}\tAL:{ToHexByte(CPU.AX.GetLowByte())}\tAH:{ToHexByte(CPU.AX.GetHighByte())}");
+        Console.WriteLine($"BX:{ToHex20(CPU.BX)}\tBL:{ToHexByte(CPU.BX.GetLowByte())}\tBH:{ToHexByte(CPU.BX.GetHighByte())}");
+        Console.WriteLine($"CX:{ToHex20(CPU.CX)}\tCL:{ToHexByte(CPU.CX.GetLowByte())}\tCH:{ToHexByte(CPU.CX.GetHighByte())}");
+        Console.WriteLine($"DX:{ToHex20(CPU.DX)}\tDL:{ToHexByte(CPU.DX.GetLowByte())}\tDH:{ToHexByte(CPU.DX.GetHighByte())}");
+        Console.WriteLine($"ZX:{ToHex20(CPU.ZX)}\tZL:{ToHexByte(CPU.ZX.GetLowByte())}\tZH:{ToHexByte(CPU.ZX.GetHighByte())}");
+        Console.WriteLine($"PC:{ToHex(CPU.PC)}");
+        Console.WriteLine($"X:{ToHex20(CPU.X)} Y:{ToHex20(CPU.Y)} SP:{ToHex20(CPU.SP)} MB:{ToHex20(CPU.MB)}");
+        Console.WriteLine($"F:{Convert.ToString(CPU.F.m_value, 2).PadLeft(16, '0')}");
         Console.Write("Error:" + CPU.Getflag(CPU.Flag_Error) + " ");
         Console.Write("Parity:" + CPU.Getflag(CPU.Flag_Parity) + " ");
         Console.Write("Sing:" + CPU.Getflag(CPU.Flag_Sing) + " ");
@@ -126,12 +139,22 @@ class Program
         Console.Write("Zero:" + CPU.Getflag(CPU.Flag_Zero) + " ");
         Console.Write("\n");
         Console.Write("\n====MEM====\n");
+        Console.Write($"Next MEM[{ToHex(CPU.PC)}] = {ToHex(MEM.Read(0, CPU.PC))}\n");
+        Console.Write($"Next Instr {CPU.DecodeInstr(MEM.Read(0, CPU.PC), out ushort am1, out ushort am2)}\nAM1:{CPU.ArgumentIdentifier[am1]}\nAM2:{CPU.ArgumentIdentifier[am2]}");
     }
-    string ToHex(Register value)
+    static string ToHex(Register value)
     {
         return Convert.ToString(value.m_value, 16).PadLeft(8, '0');
     }
-    string ToHexByte(Register value)
+    static string ToHex20(Register value)
+    {
+        return Convert.ToString(value.m_value, 16).PadLeft(5, '0');
+    }
+    static string ToHexWord(Register value)
+    {
+        return Convert.ToString(value.m_value, 16).PadLeft(4, '0');
+    }
+    static string ToHexByte(Register value)
     {
         return Convert.ToString(value.m_value, 16).PadLeft(2, '0');
     }
@@ -141,7 +164,7 @@ class Program
         Environment.Exit(exitCode);
     }
 
-    void DecodeArguments(string[] args)
+    static void DecodeArguments(string[] args)
     {
         DecodeInstr(args, "Input", ref InputFile);
 
@@ -154,7 +177,7 @@ class Program
         DecodeInstr(args, "Banks", ref MEM.BankCount);
     }
 
-    void DecodeInstr(string[] args, string instr, ref string Result)
+    static void DecodeInstr(string[] args, string instr, ref string Result)
     {
         for (int i = 0; i < args.Length; i++)
         {
@@ -165,7 +188,7 @@ class Program
             }
         }
     }
-    void DecodeInstr(string[] args, string instr, ref bool Result, string TRUE = "true", string FALSE = "false")
+    static void DecodeInstr(string[] args, string instr, ref bool Result, string TRUE = "true", string FALSE = "false")
     {
         for (int i = 0; i < args.Length; i++)
         {
@@ -192,7 +215,7 @@ class Program
             }
         }
     }
-    void DecodeInstr(string[] args, string instr, ref bool Result, bool TO)
+    static void DecodeInstr(string[] args, string instr, ref bool Result, bool TO)
     {
         for (int i = 0; i < args.Length; i++)
         {
@@ -202,7 +225,7 @@ class Program
             }
         }
     }
-    void DecodeInstr(string[] args, string instr, ref int Result)
+    static void DecodeInstr(string[] args, string instr, ref int Result)
     {
         for (int i = 0; i < args.Length; i++)
         {
@@ -227,7 +250,7 @@ class Program
             }
         }
     }
-    void DecodeInstr(string[] args, string instr, ref uint Result)
+    static void DecodeInstr(string[] args, string instr, ref uint Result)
     {
         for (int i = 0; i < args.Length; i++)
         {
@@ -252,7 +275,7 @@ class Program
             }
         }
     }
-    void DecodeInstr(string[] args, string instr, Func<int, string[], bool> func)
+    static void DecodeInstr(string[] args, string instr, Func<int, string[], bool> func)
     {
         for (int i = 0; i < args.Length; i++)
         {

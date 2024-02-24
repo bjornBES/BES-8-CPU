@@ -94,9 +94,8 @@ all the registers can be split in to a high and an low part
 
 Calling convention
     Arguments pushed to stack in order from right to left
-    Registers pushed if used in func
-    Return value in Z
-    After return offset the SP with the length of the arguments using add
+    Registers pushed using pushr
+    Return value in Z or stack
 
 INSTRUCTIONS LAYOUT
 XXXX_XXXX_ZZZZ_ZZZZ

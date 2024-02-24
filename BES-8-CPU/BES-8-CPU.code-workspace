@@ -4,12 +4,6 @@
 			"path": "."
 		},
 		{
-			"path": "../Language/basm"
-		},
-		{
-			"path": "../Language/BEC"
-		},
-		{
 			"path": "../Assembler"
 		},
 		{
@@ -19,13 +13,13 @@
 			"path": "../emulator"
 		},
 		{
-			"path": "../Basic_Interpreter"
-		},
-		{
-			"path": "../BEASM_SRC"
-		},
-		{
 			"path": "../docs"
+		},
+		{
+			"path": "../Language/Bassembly"
+		},
+		{
+			"path": "../Language/BEcLang"
 		}
 	],
 	"settings": {
@@ -49,15 +43,14 @@
 		"version": "0.2.0",
 		"configurations": [
 			{
-				"name": "Build All",
-				"type": "PowerShell",
+				"name": "Extension",
+				"type": "extensionHost",
 				"request": "launch",
-				"script": "${workspaceFolder}/tools/Build.ps1",
 				"args": [
-					"All"
-				],
-				"cwd": "${cwd}"
+					"--extensionDevelopmentPath=${workspaceFolder}"
+				]
 			}
+
 		]
 	}
 }
