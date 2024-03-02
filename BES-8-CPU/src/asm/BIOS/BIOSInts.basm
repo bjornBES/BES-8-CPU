@@ -1,0 +1,18 @@
+; short ExitCode
+.global Exit:
+pushr
+mov ZX, SP
+add SP, #8
+pop AX
+mov SP, ZX
+
+; enabling non BIOS ints
+sef #9
+
+mov MB, #1
+mov %ExitCode, AX
+; return from program
+int #FBh
+
+popr
+ret #1

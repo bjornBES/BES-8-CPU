@@ -4,98 +4,103 @@ OVERVIEW
  Memory banking via the MB register allowing for 65535 possible memory banks
  
 INSTRUCTIONS
- 00 MOV     reg/addr,      reg/imm/addr         -> reg = reg/imm/mem[addr] || mem[addr] = reg/imm/mem[addr]
- 01
- 02 
- 03 PUSH    reg16/imm16                         -> mem[SP] = reg16/imm16 SP--
- 04 POP     reg16/addr                          -> SP++ reg16/addr = mem[SP]
- 05 ADD     reg16,              reg16/imm       -> reg16 = reg16 + reg16/imm16 + C
- 06 RET     imm16                               -> pop PC + imm16
- 07 SUB     reg16,              reg16/imm       -> reg16 = reg16 - reg16/imm16 - C
- 08 AND     reg16,              reg16/imm       -> reg16 = reg16 & reg16/imm16
- 09 OR      reg16,              reg16/imm       -> reg16 = reg16 | reg16/imm16
- 0A NOR     reg16,              reg16/imm       -> reg16 = !(reg16 | reg16/imm16)
- 0B CMP     reg/addr,           reg16/imm       -> F = reg16/mem[addr] - imm/reg16
- 0C JNE     addr                                -> PC = addr if E == 0
- 0D INT     imm16/null                          -> system call 
- 0E JMP     addr                                -> PC = addr
- 0F JME     addr                                -> PC = addr if E == 1
- 10 HALT    imm16/null                          -> DIS
- 11 CALL    addr                                -> push PC, PC = addr
- 12 RTS                                         -> pop PC
- 13 INC     reg16/addr                          -> reg16/mem[addr]++
- 14 DEC     reg16/addr                          -> reg16/mem[addr]--
- 15 OUTB    imm16/reg16           reg16/imm16   -> port[imm16/reg16] = reg16/imm16
- 16 INB     imm16/reg16           reg16         -> reg = port[imm16/reg16]
- 17 NOP                                         -> 
- 18 SEF     imm16                               -> F[imm16] = 1
- 19 CLF     imm16                               -> F[imm16] = 0
- 1A JMZ     addr                                -> PC = addr if Z == 1
- 1B JNZ     addr                                -> PC = addr if Z == 0
- 1C JML     addr                                -> PC = addr if L == 1
- 1D JMG     addr                                -> PC = addr if L == 0
- 1E JMC     addr                                -> PC = addr if C == 1
- 1F JNC     addr                                -> PC = addr if C == 0
- 20 MUL     reg16,              reg16/imm16     -> reg16 = reg16 * reg16/imm16
- 21 DIV     reg16,              reg16/imm16     -> reg16 = reg16 / reg16/imm16
- 22 NOT     reg16                               -> reg16 = !reg16 
- 23 PUSHR                                       -> push AX push BX push CX push DX push ZX push X push Y
- 24 POPR                                        -> pop Y pop X pop ZX pop DX pop CX pop BX pop AX
- 25 ROL     reg16               imm16/null      -> reg16 << imm16 if null 1
- 26 ROR     reg16               imm16/null      -> reg16 >> imm16 if null 1
- 27 JER     addr                                -> PC = addr if ER = 1
+ 0x00    NOP  
+ 0x01    MOV  
+ 0x02    PUSH 
+ 0x03    POP  
+ 0x04    ADD  
+ 0x05    SUB  
+ 0x06    MUL  
+ 0x07    DIV  
+ 0x08    AND  
+ 0x09    OR   
+ 0x0A    NOT  
+ 0x0B    NOR  
+ 0x0C    ROL  
+ 0x0D    ROR  
+ 0x0E    JMP  
+ 0x0F    CMP  
+ 0x10    JLE  
+ 0x11    JE   
+ 0x12    JGE  
+ 0x13    JG   
+ 0x14    JNE  
+ 0x15    JL   
+ 0x16    JER  
+ 0x17    JMC  
+ 0x18    JMZ  
+ 0x19    JNC  
+ 0x1A    INT  
+ 0x1B    CALL 
+ 0x1C    RTS  
+ 0x1D    RET  
+ 0x1E    PUSHR
+ 0x1F    POPR 
+ 0x20    INC  
+ 0x21    DEC  
+ 0x22    IN   
+ 0x23    OUT  
+ 0x24    CLF  
+ 0x25    SEF  
+ 0x26    XOR  
+ 0x27    JMS  
+ 0x28    JNS  
+ 0x29    SHL  
+ 0x2A    SHR  
+ 0x2B    HALT 
 
 REGISTERS
-AX  (0b00_0000)   GP 16 bit register
-AL  (0b10_0000)   GP 8 bit register LOW
-AH  (0b01_0000)   GP 8 bit register HIGH
-BX  (0b00_0001)   GP 16 bit register
-BL  (0b10_0001)   GP 8 bit register LOW
-BH  (0b01_0001)   GP 8 bit register HIGH
-CX  (0b00_0010)   GP 16 bit register
-CL  (0b10_0010)   GP 8 bit register LOW
-CH  (0b01_0010)   GP 8 bit register HIGH
-DX  (0b00_0011)   GP 16 bit register
-DL  (0b10_0011)   GP 8 bit register LOW
-DH  (0b01_0011)   GP 8 bit register HIGH
-ZX  (0b00_0100)   GP 16 bit register
-ZL  (0b10_0100)   GP 8 bit register LOW
-ZH  (0b01_0100)   GP 8 bit register HIGH
-PC  (0b00_0101)   Program Counter   20 bit register
-SP  (0b00_0110)   Stack Pointer     20 bit register
-MB  (0b00_0111)   Memory bank       16 bit register
-X   (0b00_1000)   16 bit Index register
-XL  (0b10_1000)   8 bit Index register LOW
-XH  (0b01_1000)   8 bit Index register HIGH
-Y   (0b00_1001)   16 bit Index register
-YL  (0b10_1001)   8 bit Index register LOW
-YH  (0b01_1001)   8 bit Index register HIGH
-F   (0b00_1111)
-    0x0000  LESS        0
-    0x0001  EQUAL       1
-    0x0002  ZERO        2
-    0x0004  CARRY       3
-    0x0008  INT ENABLE  4
-    0x0010  HALT        5
-    0x0020  SIGN FLAG   6
-    0x0040  PARITY FLAG 7
-    0x0080  UNUSED      8
-    0x0100  UNUSED      9
-    0x0200  UNUSED      10
-    0x0400  UNUSED      11
-    0x0800  UNUSED      12
-    0x1000  UNUSED      13
-    0x2000  UNUSED      14
-    0x4000  UNUSED      15
-    0x8000  ERROR FLAG  16
+AX  (0b0000_0000)   GP 16 bit register
+AL  (0b0010_0000)   GP 8 bit register LOW
+AH  (0b0001_0000)   GP 8 bit register HIGH
+BX  (0b0000_0001)   GP 16 bit register
+BL  (0b0010_0001)   GP 8 bit register LOW
+BH  (0b0001_0001)   GP 8 bit register HIGH
+CX  (0b0000_0010)   GP 16 bit register
+CL  (0b0010_0010)   GP 8 bit register LOW
+CH  (0b0001_0010)   GP 8 bit register HIGH
+DX  (0b0000_0011)   GP 16 bit register
+DL  (0b0010_0011)   GP 8 bit register LOW
+DH  (0b0001_0011)   GP 8 bit register HIGH
+ZX  (0b0000_0100)   GP 16 bit register
+ZL  (0b0010_0100)   GP 8 bit register LOW
+ZH  (0b0001_0100)   GP 8 bit register HIGH
+PC  (0b0000_0101)   Program Counter   16 bit register
+SP  (0b0000_0110)   Stack Pointer     16 bit register
+MB  (0b0000_0111)   Memory bank       16 bit register
+X   (0b0000_1000)   16 bit Index register
+XL  (0b0010_1000)   8 bit Index register LOW
+XH  (0b0001_1000)   8 bit Index register HIGH
+Y   (0b0000_1001)   16 bit Index register
+YL  (0b0010_1001)   8 bit Index register LOW
+YH  (0b0001_1001)   8 bit Index register HIGH
+XY  (0b0000_1010)   32 bit Index register (combineing the X and Y registers into one)
+AB  (0b0001_1010)   32 bit GP register (combineing the A and B registers into one)
+CD  (0b0010_1010)   32 bit GP register (combineing the C and D registers into one)
+PMB (0b0000_1011)   Program Memory bank
+F   (0b0000_1111)   32 status register
+    0.  ZERO
+    1.  EQUAL
+    2.  LESS
+    3.  CARRY
+    4.  UNUSED
+    5.  SIGN FLAG
+    6.  PARITY FLAG
+    7.  OVERFLOW
 
-register Low and High
-all the registers can be split in to a high and an low part 
+    0.  INTERRUPT_ENABLE
+    1.  HALT
+    2.  ERROR
+    3.  UNUSED
+    4.  UNUSED
+    5.  UNUSED
+    6.  UNUSED
+    7.  UNUSED
 
 Calling convention
     Arguments pushed to stack in order from right to left
     Registers pushed using pushr
-    Return value in Z or stack
+    Return value in ZX or stack
 
 INSTRUCTIONS LAYOUT
 XXXX_XXXX_ZZZZ_ZZZZ
@@ -103,11 +108,14 @@ X 8 bit instructions identifier
 Z 8 bit instructions argument identifier
 
 ARGUMENT IDENTIFIER
-0000    imm
-0001    addr
-0010    register
-0011    Indexed with register
-0100    Indexed with addr
+0000    imm                 #number                 here the value will be an Immediate 16 bit value
+0001    address             [address]               here the value will be the value in from the address
+0010    register            register                here the vlaue will be the registers value
+0011    RegAddr             [register]              here the value will be the registers value as an address
+0100    IndexReg            [address]&reg           
+0101    IndexImm            [address]&number
+0110    IndexRegAddrReg     [register]&register
+0111    IndexRegAddrImm     [register]&imm
 
 MEMORY LAYOUT
 the memory layout is split op into 3 banks or more
@@ -115,20 +123,23 @@ you can used more banks but bank 0 to 2 is resuves
 for the program 
 
 BANK LAYOUT
-BANK 0
-    0x00000 - 0xFFFFF GENERAL PURPOSE ROM
+Bank 0, 1, 2: 
+    ROM Range static:               0x00000 to 0x30000
 
-BANK 1
-    0x00000 - 0x001FF IO (PORTS)
-    0x00200 - 0x01FFF STACK
-    0x02000 - 0xFFFFF GENERAL PURPOSE MEMORY
+Bank 3:
+    IO Range static:                0x0000 to 0x01FF
+    Stack Range static:             0x0200 to 0x1FFF
+    Interrupt Table Location:       0x2000 to 0x2000
+    Video Memory Range static:      0x2001 to 0xD8FF
+    Cache1 Range static:            0xD900 to 0xE8FF
+    General Purpose Memory Range:   0xE900 to 0xFFFF
 
-BANK 2
-    0x00000 - 0x0FFFF VIDEO MEMORY
-    0x10000 - 0x1FFFF Charse
-    0x20000 - 0x6FFFF variable Memory
-    0x70000 - 0x8FFFF resuves memory
-    0x70000 - 0xFFFFF UNUSED MEMORY
+Bank 4:
+    General Purpose Memory Range:   0x0000 to 0x7FFF
+    Variable Memory Range static:   0x8000 to 0xFFFF
+
+Bank 5:
+    General Purpose Memory Range:   0x0000 to 0xFFFF
 
 PORTS
 PORTS are used to communicate with devices or by the BES-8 itself. See
@@ -136,26 +147,22 @@ SPECIAL PORTS for a list of which ports are controlled by the BES-8 and not
 external devices.
 
 SPECIAL PORTS
-0x000: Expansion Port 0         (I/O)
-0x001: SCREEN
-0x002: User Port1 SPI           (I/O)
-0x003: User Port2 SPI           (I/O)
-0x004: User Port3 SPI           (I/O)
-0x005: User Port4 SPI           (I/O)
-0x006: Expansion Port 1         (I/O)
-0x007: Expansion Port 2         (I/O)
-0x008: Expansion Port 3         (I/O)
-0x009: Expansion Port 4         (I/O)
-0x00A: Expansion Port 5         (I/O)
-0x00B: Expansion Port 6         (I/O)
-0x00C: Expansion Port 7         (I/O)
-0x00D: Expansion Port 8         Output only
-0x00E: Expansion Port 9         Input only Output external
-0x00F: Expansion Port 10        Input only Output external
-0x010: Disk Header
-0x011: Boot Disk                (10 sectors for the bootloader)
-0x012 - 0x01F: 13 Disk slots    (more in the FileSystemSPEC.txt)
-0x020: Floppy disk Reader
+  0x000         Expansion slot 0
+  0x001         Expansion slot 1
+  0x002         Expansion slot 2
+  0x003         Expansion slot 3
+  0x004         Keyboard Port
+  0x005         Screen port
+  0x006         User port 1
+  0x007         User port 2
+  0x008         User port 3
+  0x009         User port 4
+  0x00A         Disk 1
+  0x00B         Disk 2
+  0x00C         Disk 3
+  0x00D         Disk 4
+  0x00E         Floppy Disk       Read only
+  0x00F         Cartridge Disk    Read only
 
 EXPANSION PORT
 in the Expansion port there is a way to expant the memory using the data bus and addr bus.
@@ -179,56 +186,3 @@ the screen can be in to different modes depending on the starting value sent to 
 
 BIOS interrupts
 A BIOS interrupt is a way to communicate 
-
-Micro Instructions
-
-LAYOUT
-00_00_0000_0000_00000000
-0E LH RRRR AAAA IIIIIIII
-
-E = register enable
-L = low enable
-H = high enable
-R = register identifier
-I = instruction identifier
-A = argument identifier
-
-Instructions
-00_00_0000_0_00 (00010)
-register disbaled
-argument imm
-instr MOV (Mov_Reg_16)
-
-01_00_0101_F_50 (45F50)
-register PC
-argument implied
-instr inc (inc_Reg_32)
-
-01_00_0101_F_80 (45F80)
-register PC
-argument implied
-instr out_Reg_32
-
-00_00_0000_0_FF (000FF)
-instr End instruction
-
-00_00_0000_F_EF (00FEF)
-instr 
-
-00_00_0000_0_31 (00031)
-Set_Addr_Ram
-
-00_00_0000_0_01 (00001)
-Write_Ram
-
-00_00_0000_0_61 (00061) Outb Imm
-Ports_Data_Out
-
-00_00_0000_2_61 (00261)  Outb Reg
-Ports_Data_Out
-
-00_00_0000_0_71 (00071) Inb imm
-Ports_Data_Out  
-
-00_00_0000_2_71 (00271)  Outb Reg
-Ports_Data_Out  

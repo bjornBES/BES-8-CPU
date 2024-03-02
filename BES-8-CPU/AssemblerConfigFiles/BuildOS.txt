@@ -1,0 +1,8 @@
+Input ./src/asm/BIOS/BIOS.Basm
+InputDir ./src/asm/BIOS
+UseDebuger
+ObjFile ./Builds/ASMBIOS/a.obj
+UseBinary ./Builds/ASMBIOS/bin.bin
+Output ./Builds/ASMBIOS/a.out
+DontBuild false
+FillTo 0x4FFF

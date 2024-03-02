@@ -37,12 +37,14 @@ page layout
 on the first page all the metadata is located (this is in bytes)
 [0000-0002] file system version
 [0003-0004] free pages count
-[0005-0203] fat 
-[0300-06FF] root directory entries (20 entries)
-[0700-070F] Mata name
-
-[0200-05FF] root directory entries (49 entries)
-[0605-060A] Mata name
+[0005-01FF] fat 
+[0200-06FF] root directory entries (20 entries)
+[0700-0701] Disk Size
+[0702-0702] Disk Letter Writable
+[0703-0703] sectors par page
+[070A-070A] Bootabul
+[070B-070B] Boot from disk if Bootabul == 1
+[070C-070E] boot in page (default = 1) 
 
 Pages
 page 0 is the metadata/file system data 

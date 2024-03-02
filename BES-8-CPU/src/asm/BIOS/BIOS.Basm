@@ -1,0 +1,142 @@
+$Keyboard #= 4
+$Dispaly #= 5
+
+$PortIsthere *= 02000h              ; bank 1
+$ExitCode *= 02001h                 ; bank 1
+$ProgramBankRegister *= FFFFFh      ; bank 0
+
+.org 0
+
+_Main:
+pushr
+sef #FI
+
+; moving 1 to the memory bank 
+mov MB, #1
+mov XL, #FFh
+mov DX, #80FFh                      ; testing the ports
+out %Dispaly, DX
+; testing what port are in use and what are not in use
+Test_Port_Loop:
+; overflow XL from FF to 0
+inc XL
+call [Test_Ports]
+; exit loop?
+cmp XL, #9                          ; Test_Port_Loop > 9?
+jl [Test_Port_Loop]                 ; yes
+
+; overflowing XL
+inc MB
+; setting up the interrupt table
+; MB = 2
+;     \/ in bank 2
+mov [0D801h], [INTERRUPT_TABLE]
+; read a disk
+; here we get the bytes used to boot (55AA)
+Read_Disk_Loop:
+inc XH
+; here we read the disk
+
+; disk in XL
+push XH                             ; disk
+push #1                             ; page = 1
+push #4                             ; sector = 4
+call [Read]
+; getting the to bytes
+mov BX, [101FFh]                    ; high byte
+mov AX, [101FEh]                    ; low byte
+; placing the bytes in to AX
+or AX, BL
+
+cmp AX, #55AAh
+jne [Read_Disk_Loop]
+
+; no call?
+; need full stack to do shit
+; fx. the bootloader and other things
+
+; this is where the BOOT code is at
+; Bootstrap Loader
+Boot:
+mov MB, #0
+mov %ProgramBankRegister, #3
+
+push XH                             ; byte Disk
+push #0                             ; short Page
+push #4                             ; byte sector
+call [Read]
+
+; set up some things
+
+; Boot to an OS
+; reading boot in page from sector 4 page 0
+mov MB, #2
+mov R1, [1000Ch]                    ; 0x70C
+mov BX, [1000Eh]                    ; 0x70E
+; combining AX and BX
+or R1, BX
+
+; page * PageSize(0x800) = BootAddress
+; setting the address using AX
+mul R1, #800h
+
+popr
+
+; the OS now uses the BIOS ints
+clf #FI
+
+; Jump to Program
+int #FAh
+
+; after exiting the OS
+mov AX, %ExitCode
+cmp AX, #1                          ; 0 = good
+; AX >= 1
+jge [Exit_Fall]
+
+
+Exit_Fall:
+; clearing the scrren
+out #5, #80FFh
+
+mov AX, [Exit_Fall_Message]
+call [Print_Message]
+
+Exit_BIOS:
+int #E0h
+
+; XL byte Port
+; DX uint value
+; testing if a port is in use or not
+Test_Ports:
+push AX
+out XL, DX
+in XL, AX
+; the port will return with CARRY set to 0 if there
+; and CARRY set to 1 if not there
+jnc [ISTHERE]
+; setting it to 1 if it is not there
+or %PortIsthere, XL
+
+ISTHERE:
+pop AX
+rts
+
+; AX uint* Address
+.global Print_Message:
+pushr
+
+mov X, #0
+Print_Message_Loop:
+mov BX, [AX]&X
+jmz [Exit_Print_Loop] 
+out #5, BX
+inc X
+jnc [Print_Message_Loop]
+Exit_Print_Loop:
+popr
+rts
+
+; data
+Exit_Fall_Message:
+.strz "Error: "

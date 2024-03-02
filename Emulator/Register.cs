@@ -57,6 +57,14 @@ namespace emulator
         {
             return new Register((m_value & 0x000007FF));
         }
+        public Register Get16BitHighByte()
+        {
+            return new Register((m_value & 0x0000FF00));
+        }
+        public Register Get16BitLowByte()
+        {
+            return new Register((m_value & 0x000000FF));
+        }
         public void SetHighByte(uint value)
         {
             m_value = (m_value & 0x000FF800) | ((uint)value << 8);

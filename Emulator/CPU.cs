@@ -230,7 +230,13 @@ namespace emulator
                     }
                     break;
                 case Instructions.INT:
-                    SystemCall.Call(FetchInstr(), AX, BX, CX, DX, ZX, X, Y);
+                    if (argumentIdent1 == ArgumentIdent.Imm)
+                    {
+                        SystemCall.Call(FetchInstr(), ref AX, ref BX, ref CX, ref DX, ref ZX, ref X, ref Y);
+                    }
+                    else if (argumentIdent1 == ArgumentIdent.none)
+                    {
+                    }
                     break;
                 case Instructions.CALL:
                     switch (argumentIdent1)
@@ -280,12 +286,16 @@ namespace emulator
                     Pop(out AX);
                     break;
                 case Instructions.INC:
+                    INCDEC(argumentIdent1, false);
                     break;
                 case Instructions.DEC:
+                    INCDEC(argumentIdent1, true);
                     break;
                 case Instructions.IN:
+                    InPort(argumentIdent1, argumentIdent2);
                     break;
                 case Instructions.OUT:
+                    OutPort(argumentIdent1, argumentIdent2);
                     break;
                 case Instructions.CLF:
                     if(argumentIdent1 == ArgumentIdent.Imm)
@@ -326,6 +336,9 @@ namespace emulator
                         default:
                             break;
                     }
+                    break;
+                case Instructions.HALT:
+                    Setflag(Flag_Halt, 1);
                     break;
             }
         }

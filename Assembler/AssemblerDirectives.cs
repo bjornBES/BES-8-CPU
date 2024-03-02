@@ -29,6 +29,8 @@ namespace assembler
                 AssemblerDirective.Add("out", Out);
                 AssemblerDirective.Add("include", Include);
                 AssemblerDirective.Add("bits", Bits);
+
+                AssemblerDirective.Add("global", Global);
             }
 
             static bool Word(string[] arg)
@@ -42,14 +44,17 @@ namespace assembler
                         Console.WriteLine("Error Var " + "BE201");
                         //Environment.Exit(1);
                     }
+                    arg[i] = arg[i].TrimStart();
                     if (arg[i].Contains('$') == false)
                     {
-                        AssemblerMarcos.ConvFrom(ref arg[i]);
+                        AssemblerMarcos.ConvFrom(ref arg[i], false);
+                        AssemblerObj.AddWord(arg[i]);
                         AssemblerLists.MCcode[PC] = arg[i];
                     }
                     else
                     {
                         string addr = Convert.ToString(PC, 16) + "h";
+                        AssemblerObj.AddWord(Convert.ToString(PC, 16));
                         AssemblerLists.MCcode[PC] = AssemblerMarcos.ConvFrom(ref addr);
                     }
                     PC++;
@@ -81,7 +86,7 @@ namespace assembler
                 }
 
                 string FullString = OrgSrc[LineIndex].Split(' ', 2)[1];
-
+                AssemblerObj.AddStr(FullString.TrimStart('"').TrimEnd('"') + "\0");
                 AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | strz " + FullString);
 
                 if (FullString.StartsWith('"') && FullString.EndsWith('"'))
@@ -116,7 +121,7 @@ namespace assembler
                 }
 
                 string FullString = OrgSrc[LineIndex].Split(' ', 2)[1];
-
+                AssemblerObj.AddStr(FullString.TrimStart('"').TrimEnd('"'));
                 AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | str " + FullString);
 
                 if (FullString.StartsWith('"') && FullString.EndsWith('"'))
@@ -153,6 +158,7 @@ namespace assembler
                     AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | org to " + arg[0]);
                     AssemblerMarcos.ConvFrom(ref arg[0]);
                     PC = Convert.ToInt32(arg[0], 16);
+                    AssemblerObj.AddOrg(arg[0]);
                     if (MaxPC < PC) MaxPC = PC;
                 }
                 else
@@ -192,7 +198,8 @@ namespace assembler
                         }
                     }
                 }
-
+                AssemblerObj.AddStr("NEWFILE");
+                LineNumber = 0;
                 AssemblerLists.lables.Clear();
                 AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | New File " + arg[0]);
                 CurrentFile = arg[0];
@@ -223,6 +230,27 @@ namespace assembler
                 }
                 return true;
             }
+            static bool Global(string[] arg)
+            {
+                if (arg[0].Contains('#') || arg[0].Contains('&'))
+                {
+                    Console.WriteLine("Error Var " + "BE200");
+                    //Environment.Exit(1);
+                }
+
+                AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Global Lable " + OrgSrc[LineIndex]);
+                //OBJBuffer += ":" + OrgSrc[LineIndex].Split(' ')[1].TrimEnd(':') + "|" + Convert.ToString(PC, 16) + "#";
+                string Name = OrgSrc[LineIndex].Split(' ')[1].TrimEnd(':');
+                AssemblerObj.AddLabel(Name, Convert.ToString(PC));
+                AssemblerLists.GlobalLables.Add(new Lable()
+                {
+                    Name = Name,
+                    Addr = PC
+                });
+
+                return true;
+            }
+
             public static void AssemblerInstruction(string instr, string[] arg)
             {
                 instr = instr.TrimStart('.');

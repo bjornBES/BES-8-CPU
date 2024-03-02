@@ -1,0 +1,6 @@
+
+; AX short Exit_Code
+.global Exit:
+pushr
+
+

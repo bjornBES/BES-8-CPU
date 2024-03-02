@@ -13,13 +13,13 @@ internal class Program
     static Tokenization Tokenization = new Tokenization();
     static Generation Generation = new Generation();
     public static FileInfo[] Files;
+    public static string[] SrcCode;
 
-    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU";
+    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\CPUs\\BES-8-CPU";
 
     public static void Main(string[] args)
     {
         Console.CursorVisible = false;
-
         DecodeArguments(args);
         if (InputFile == "\0\0") { Console.WriteLine("Missing Input Arguments"); Exit(1); }
         if (OutputFile == "")
@@ -41,7 +41,7 @@ internal class Program
         Console.WriteLine("Input File " + Input);
 
         if (File.Exists(Input) == false) CompilerErrors.ErrorCantFindInputFile(InputFile);
-        if (File.Exists(OutputFile) == false && !File.Exists(OutputFile)) File.Create(OutputFile, 100).Close();
+        if (File.Exists(OutputFile) == false) File.Create(OutputFile, 100).Close();
 
         // go in to the assembler
 
@@ -51,21 +51,25 @@ internal class Program
         {
             DirectoryInfo Programdirectory = new DirectoryInfo(ProgramPath);
             Files = Programdirectory.GetFiles("*.BEc");
-            src += File.ReadAllText(Input) + "\r\n";
+            src += File.ReadAllText(Input) + Environment.NewLine;
             for (int i = 0; i < Files.Length; i++)
             {
                 if (Files[i].FullName != Input)
                 {
-                    src += File.ReadAllText(Files[i].FullName) + "\r\n";
+                    src += File.ReadAllText(Files[i].FullName) +
+                        Environment.NewLine +
+                        $"FILE{Files[i].FullName}" +
+                        Environment.NewLine;
                 }
             }
         }
         else
         {
-            src = File.ReadAllText(Input);
             //src = "newfile " + Input + "\r\n" + src;
         }
-
+        src = "Main(10,20,30)" + Environment.NewLine + src;
+        src = $"FILE:{Input}{Environment.NewLine}" + File.ReadAllText(Input);
+        SrcCode = src.Split(Environment.NewLine);
         Tokenization.Build(src);
         Console.WriteLine("TOKEN DONE");
         Generation.Build(Tokenization);
@@ -102,9 +106,12 @@ internal class Program
                 $"\t" + $"Size = {variable.Size}" + "\n" +
                 $"\t" + $"FuncName = {variable.FuncName}" + "\n" +
                 $"\t" + $"Settings {{" + "\n" +
-                //$"\t\t" + $"IsArgument = {variable.IsArgument}" + "\n" +
-                //$"\t\t" + $"IsPointer = {variable.IsPointer}" + "\n" +
                 $"\t\t" + $"IsLocal = {variable.IsLocal}" + "\n" +
+                $"\t\t" + $"IsPublic = {variable.IsPublic}" + "\n" +
+                $"\t\t" + $"IsConst = {variable.IsConst}" + "\n" +
+                $"\t\t" + $"IsGlobal = {variable.IsGlobal}" + "\n" +
+                $"\t\t" + $"IsProtected = {variable.IsProtected}" + "\n" +
+                $"\t\t" + $"IsPtr = {variable.IsPtr}" + "\n" +
                 "\t}\n" +
                 "}\n";
         }
@@ -126,6 +133,7 @@ internal class Program
     {
         DecodeInstr(args, "-i", ref InputFile);
         DecodeInstr(args, "-o", ref OutputFile);
+        DecodeInstr(args, "-D", ref Generation.Debug, true);
         DecodeInstr(args, "-s", ref DoClear, true);
         DecodeInstr(args, "-I", ref ProgramPath);
     }

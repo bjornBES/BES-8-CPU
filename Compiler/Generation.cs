@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System.Reflection.Metadata.Ecma335;
 
 namespace Compiler
 {
@@ -9,23 +9,26 @@ namespace Compiler
         Token[] m_src;
 
         bool IsGlobal = false;
+        bool IsPublic = false;
         bool IsPointer = false;
+        bool IsConst = false;
         bool Call_Func = false;
         int Level = 0;
 
         public List<Variable> Variables = new List<Variable>();
         public List<string> Assembly_Src = new List<string>();
+        public List<string> Const_Src = new List<string>();
 
         const string Variable_Word = "Var_";
 
-        bool Debug = true;
+        public bool Debug = false;
         string Func_Name = "";
         const uint ArgumentVariableOffset = 0x11000;
         const uint VariableOffset = 0x12000;
         uint ArgumentVariable = 0;
-        uint VariableCount;
-        uint RegisterCount;
-        uint ArgumentCount;
+        uint VariableCount = 0;
+        uint RegisterCount = 1;
+        uint ArgumentCount = 0;
 
         public void Build(Tokenization tokenization)
         {
@@ -34,13 +37,14 @@ namespace Compiler
         }
         void gen()
         {
-            Assembly_Src.Add("push #30");
-            Assembly_Src.Add("push #20");
-            Assembly_Src.Add("push #10");
-            Assembly_Src.Add("call [Func_main]");
-            Assembly_Src.Add("add SP, #3");
+            Assembly_Src.Add($"mov MB, #2");
             while (peek() != null)
             {
+                if(peek(-8) != null && peek(-8).Type == TokenType.ident && peek(-8).Value == "Main" && peek(-1).Type == TokenType.close_paren)
+                {
+                    Assembly_Src.Add("");
+                    Assembly_Src.Add("call [Exit]");
+                }
                 switch (peek().Type)
                 {
                     case TokenType.func:
@@ -53,6 +57,10 @@ namespace Compiler
                             }
                         }
                         break;
+                    case TokenType.const_:
+                        consume();
+                        IsConst = true;
+                        break;
                     case TokenType.ptr:
                         consume();
                         IsPointer = true;
@@ -60,6 +68,10 @@ namespace Compiler
                     case TokenType.global:
                         consume();
                         IsGlobal = true;
+                        break;
+                    case TokenType.public_:
+                        consume();
+                        IsPublic = true;
                         break;
                     case TokenType.word:
                         consume();
@@ -85,7 +97,8 @@ namespace Compiler
                             {
                                 Variable variable = get_Variable(VariableName);
                                 Assembly_Src.Add($"");
-                                Assembly_Src.Add($"mov R{RegisterCount}, [{variable.Address}]");
+                                Assembly_Src.Add($"; moving Address 0x{Convert.ToString(variable.Address, 16)} into an temp register to return out of the func");
+                                Assembly_Src.Add($"mov {GetTempRegister()}, [{Convert.ToString(variable.Address, 16)}h]");
                                 RegisterCount++;
                             }
                         }
@@ -132,11 +145,13 @@ namespace Compiler
                             Level--;
                             Assembly_Src.Add($"{Environment.NewLine}; close_curly");
                             Assembly_Src.Add("popr");
-                            if(RegisterCount > 0)
+                            if(RegisterCount > 1)
                             {
                                 RegisterCount--;
-                                Assembly_Src.Add($"mov ZX R{RegisterCount}");
+                                Assembly_Src.Add($"mov ZX, {GetTempRegister()}");
                             }
+
+                            Assembly_Src.Add($"; returning from {Func_Name} with {ArgumentCount} argsuments");
                             Assembly_Src.Add($"ret #{ArgumentCount}");
                         }
                         Call_Func = false;
@@ -156,6 +171,11 @@ namespace Compiler
                         break;
                 }
             }
+            Assembly_Src.Add($"");
+            Assembly_Src.Add($"; Inports");
+            Assembly_Src.Add($".include ./Libs/Function.basm");
+            Assembly_Src.Add($"");
+            Assembly_Src.InsertRange(Assembly_Src.Count, Const_Src);
         }
 
         void gen_Func(TokenType ReturnType)
@@ -186,14 +206,14 @@ namespace Compiler
                             case TokenType.word:
                             case TokenType.let:
                             case TokenType.int_:
-                                TokenType tokenType = consume().Type;
+                                Token token = consume();
                                 if (peek().Type != TokenType.ident)
                                 {
                                     Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
                                     Environment.Exit(1);
                                 }
                                 name = Parse_Expr(out _);
-                                gen_Local_Variable(name, FuncName, tokenType, true);
+                                gen_Local_Variable(name, FuncName, token.Type, true, token);
                                 if (peek().Type == TokenType.close_paren) break;
                                 if (peek().Type != TokenType.comma)
                                 {
@@ -213,8 +233,7 @@ namespace Compiler
                 }
                 if (peek().Type != TokenType.close_paren)
                 {
-                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                    Environment.Exit(1);
+                    CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
                 }
                 consume();
             }
@@ -236,8 +255,7 @@ namespace Compiler
             List<string> args = new List<string>();
             if (peek().Type != TokenType.open_paren)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                Environment.Exit(1);
+                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
             }
             consume();
             while (peek().Type != TokenType.close_paren)
@@ -252,8 +270,7 @@ namespace Compiler
 
                 if (peek().Type != TokenType.comma)
                 {
-                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                    Environment.Exit(1);
+                    CompilerErrors.ExpectedError(peek(), TokenType.comma);
                 }
                 consume();
             }
@@ -272,8 +289,7 @@ namespace Compiler
         {
             if (peek().Type != TokenType.open_paren)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                Environment.Exit(1);
+                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
             }
 
             Assembly_Src.Add($"{Environment.NewLine}; Exit");
@@ -285,8 +301,7 @@ namespace Compiler
                 string Exit_Value = Parse_Expr(out _);
                 if (peek().Type != TokenType.close_paren)
                 {
-                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                    Environment.Exit(1);
+                    CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
                 }
                 consume();
                 Assembly_Src.Add($"mov AX, #{Exit_Value}");
@@ -300,11 +315,10 @@ namespace Compiler
                     Variable variable = get_Variable(VariableName);
                     if (peek().Type != TokenType.close_paren)
                     {
-                        Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                        Environment.Exit(1);
+                        CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
                     }
                     consume();
-                    Assembly_Src.Add($"mov AX, [{variable.Address}]");
+                    Assembly_Src.Add($"mov AX, [{Convert.ToString(variable.Address, 16)}h]");
                     Assembly_Src.Add($"int #0");
                 }
             }
@@ -314,8 +328,7 @@ namespace Compiler
         {
             if (peek().Type != TokenType.open_paren)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                Environment.Exit(1);
+                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
             }
 
             consume();
@@ -326,9 +339,10 @@ namespace Compiler
                 Variable variable = get_Variable(GetVariableName(Name));
                 if (variable.IsPtr == true)
                 {
-                    Console.WriteLine($"ERORR {TokenType.ampersand} at line {peek().Line}");
-                    Console.WriteLine($"{variable.Name} is a Pointer");
-                    Environment.Exit(1);
+                    CompilerErrors.ErrorVariablePointer(Name, peek(), variable);
+                    //Console.WriteLine($"ERORR {TokenType.ampersand} at line {peek().Line}");
+                    //Console.WriteLine($"{variable.Name} is a Pointer");
+                    //Environment.Exit(1);
                 }
                 gen_FreeVariable(variable);
             }
@@ -338,39 +352,52 @@ namespace Compiler
                 Variable variable = get_Variable(GetVariableName(Name));
                 if (variable.IsPtr != true)
                 {
-                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)} at line {peek().Line}");
-                    Console.WriteLine($"{variable.Name} is not a Pointer");
-                    Environment.Exit(1);
+                    CompilerErrors.ErrorVariableNotPointer(Name, peek(), variable);
+                    //Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)} at line {peek().Line}");
+                    //Console.WriteLine($"{variable.Name} is not a Pointer");
+                    //Environment.Exit(1);
                 }
                 gen_FreeVariable(variable);
             }
 
             if (peek().Type != TokenType.close_paren)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                Environment.Exit(1);
+                CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
             }
             consume();
         }
 
         void gen_FreeVariable(Variable variable, bool force = false)
         {
+            Assembly_Src.Add("");
             if (force)
             {
-                Assembly_Src.Add("");
-                Assembly_Src.Add($"mov {variable.Address}, #0");
+                Assembly_Src.Add($"mov [{Convert.ToString(variable.Address, 16)}h], #0");
+                if(variable.FuncName == "")
+                {
+                    VariableCount--;
+                }
+                else
+                {
+                    ArgumentVariable--;
+                }
                 Variables.Remove(variable);
-                VariableCount--;
             }
             else
             {
                 if (variable.IsProtected == false)
                 {
-                    Assembly_Src.Add("");
-                    Assembly_Src.Add($"mov {variable.Address}, #0");
+                    Assembly_Src.Add($"mov [{Convert.ToString(variable.Address, 16)}h], #0");
+                    if (variable.FuncName == "")
+                    {
+                        VariableCount--;
+                    }
+                    else
+                    {
+                        ArgumentVariable--;
+                    }
                     Variables.Remove(variable);
                 }
-                VariableCount--;
             }
         }
 
@@ -381,87 +408,211 @@ namespace Compiler
             {
                 consume();
                 string value = Parse_Expr(out Token Token);
-                if (value != "" && type == TokenType.ident)
+                if (IsConst == true)
+                {
+                    gen_const_Variable(Name, Token, type, IsPointer, value);
+                    IsConst = false;
+                }
+                else if (value != "" && type == TokenType.ident)
                 {
                     if (Level > 0)
                     {
-                        if (value.StartsWith('[') && value.EndsWith(']') && Token.Type == TokenType.ident)
+                            Assembly_Src.Add($"");
+                        if (value.StartsWith('[') && value.EndsWith(']') &&
+                            Token.Type == TokenType.ident && value[1] != Variable_Word[0] &&
+                            !IsDigit(value.TrimEnd(']').TrimStart('[')))
                         {
-                            Assembly_Src.Add($"mov {Name}, {value}");
+                            Name = Name.TrimEnd(']').TrimStart('[');
+                            value = value.TrimEnd(']').TrimStart('[');
+                            Assembly_Src.Add($"");
+                            Assembly_Src.Add($"mov [{Convert.ToString(Convert.ToInt32(Name), 16)}h], [{Convert.ToString(Convert.ToInt32(value), 16)}h]");
                         }
                         else if (Token.Type == TokenType.int_lit)
                         {
-                            Assembly_Src.Add($"mov [{Name}], #{value}");
+                            Name = Name.TrimEnd(']').TrimStart('[');
+                            Assembly_Src.Add($"");
+                            Assembly_Src.Add($"mov [{Convert.ToString(Convert.ToInt32(Name), 16)}h], #{value}");
+                        }
+                        else if (Token.Type == TokenType.ident && IsDigit(value))
+                        {
+                            Name = Convert.ToString(Convert.ToUInt32(Name.TrimEnd(']').TrimStart('[')), 16);
+                            Assembly_Src.Add($"; [{Name}h] == #{value}h");
+                            Assembly_Src.Add($"mov [{Name}h], #{value}h");
+                        }
+                        else if (Token.Type == TokenType.ident && IsDigit(value.TrimEnd(']').TrimStart('[')))
+                        {
+                            Name = Convert.ToString(Convert.ToUInt32(Name.TrimEnd(']').TrimStart('[')), 16);
+                            value = Convert.ToString(Convert.ToUInt32(value.TrimEnd(']').TrimStart('[')), 16);
+                            Assembly_Src.Add($"; [{Name}h] == [{value}h]");
+                            Assembly_Src.Add($"mov [{Name}h], [{value}h]");
                         }
                     }
                 }
                 else if (Local && type != TokenType.ident)
                 {
-                    bool pointer = (peek(-5) != null && peek(-5).Type == TokenType.ptr) || IsPointer;
                     if (peek(0).Type == TokenType.open_paren)
                     {
                         gen_CallFunc(value);
-                        Assembly_Src.Add($"push ZX");
                         if (Level > 0)
                         {
-                            gen_Local_Variable(Name, Func_Name, type, false);
+                            gen_Local_Variable(Name, Func_Name, type, false, Token, RegisterValue: "ZX");
                         }
                         else
                         {
-                            if(IsGlobal == false)
+                            if (IsGlobal == true)
                             {
-                                gen_public_Variable(Name, type, pointer);
+                                gen_global_Variable(Name, type, IsPointer, RegisterValue: "ZX");
+                                IsGlobal = false;
+                            }
+                            else if (IsPublic == true)
+                            {
+                                gen_public_Variable(Name, type, IsPointer, RegisterValue: "ZX");
+                                IsPublic = false;
                             }
                             else
                             {
-                                gen_global_Variable(Name, type, pointer);
-                                IsGlobal = false;
+                                gen_Local_Variable(Name, Func_Name, type, false, Token, RegisterValue: "ZX");
                             }
                         }
+                        if (IsPointer) IsPointer = false;
+                    }
+                    else if (value.StartsWith("[V"))
+                    {
+                        if (Level > 0)
+                        {
+                            gen_Local_Variable(Name, Func_Name, type, false, Token, value.TrimStart('[').TrimEnd(']'));
+                        }
+                        else
+                        {
+                            if (IsGlobal == true)
+                            {
+                                gen_global_Variable(Name, type, IsPointer, value.TrimStart('[').TrimEnd(']'));
+                                IsGlobal = false;
+                            }
+                            else if (IsPublic == true)
+                            {
+                                gen_public_Variable(Name, type, IsPointer, value.TrimStart('[').TrimEnd(']'));
+                                IsPublic = false;
+                            }
+                            else
+                            {
+                                gen_Local_Variable(Name, Func_Name, type, false, Token, value.TrimStart('[').TrimEnd(']'));
+                            }
+                        }
+                        if (IsPointer) IsPointer = false;
                     }
                     else if (Token.Type == TokenType.int_lit)
                     {
                         if (Level > 0)
                         {
-                            gen_Local_Variable(Name, Func_Name, type, false, value);
+                            gen_Local_Variable(Name, Func_Name, type, false, Token, value);
                         }
                         else
                         {
-                            if (IsGlobal == false)
+                            if (IsGlobal == true)
                             {
-                                gen_public_Variable(Name, type, pointer, value);
+                                gen_global_Variable(Name, type, IsPointer, value);
+                                IsGlobal = false;
+                            }
+                            else if (IsPublic == true)
+                            {
+                                gen_public_Variable(Name, type, IsPointer, value);
+                                IsPublic = false;
                             }
                             else
                             {
-                                gen_global_Variable(Name, type, pointer, value);
-                                IsGlobal = false;
+                                gen_Local_Variable(Name, Func_Name, type, false, Token, value);
                             }
                         }
+                        if (IsPointer) IsPointer = false;
                     }
                     else
                     {
-                        if (Level > 0)
+                        bool IsAddress;
+                        if (value.Length == 0)
                         {
-                            gen_Local_Variable(Name, Func_Name, type, false);
+                            IsAddress = false;
                         }
                         else
                         {
-                            if (IsGlobal == false)
+                            IsAddress = IsDigit(value);
+                        }
+
+                        if (IsAddress == false)
+                        {
+                            if (Level > 0)
                             {
-                                gen_public_Variable(Name, type, pointer);
+                                gen_Local_Variable(Name, Func_Name, type, false, Token);
                             }
                             else
                             {
-                                gen_global_Variable(Name, type, pointer);
-                                IsGlobal = false;
+                                if (IsGlobal == true)
+                                {
+                                    gen_global_Variable(Name, type, IsPointer);
+                                    IsGlobal = false;
+                                }
+                                else if (IsPublic == true)
+                                {
+                                    gen_public_Variable(Name, type, IsPointer);
+                                    IsPublic = false;
+                                }
+                                else
+                                {
+                                    gen_Local_Variable(Name, Func_Name, type, false, Token);
+                                }
                             }
                         }
+                        else
+                        {
+                            value += "h";
+                            if (Level > 0)
+                            {
+                                gen_Local_Variable(Name, Func_Name, type, false, Token, value);
+                            }
+                            else
+                            {
+                                if (IsGlobal == true)
+                                {
+                                    gen_global_Variable(Name, type, IsPointer, value);
+                                    IsGlobal = false;
+                                }
+                                else if (IsPublic == true)
+                                {
+                                    gen_public_Variable(Name, type, IsPointer, value);
+                                    IsPublic = false;
+                                }
+                                else
+                                {
+                                    gen_Local_Variable(Name, Func_Name, type, false, Token, value);
+                                }
+                            }
+                        }
+                        if (IsPointer) IsPointer = false;
+                    }
+                }
+                else if (Token.Type == TokenType.open_curly)
+                {
+                    if(type == TokenType.ident)
+                    {
+                        Name = Name.TrimStart('[').TrimEnd(']');
+                        Name = "[" + Convert.ToString(Convert.ToUInt32(Name), 16) + "h]";
+                        Assembly_Src.Add("");
+                        Assembly_Src.Add($"pop {GetTempRegister()}");
+                        Assembly_Src.Add($"mov {Name}, {GetTempRegister()}");
+                    }
+                    else
+                    {
+
                     }
                 }
                 else
                 {
-                    //
+                    CompilerErrors.ExpectedExpressionError(peek());
                 }
+            }
+            else
+            {
+                CompilerErrors.ExpectedError(peek(), TokenType.eq);
             }
         }
 
@@ -472,8 +623,32 @@ namespace Compiler
                 case TokenType.ident:
                     if (isVariable(GetVariableName(peek().Value)))
                     {
+                        Variable variable = get_Variable(GetVariableName(peek().Value));
+                        if (variable.IsConst == true)
+                        {
+                            token = consume();
+                            return $"[{variable.Name}]";
+                        }
+                        else
+                        {
+                            token = consume();
+                            return $"[{Convert.ToString(variable.Address)}]";
+                        }
+                    }
+                    else if (!isVariable(GetVariableName(peek().Value)))
+                    {
                         token = peek();
-                        return $"[{Convert.ToString(get_Variable(GetVariableName(consume().Value)).Address)}]";
+                        return consume().Value;
+                    }
+                    token = peek();
+                    return "";
+                case TokenType.ampersand:
+                    consume();
+                    if (isVariable(GetVariableName(peek().Value)))
+                    {
+                        Variable variable = get_Variable(GetVariableName(peek().Value));
+                        token = consume();
+                        return $"{Convert.ToString(variable.Address, 16)}";
                     }
                     else if (!isVariable(GetVariableName(peek().Value)))
                     {
@@ -502,10 +677,11 @@ namespace Compiler
                     token = peek();
                     return Convert.ToString(Convert.ToUInt32(consume().Value, 16));
                 case TokenType.open_curly:
-                    CompileExpression(Debug);
                     token = peek();
+                    CompileExpression(Debug);
                     return "";
                 default:
+                    CompilerErrors.ExpectedExpressionError(peek());
                     token = peek();
                     return "";
             }
@@ -561,64 +737,81 @@ namespace Compiler
             return vars.ToArray();
         }
 
-        public void gen_global_Variable(string name, TokenType tokenType, bool Pointer, string value = "")
+        public void gen_const_Variable(string name, Token tokenType, TokenType type, bool Pointer, string value)
+        {
+            uint VariableAddress = VariableOffset + VariableCount;
+            VariableCount++;
+            Assembly_Src.Add($"");
+            Assembly_Src.Add($"; const {Tokenization.to_string(type)} {Variable_Word}{name} = {value}");
+            if (value != "")
+            {
+                Const_Src.Add($"; const {Tokenization.to_string(type)} {name} = {value} at line {tokenType.Line}");
+                Const_Src.Add($"{Variable_Word}{name}:");
+                Const_Src.Add($".word {value}");
+            }
+            else
+            {
+                CompilerErrors.ExpectedError(tokenType, TokenType.int_lit);
+            }
+            NewVariable(name, VariableAddress, false, false, true, true, Pointer, tokenType.Type, "", true);
+            Variables.Add(new Variable()
+            {
+                Name = GetVariableName(name),
+                Address = VariableAddress,
+                IsLocal = false,
+                IsConst = true,
+                IsPublic = false,
+                IsGlobal = true,
+                Size = GetSize(tokenType.Type),
+                IsProtected = true,
+                IsPtr = Pointer,
+            });
+        }
+        public void gen_global_Variable(string name, TokenType tokenType, bool Pointer, string value = "", string RegisterValue = "")
         {
             uint VariableAddress = VariableOffset + VariableCount;
             VariableCount++;
             Assembly_Src.Add($"");
             Assembly_Src.Add($"; global type Var_{name} = [SP]");
-            if (value == "")
+            if (value != "")
+            {
+                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
+            }
+            else if (RegisterValue != "")
+            {
+                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], {RegisterValue}");
+            }
+            else
             {
                 Assembly_Src.Add($"inc SP");
                 Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], [SP]");
             }
-            else
-            {
-                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
-            }
 
-            Variables.Add(new Variable()
-            {
-                Name = GetVariableName(name),
-                Address = VariableAddress,
-                IsLocal = false,
-                IsPublic = false,
-                IsGlobal = true,
-                Size = GetSize(tokenType),
-                IsProtected = false,
-                IsPtr = Pointer,
-            });
+            NewVariable(name, VariableAddress, false, false, true, false, Pointer, tokenType, "", false);
         }
 
-        public void gen_public_Variable(string name, TokenType tokenType, bool Pointer, string value = "")
+        public void gen_public_Variable(string name, TokenType tokenType, bool Pointer, string value = "", string RegisterValue = "")
         {
             uint VariableAddress = VariableOffset + VariableCount;
             VariableCount++;
             Assembly_Src.Add($"");
             Assembly_Src.Add($"; public type Var_{name} = [SP]");
-            if (value == "")
+            if (value != "")
+            {
+                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
+            }
+            else if (RegisterValue != "")
+            {
+                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], {RegisterValue}");
+            }
+            else
             {
                 Assembly_Src.Add($"inc SP");
                 Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], [SP]");
             }
-            else
-            {
-                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
-            }
-
-            Variables.Add(new Variable()
-            {
-                Name = GetVariableName(name),
-                Address = VariableAddress,
-                IsLocal = false,
-                IsPublic = true,
-                IsGlobal = false,
-                Size = GetSize(tokenType),
-                IsProtected = false,
-                IsPtr = Pointer,
-            });
+            NewVariable(name, VariableAddress, false, true, false, false, Pointer, tokenType, "", false);
         }
-        public void gen_Local_Variable(string name, string func_name, TokenType tokenType, bool Args, string value = "")
+        public void gen_Local_Variable(string name, string func_name, TokenType tokenType, bool Args, Token TokenLine, string value = "", string RegisterValue = "")
         {
             uint VariableAddress;
             if (Args)
@@ -631,31 +824,49 @@ namespace Compiler
                 VariableAddress = VariableOffset + VariableCount;
                 VariableCount++;
             }
+
                 Assembly_Src.Add($"");
-                Assembly_Src.Add($"; local type Var_{name} = [SP]");
-            if (value == "")
+            if (isVariable(value) == true)
             {
-                Assembly_Src.Add($"inc SP");
-                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], [SP]");
+                Variable ConstVariable = get_Variable(value);
+                Assembly_Src.Add($"; local type Var_{name} = {ConstVariable.Name}");
+                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], [{ConstVariable.Name}]");
             }
             else
             {
-                Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
+                Assembly_Src.Add($"; local type Var_{name} = [SP]");
+                if (value != "")
+                {
+                    Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], #{value}");
+                }
+                else if (RegisterValue != "")
+                {
+                    Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], {RegisterValue}");
+                }
+                else
+                {
+                    Assembly_Src.Add($"inc SP");
+                    Assembly_Src.Add($"mov [{Convert.ToString(VariableAddress, 16)}h], [SP]");
+                }
             }
-
+            NewVariable(name, VariableAddress, true, false, false, false, false, tokenType, func_name, Args);
+        }
+        void NewVariable(string name, uint Address, bool IsLocal, bool IsPublic, bool IsGlobal, bool IsConst, bool IsPtr, TokenType type, string func_name, bool IsProtected)
+        {
             Variables.Add(new Variable()
             {
                 Name = GetVariableName(name),
-                Address = VariableAddress,
-                IsLocal = true,
-                IsPublic = false,
-                IsGlobal = false,
-                Size = GetSize(tokenType),
+                Address = Address,
+                IsLocal = IsLocal,
+                IsPublic = IsPublic,
+                IsGlobal = IsGlobal,
+                IsConst = IsConst,
+                IsPtr = IsPtr,
+                Size = GetSize(type),
                 FuncName = func_name,
-                IsProtected = Args,
+                IsProtected = IsProtected,
             });
         }
-
         uint GetSize(TokenType tokenType)
         {
             switch (tokenType)
@@ -679,7 +890,16 @@ namespace Compiler
         {
             const string ExpressionRegister = "ZX";
             const string Register = "AX";
-            const string AtSP = "[SP]";
+            
+            int ExprOperator = 2;
+            int Save_m_index = m_index;
+            int End_Index = m_index;
+            while (peek().Type != TokenType.close_curly)
+            {
+                consume();
+                End_Index++;
+            }
+            m_index = Save_m_index;
 
             if (peek().Type != TokenType.open_curly)
             {
@@ -691,8 +911,12 @@ namespace Compiler
             Assembly_Src.Add("");
             Assembly_Src.Add("push ZX");
             Assembly_Src.Add("push AX");
-            Assembly_Src.Add("push #0 ; result buffer");
-
+            Assembly_Src.Add($"");
+            uint Address;
+            string name;
+            int Times = 0;
+            Stack<int> stack = new Stack<int>();
+            StartAgain:
             while (peek().Type != TokenType.close_curly)
             {
                 Token token = peek();
@@ -701,58 +925,198 @@ namespace Compiler
                     case TokenType.int_lit:
                     case TokenType.Hex_int_lit:
                     case TokenType.Bin_int_lit:
-                        Assembly_Src.Add($"push #{Parse_Expr(out _)}");
-                        break;
-                    case TokenType.ident:
-                        Assembly_Src.Add($"push {Parse_Expr(out _)}");
-                        break;
-                    case TokenType.open_paren:
-                        break;
-                    case TokenType.close_paren:
-                        break;
-                    case TokenType.plus:
-                        consume();
-                        if (peek().Type == TokenType.ident)
+                        if (Times == 0)
                         {
-                            Assembly_Src.Add($"push {Parse_Expr(out _)}");
+                            Assembly_Src.Add($"push #{Parse_Expr(out _)}");
+                            Assembly_Src.Add($"");
                         }
                         else
                         {
-                            Assembly_Src.Add($"push #{Parse_Expr(out _)}");
+                            consume();
                         }
-
-                        Assembly_Src.Add($"pop {Register}");
-                        Assembly_Src.Add($"pop {ExpressionRegister}");
-                        Assembly_Src.Add($"add {ExpressionRegister}, {Register}");
-                        Assembly_Src.Add($"add {AtSP}, {ExpressionRegister}");
-
                         break;
-                    case TokenType.star:
-                        consume();
+                    case TokenType.ident:
+                        if (Times == 0)
+                        {
+                            name = peek().Value;
+                            Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
+                            if (debug)
+                            {
+                                Assembly_Src.Add($"; {name}");
+                            }
+                            Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
+                            Assembly_Src.Add($"");
+                        }
+                        else
+                        {
+                            consume();
+                        }
+                        break;
+                    case TokenType.close_paren:
+                        if(Times == 0 && stack.Count == 0)
+                        {
+                            if (debug)
+                            {
+                                Assembly_Src.Add($"; {token.Type}");
+                            }
+                            ExprOperator = 1;
+                        }
+                        if (Times == 0 && stack.Count > 0)
+                        {
+                            m_index = stack.Pop();
+                            ExprOperator--;
+                        }
+                            consume();
+                        break;
+                    case TokenType.open_paren:
+                        if (Times == 0)
+                        {
+                            if (debug)
+                            {
+                                Assembly_Src.Add($"; {token.Type}");
+                            }
+                            stack.Push(m_index + 1);
+                            ExprOperator = 1;
+                        }
+                            consume();
                         break;
                     case TokenType.minus:
-                        consume();
+                    case TokenType.plus:
+                        if (ExprOperator == 0)
+                        {
+                            if (debug)
+                            {
+                                Assembly_Src.Add($"; {token.Type} {ExprOperator}");
+                            }
+                            consume();
+                            if (Times == 0)
+                            {
+                                if (peek().Type == TokenType.ident)
+                                {
+                                    name = peek().Value;
+                                    Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
+                                    if (debug)
+                                    {
+                                        Assembly_Src.Add($"; {name}");
+                                    }
+                                    Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
+                                }
+                                else
+                                {
+                                    Assembly_Src.Add($"push #{Parse_Expr(out _)}");
+                                }
+                            }
+                            else
+                            {
+                                consume();
+                            }
+                            Assembly_Src.Add($"");
+                            Assembly_Src.Add($"pop {Register}");
+                            Assembly_Src.Add($"pop {ExpressionRegister}");
+                            if (token.Type == TokenType.plus)
+                            {
+                                Assembly_Src.Add($"add {ExpressionRegister}, {Register}");
+                            }
+                            if (token.Type == TokenType.minus)
+                            {
+                                Assembly_Src.Add($"sub {ExpressionRegister}, {Register}");
+                            }
+                            Assembly_Src.Add($"push {ExpressionRegister}");
+                            Assembly_Src.Add($"");
+                        }
+                        else
+                        {
+                            consume();
+                        }
                         break;
                     case TokenType.fslash:
-                        consume();
+                    case TokenType.star:
+                        if (ExprOperator == 1)
+                        {
+                            if (debug)
+                            {
+                                Assembly_Src.Add($"; {token.Type} {ExprOperator}");
+                            }
+                            consume();
+                            if (Times == 0)
+                            {
+                                if (peek().Type == TokenType.ident)
+                                {
+                                    name = peek().Value;
+                                    Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
+                                    if (debug)
+                                    {
+                                        Assembly_Src.Add($"; {name}");
+                                    }
+                                    Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
+                                }
+                                else
+                                {
+                                    Assembly_Src.Add($"push #{Parse_Expr(out _)}");
+                                }
+                            }
+                            else
+                            {
+                                consume();
+                            }
+                            Assembly_Src.Add($"");
+                            Assembly_Src.Add($"pop {Register}");
+                            Assembly_Src.Add($"pop {ExpressionRegister}");
+                            if (token.Type == TokenType.star)
+                            {
+                                Assembly_Src.Add($"mul {ExpressionRegister}, {Register}");
+                            }
+                            if (token.Type == TokenType.fslash)
+                            {
+                                Assembly_Src.Add($"mul {ExpressionRegister}, {Register}");
+                            }
+                            Assembly_Src.Add($"push {ExpressionRegister}");
+                            Assembly_Src.Add($"");
+                        }
+                        else
+                        {
+                            consume();
+                        }
                         break;
+
                     default:
+                        CompilerErrors.ExpectedExpressionError(peek());
                         break;
                 }
             }
 
+            if(Times == 0 || Times == 1)
+            {
+                if(stack.Count > 0)
+                {
+                    m_index = Save_m_index;
+                    ExprOperator--;
+                    consume();
+                }
+                Times++;
+                m_index = Save_m_index;
+                ExprOperator--;
+                consume();
+                goto StartAgain;
+            }
+
             if (peek().Type != TokenType.close_curly)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
-                Environment.Exit(1);
+                CompilerErrors.ExpectedError(peek(), TokenType.close_curly);
             }
             consume();
 
-            Assembly_Src.Add($"pop R{RegisterCount} ; result buffer");
+            Assembly_Src.Add($"pop {GetTempRegister()}");
             Assembly_Src.Add("pop AX");
             Assembly_Src.Add("pop ZX");
-            Assembly_Src.Add($"push R{RegisterCount}");
+            Assembly_Src.Add($"push {GetTempRegister()}");
         }
+
+        string GetTempRegister()
+        {
+            return $"R{RegisterCount}";
+        }
+
         string GetVariableName(string name)
         {
             return $"{Variable_Word}{name}";
@@ -772,6 +1136,17 @@ namespace Compiler
         Token consume()
         {
             return m_src[m_index++];
+        }
+        bool IsDigit(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsDigit(str[i]) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

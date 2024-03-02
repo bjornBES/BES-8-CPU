@@ -14,12 +14,6 @@
 		},
 		{
 			"path": "../docs"
-		},
-		{
-			"path": "../Language/Bassembly"
-		},
-		{
-			"path": "../Language/BEcLang"
 		}
 	],
 	"settings": {
@@ -30,7 +24,7 @@
 			"*.ino": "arduino",
 			"*.s": "ca65",
 			"*.vim": "Vimscript",
-			"*.Basm": "Bassembly",
+			"*.Basm": "basm"
 		},
 		"applesoft.detokenizer.escapes": [
 			10,
@@ -42,14 +36,6 @@
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [
-			{
-				"name": "Extension",
-				"type": "extensionHost",
-				"request": "launch",
-				"args": [
-					"--extensionDevelopmentPath=${workspaceFolder}"
-				]
-			}
 
 		]
 	}

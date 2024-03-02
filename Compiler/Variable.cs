@@ -13,7 +13,9 @@ namespace Compiler
         public uint Size;
 
         public bool IsLocal;
-        public string FuncName;
+        public string FuncName = "";
+
+        public bool IsConst;
 
         public bool IsPublic;
 

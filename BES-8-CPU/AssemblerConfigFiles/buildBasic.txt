@@ -5,4 +5,5 @@ ObjFile ./Builds/ASMbasic/a.obj
 UseBinary ./Builds/ASMbasic/bin.bin
 Output ./Builds/ASMbasic/a.out
 DontBuild false
+Silent false
 FillTo 0x4FFF

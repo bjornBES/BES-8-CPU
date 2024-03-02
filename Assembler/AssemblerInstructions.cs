@@ -51,7 +51,6 @@ namespace assembler
                                 string CByteHex = Convert.ToString(CByte, 16);
 
                                 AssemblerLists.MCcode[PC] = CByteHex;
-                                // TODO AddToOBJ(CByteHex);
                                 PC++;
                                 arg[a] = arg[a].TrimEnd('h', 'b');
 
@@ -77,7 +76,7 @@ namespace assembler
                                 AM1 = AssemblerLists.ArgumentIdentifier["imm"];
                         }
                         // Indexed
-                        else if (arg[a].Contains('&'))
+                        else if (arg[a].Contains('&') && !arg[a].Contains("&&"))
                         {
                             string Lable = arg[a].Split('&')[0];
                             string Register = arg[a].Split('&')[1];
@@ -107,7 +106,7 @@ namespace assembler
                                 AssemblerErrors.ErrorSyntax("ARGS");
                             }
                             TokenBuffer += " Indexed " + Lable + " " + Register;
-                            if (AssemblerLists.Registers.TryGetValue(Register, out byte Value))
+                            if (AssemblerLists.Registers.TryGetValue(Register, out ushort Value))
                             {
                                 if (IsRegisterFirst)
                                 {
@@ -159,7 +158,7 @@ namespace assembler
                             AssemblerMarcos.CheakAddr(arg[a]);
                         }
                         // register
-                        else if (AssemblerLists.Registers.TryGetValue(arg[a], out byte Value))
+                        else if (AssemblerLists.Registers.TryGetValue(arg[a], out ushort Value))
                         {
                             TokenBuffer += " Reg " + arg[a];
                             string RegValue = AssemblerMarcos.ConvTo(16, Value.ToString().PadLeft(6, '0'), 10).PadLeft(4, '0');
@@ -199,7 +198,6 @@ namespace assembler
                             string AddrValue = AssemblerMarcos.ConvFrom(ref addr);
 
                             AssemblerLists.MCcode[PC] = AddrValue;
-                            //OBJBuffer += AddrValue;
                             PC++;
                             addr = addr.TrimEnd('h', 'b');
                             OutSrc[LineIndex] += AssemblerMarcos.ConvTo(16, CopyPC.ToString(), 10).PadLeft(4, '0') + " ";
@@ -212,7 +210,6 @@ namespace assembler
 
                     }
                     AssemblerLists.MCcode[PC - (offset + 1)] = AssemblerLists.MCcode[PC - (offset + 1)].Replace("/", AM);
-                    //OBJBuffer = OBJBuffer.Replace("/", AM);
                     OutSrc[LineIndex] = OutSrc[LineIndex].Replace("/", AM);
                     //Console.WriteLine((PC - (offset + 1)).ToString().PadLeft(4, '0') + ": " + instr.PadRight(5, ' ') + "\t" + MCcode[Math.Max(PC - (offset + 1), 0)]);
                 }
@@ -226,8 +223,10 @@ namespace assembler
                 OutSrc[LineIndex] = OutSrc[LineIndex].Replace("/", AM).PadLeft(4, '0');
                 AssemblerLists.MCcode[Off] = AssemblerLists.MCcode[Off].Replace("|", AM1);
                 AssemblerLists.MCcode[Off] = AssemblerLists.MCcode[Off].Replace("/", AM);
-                //OBJBuffer = OBJBuffer.Replace("|", AM1);
-                //OBJBuffer = OBJBuffer.Replace("/", AM);
+
+                string[] OBJcopy = new string[3];
+                Array.Copy(AssemblerLists.MCcode, Off, OBJcopy, 0, 3);
+                AssemblerObj.AddInstr(OBJcopy);
             }
 
             public static string GetInstrCode(string instr, out Instructions instruction)

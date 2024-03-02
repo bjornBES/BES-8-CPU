@@ -5,7 +5,15 @@
     },
     "assembler Debug": {
       "commandName": "Project",
-      "commandLineArgs": "buildBasic.txt -D Basic/main.basm Basic"
+      "commandLineArgs": "./AssemblerConfigFiles/buildOS.txt -D"
+    },
+    "assembler Build OS": {
+      "commandName": "Project",
+      "commandLineArgs": "./AssemblerConfigFiles/BuildOS.txt"
+    },
+    "assembler Build Tests": {
+      "commandName": "Project",
+      "commandLineArgs": "./AssemblerConfigFiles/BuildTests.txt"
     }
   }
 }

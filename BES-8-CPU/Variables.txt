@@ -4,6 +4,11 @@ Var_HELLO{
 	FuncName = 
 	Settings {
 		IsLocal = False
+		IsPublic = True
+		IsConst = False
+		IsGlobal = False
+		IsProtected = False
+		IsPtr = False
 	}
 }
 Var_hello{
@@ -11,7 +16,12 @@ Var_hello{
 	Size = 1
 	FuncName = 
 	Settings {
-		IsLocal = False
+		IsLocal = True
+		IsPublic = False
+		IsConst = False
+		IsGlobal = False
+		IsProtected = False
+		IsPtr = False
 	}
 }
 Var_etst{
@@ -20,5 +30,36 @@ Var_etst{
 	FuncName = 
 	Settings {
 		IsLocal = False
+		IsPublic = False
+		IsConst = False
+		IsGlobal = True
+		IsProtected = False
+		IsPtr = False
+	}
+}
+Var_NULL{
+	Addr = 73731
+	Size = 32768
+	FuncName = 
+	Settings {
+		IsLocal = False
+		IsPublic = False
+		IsConst = True
+		IsGlobal = True
+		IsProtected = True
+		IsPtr = False
+	}
+}
+Var_NULL{
+	Addr = 73731
+	Size = 32768
+	FuncName = 
+	Settings {
+		IsLocal = False
+		IsPublic = False
+		IsConst = True
+		IsGlobal = True
+		IsProtected = True
+		IsPtr = False
 	}
 }

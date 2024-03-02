@@ -10,6 +10,7 @@ namespace assembler
         public static string[] OutSrc = Array.Empty<string>();
         public static string CurrentFile;
         public static int LineIndex = 0;
+        public static int LineNumber = 0;
         public static int LastNewFile = 0;
         public static bool HasError = false;
 
@@ -23,6 +24,7 @@ namespace assembler
 
             for (LineIndex = 0; LineIndex < src.Length; LineIndex++)
             {
+                LineNumber++;
                 //if (!(LineIndex < OrgSrc.Length)) break;
                 OutSrc[LineIndex] = OutSrc[LineIndex].Trim(' ');
                 OutSrc[LineIndex] = OutSrc[LineIndex].TrimEnd(' ');
@@ -163,27 +165,9 @@ namespace assembler
             }
             else
             {
-                if (OrgSrc[LineIndex].StartsWith('.'))
-                {
-                    OutSrc[LineIndex] = OrgSrc[LineIndex].TrimStart('.');
-                    if (OrgSrc[LineIndex].StartsWith("global"))
-                    {
-                        AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Global Lable " + OrgSrc[LineIndex]);
-                        //OBJBuffer += ":" + OrgSrc[LineIndex].Split(' ')[1].TrimEnd(':') + "|" + Convert.ToString(PC, 16) + "#";
-                        AssemblerLists.GlobalLables.Add(new Lable()
-                        {
-                            Name = OrgSrc[LineIndex].Split(' ')[1].TrimEnd(':'),
-                            Addr = PC
-                        });
-                        return;
-                    }
-                    else
-                    {
-                        AssemblerErrors.ErrorDirInstructionNotFound(OrgSrc[LineIndex]);
-                    }
-                }
                 AssemblerLists.Tokens.Add(Convert.ToString(PC, 16).PadLeft(5, '0') + " | Lable " + OrgSrc[LineIndex]);
                 //OBJBuffer += ":" + OrgSrc[LineIndex].TrimEnd(':') + "|" + Convert.ToString(PC, 16) + "*";
+                AssemblerObj.AddLabel(OrgSrc[LineIndex].TrimEnd(':'), Convert.ToString(PC));
                 AssemblerLists.lables.Add(new Lable()
                 {
                     Name = OrgSrc[LineIndex].TrimEnd(':'),

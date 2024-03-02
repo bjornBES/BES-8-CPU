@@ -1,71 +1,139 @@
-﻿namespace Compiler
+﻿using System.ComponentModel;
+using System.Linq.Expressions;
+
+namespace Compiler
 {
     public static class CompilerErrors
     {
         public static void ErrorCantFindInputFile(string FilePath)
         {
         }
-        public static void ErrorSameName(string file, Token token, string Name)
+        public static void ErrorSameName(Token token, string Name)
         {
-            //Error("201230", file, token.Line);
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            Console.WriteLine("0");
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($"Systax error: ");
-            Console.ResetColor();
-            Console.WriteLine($"at line {token.Line} A variable or function named '{Name}' is already defined");
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"A variable or function named '{Name}' is already defined");
             Console.WriteLine("");
             Environment.Exit(1);
         }
         public static void ErrorVariableNotFound(string Name)
         {
+            Console.Write($"Systax error: Variable not found");
         }
-
-        public static void SyntaxError(string file, Token token, TokenType expectedToken)
+        public static void ErrorVariablePointer(string VariableName, Token token, Variable variable)
         {
-            //Error("201230", file, token.Line);
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($"Systax error: ");
-            Console.ResetColor();
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            GetCol(TokenType.ampersand, token);
 
-            Console.WriteLine($"at line {token.Line} Expected an {Tokenization.to_string(expectedToken)}");
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+
+            Console.WriteLine($"{VariableName} Is a pointer. A pointers address can't be referenced using {Tokenization.to_string(TokenType.ampersand)}");
+            Console.WriteLine("\t\t" + Program.SrcCode[SrcLineNumber]);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\t\t" + "".PadLeft(Program.SrcCode[SrcLineNumber].IndexOf('&'), ' ') + "~");
+            Console.ResetColor();
+        }
+        public static void ErrorVariableNotPointer(string VariableName, Token token, Variable variable)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"{VariableName} Is a pointer");
+        }
+        public static void SyntaxError()
+        {
+            Console.Write($"Systax error: ");
+        }
+        public static void ExpectedError(Token token, TokenType expectedToken)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            GetCol(expectedToken, token);
+
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"Expected an {Tokenization.to_string(expectedToken)}");
+            Console.WriteLine("");
+            Environment.Exit(1);
+        }
+        public static void ExpectedExpressionError(Token token)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            Console.WriteLine("0");
+
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"Expected an Expression");
+            Console.WriteLine("");
+            Environment.Exit(1);
+        }
+        public static void ExpectedError(Token token)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            Console.WriteLine("0");
+
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"Expected an {Tokenization.to_string(token.Type)}");
+            Console.WriteLine("");
+            Environment.Exit(1);
+        }
+        public static void ExpectedSomeThingError(Token token)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            Console.WriteLine("0");
+
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"Expected char");
+            Console.WriteLine("");
+            Environment.Exit(1);
+        }
+        public static void UnexpectedError(Token token)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Error("201230", token);
+            Console.WriteLine("0");
+            ColorTextFormat("Systax error: ", ConsoleColor.Red);
+
+            Console.WriteLine($"Expected an {Tokenization.to_string(token.Type)}");
             Console.WriteLine("");
             Environment.Exit(1);
         }
 
-        static void WriteDown(string[] src, int count, int startingIndex)
+        private static int GetSrcLineNumber(Token token)
         {
-            int writing = 0;
-            for (int i = startingIndex; i < src.Length && writing != count; i++)
-            {
-                if (!string.IsNullOrEmpty(src[i]))
-                {
-                    writing++;
-                    Console.WriteLine(src[i]);
-                }
-            }
+            return token.Line + 1;
         }
-
-        private static void Error(string code, string File, int LineNumber)
+        private static void ColorTextFormat(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ResetColor();
+        }
+        private static void GetCol(TokenType expectedToken, Token token)
+        {
+            int SrcLineNumber = GetSrcLineNumber(token);
+            Console.WriteLine($"{Program.SrcCode[SrcLineNumber].IndexOf(Tokenization.ToString(expectedToken))}");
+        }
+        private static void Error(string code, Token token)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("Error");
             Console.ResetColor();
             Console.Write(" BES-" + code + " ");
-            Console.WriteLine("in " + File + " at line " + LineNumber);
-        }
-        private static int GetSrcLineNumber(string path)
-        {
-            int Line = 0;
-            string[] SrcFile = File.ReadAllText(path).Split("\r\n");
-            for (int i = 0; i < SrcFile.Length; i++)
-            {
-                if (string.IsNullOrEmpty(SrcFile[i])) { Line++; }
-                else if (SrcFile[i].StartsWith('.')) { Line++; }
-                else if (SrcFile[i].StartsWith('$')) { Line++; }
-                else if (SrcFile[i].EndsWith(':')) { Line++; }
-                else Line++;
-            }
-            return Line;
+            Console.Write($"in {token.File}:{token.Line}:");
         }
     }
 }

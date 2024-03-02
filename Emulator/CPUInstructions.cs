@@ -382,6 +382,48 @@ namespace emulator
                     break;
             }
         }
+        public void InPort(ArgumentIdent AM1, ArgumentIdent AM2)
+        {
+
+        }
+        public void OutPort(ArgumentIdent AM1, ArgumentIdent AM2)
+        {
+
+        }
+        public void INCDEC(ArgumentIdent AM1, bool dec)
+        {
+                    uint data;
+            switch (AM1)
+            {
+                case ArgumentIdent.Addr:
+                    uint addr = FetchInstr();
+                    if (dec)
+                    data = ReadMem(addr) - 1;
+                    else
+                    data = ReadMem(addr) + 1;
+                    WriteMem(addr, data);
+                    break;
+                case ArgumentIdent.Reg:
+                    uint register = FetchInstr();
+                    if (dec)
+                        data = GetRegValue(DecodeRegister(register)).m_value - 1;
+                    else
+                        data = GetRegValue(DecodeRegister(register)).m_value + 1;
+                    LoadRegister(DecodeRegister(register), data);
+                    break;
+                case ArgumentIdent.RegAddr:
+                    uint registerAddr = GetRegValue(DecodeRegister(FetchInstr())).m_value;
+                    if (dec)
+                        data = ReadMem(registerAddr) - 1;
+                    else
+                        data = ReadMem(registerAddr) + 1;
+                    WriteMem(registerAddr, data);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void ALU(ArgumentIdent AM1, ArgumentIdent AM2, Instructions instructions)
         {
             uint destination;

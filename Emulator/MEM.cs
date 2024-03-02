@@ -77,6 +77,21 @@ namespace emulator
             WriteCount(MB, StartAddr, Data, Data.Length);
         }
 
+        public static void WriteCache(uint[] data)
+        {
+            for (int i = 0; i < data.Length; i++)
+            {
+                Write(2, 0x10000 + i, data[i]);
+            }
+        }
+        public static void WriteCache(byte[] data)
+        {
+            for (int i = 0; i < data.Length; i++)
+            {
+                Write(2, 0x10000 + i, data[i]);
+            }
+        }
+
         public static void Write(uint MB, uint Addr, uint Data)
         {
             mem[(int)MB][Addr] = Data;

@@ -22,6 +22,7 @@
         elif,
         else_,
 
+        const_,
         global, // it is global beteen files
         public_, // it is public beteen calsses
         local, // it is local to a func

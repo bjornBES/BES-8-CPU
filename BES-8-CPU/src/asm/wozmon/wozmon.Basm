@@ -1,174 +1,162 @@
-XAM             = $24           ;  Last "opened" location
-ST              = $26           ;  Store address
-HALT            = $28           ;  Hex value parsing
-YSAV            = $2A           ;  Used to see if hex value is given
-MODE            = $2B           ;  $00=XAM, $7F=STOR, $AE=BLOCK XAM
+$XAM            = 00h               ; Last "opened" location
+$ST             = 00h               ; Store address
+$YSAV           = 00h               ; Used to see if hex value is given
+$MODE           = 00h               ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
-$KBD            #= 1h           ;  keyboard input
-$DSP            #= 0h           ;  display output register
+$KBD            #= 1h               ; keyboard input
+$DSP            #= 0h               ; display output register
 
 
-; in DX  MODE  0x00=XAM, 0x7F=STOR, 0xAE=BLOCK XAM
-; in CL  L
-; in CH  H
-; in Y   store address
 RESET:
-    mov     MB, #1              ; setting the bank to 1
-    out     %DSP, #80FFh        ; clearing the screen
-    mov     %CUX, #0            
-    mov     ZX, #0
-    mov     DX, #0              ; reseting the registers
-
+    out     %DSP,       #80FFh      ; claering the screen
+    mov     YL,         #7Fh
 NOTCR:
-    cmp     ZX, #KW_BS          ; back space
-    je      [BACKSPACE]         ; yes
-    cmp     ZX, #KW_ESC         ; back space
-    je      [ESCAPE]            ; yes
-    inc     XL
-    cmp     XL, #127
+    cmp     AX,         #KW_BS      ; BackSpace?
+    je      [BACKSPACE]             ; Yes.
+    cmp     AX,         #KW_ESC     ; ESC?
+    je      [ESCAPE]                ; Yes.
+    inc     YL                      ; Advance text index
+    cmp     YL,         #80h        ; auto ESC if > 127
     jl      [NEXTCHAR]
-
 ESCAPE:
-    mov     AX, #'\'
-    call    [ECHO]
-
+    mov     AX,         #'\'        ; "\"
+    call    [ECHO]                  ; output it
 GETLINE:
-    mov     AX, #0Ah
-    call    [ECHO]
-    mov     XL, #1
-
+    mov     AX,         #KW_ENT     ; New Line
+    call    [ECHO]                  ; output it
+    mov     YL,         #1          ; Initialize Text index
 BACKSPACE:
-    dec     XL
-    jmc     [GETLINE]
-
+    dec     YL                      ; back up text index
+    jmc     [GETLINE]               ; Beyond start of line, reinitialize.
 NEXTCHAR:
-    in      %KBD, ZX
-    cmp     ZX, #0
-    je      [NEXTCHAR]
-    mov     BX, XL
-    add     BX, [buffer]
-    mov     [BX], ZX
-    mov     AX, ZX
-    call    [ECHO]
-    cmp     AX, #KW_ENT
-    je      [NOTCR]
-    mov     XL, #FFh
-    mov     DX, #0
+    in      %KBD,       AX          ; Key ready?
+    jmz     [NEXTCHAR]              ; loop until ready
+    mov     [buffer]&YL,AX          ; Add to text buffer
+    call    [ECHO]                  ; Display character
+    cmp     AX,         #KW_ENT     ; CR?
+    jne     [NOTCR]                 ; No
+    mov     YL,         #FFh        ; Reset text index
+    mov     AX,         #0          ; for XAM mode
+    mov     X,          AX          ; 0->X
 SETSTOR:
-    rol     DX, #1
+    shl     AL,         #1          ; Leaves $7B if setting STOR mode.
 SETMODE:
-    mov     DX, AX
+    mov     %MODE,      AX          ; $00=XAM, $7B=STOR, $AE=BLOCK XAM.
 BLSKIP:
-    inc     XL
+    inc     YL                      ; Advance text index.
 NEXTITEM:
-    mov     BX, XL
-    add     BX, [buffer]
-    mov     AX, [BX]
-    pop     XL
-    cmp     AX, #KW_ENT
-    je      [GETLINE]
-    cmp     AX, #'.'        ; "."?
-    jnc     [BLSKIP]        ; Skip delimiter.
-    je      [SETMODE]       ; Set BLOCK XAM mode.
-    cmp     AX, #':'        ; ":"?
-    je      [SETSTOR]       ; Yes. Set STOR mode.
-    cmp     AX, #'R'        ; "R"?
-    je      [RUN]           ; Yes. Run user program.
-    mov     CL, #0          ; $00->L.
-    mov     CH, #0          ;  and H.
-    mov     XL, XH          ; Save Y for comparison.
-NEXTHEX:      
-    mov     BX, XL
-    add     BX, [buffer]
-    mov     AX, [BX]        ; Get character for hex test.
-    pop     XL
-    xor     AX, #30h        ; Map digits to $0-9.
-    cmp     AX, #0Ah        ; Digit?
-    jnc     [DIG]           ; Yes.
-    add     AX, #41h        ; Map letter "A"-"F" to $FA-FF.
-    CMP     AX, #41h        ; Hex letter?
-    jnc     [NOTHEX]        ; No, character not hex.
-DIG:          
-    int     #6
-    inc     XL
-    je      [NEXTHEX]
+    mov     AX,         [buffer]&YL ; Get Character
+    cmp     AX,         #KW_ENT     ; CR?
+    je      [GETLINE]               ; yes, done this line
+    cmp     AX,         #'.'        ; "."?
+    jnc     [BLSKIP]                ; Skip delimiter
+    je      [SETMODE]               ; Set XAM mode
+    cmp     AX,         #':'        ; ":"?
+    je      [SETSTOR]               ; Yes Set stor mode
+    cmp     AX,         #'R'        ; "R"?
+    je      [SETSTOR]               ; Yes Run user program
+    mov     %L,         #0          ; 00->L
+    mov     %L,         %H          ; and H
+    mov     %YSAV,      YL          ; Save Y for comparison.
+NEXTHEX:
+    mov     AX,         [buffer]&YL ; Get character for hex test.
+    xor     AX,         #30h        ; Map digits to 0-9
+    cmp     AX,         #Ah         ; digit
+    jl      [DIG]                   ; yes
+    add     AX,         #B9h        ; Map letter "A"-"F" to 0xFA-0xFF
+    cmp     AX,         #FAh        ; Hex letter?
+    jl      [NOTHEX]                ; No, character not hex
+DIG:
+    shl     AL,         #4          ; Hex digit to MSD of AL
+    mov     X,          #4          ; Shift count.
+HEXSHIFT:
+    shl     AX,         #1          ; Hex digit left, MSB to carry.
+    rol     %L,         #1          ; Rotate into LSD.
+    rol     %H,         #1          ; Rotate into MSD's.
+    dec     X                       ; Done 4 shifts?
+    cmp     X,          #0          ; 
+    jne     [HEXSHIFT]              ; No, loop.
+    inc     YL                      ; Advance text index.
+    jne     [NEXTHEX]               ; Always taken. Check next character for hex.
 NOTHEX:         
-    cmp     XL, XH          ; Check if L, H empty (no hex digits).
-    je      [ESCAPE]        ; Yes, generate ESC sequence.
-    and     X, DX           ; Test MODE byte. ?
-    jmc     [NOTSTOR]       ; B6=0 STOR, 1 for XAM and BLOCK XAM ?
-    mov     AX, YL          ; LSD’s of hex data.
-    inc     YL              ; Increment store index.
-    je      [NEXTITEM]      ; Get next item. (no carry).
-    inc     YH              ; Add carry to ‘store index’ high order.
+    cmp     YL,         %YSAV       ; Check if L, H empty (no hex digits).
+    je      [ESCAPE]                ; Yes, generate ESC sequence.
+    and     AX,         %MODE       ; Test MODE byte.
+    jmc     [NOTSTOR]               ; B6=0 STOR, 1 for XAM and BLOCK XAM
+    mov     AX,         [L]         ; LSD’s of hex data.
+    mov     DX,         %ST
+    mov     [DL]&X,     AX          ; Store at current ‘store index’.
+    inc     DL                      ; Increment store index.
+    mov     %ST,        DX
+    jne     [NEXTITEM]              ; Get next item. (no carry).
+    INC     DH                      ; Add carry to ‘store index’ high order.
+    mov     %ST,        DX
 TONEXTITEM:     
-    JMP     [NEXTITEM]      ; Get next command item.
-RUN:            
-    JMP     %XAM            ; Run at current XAM index.
-NOTSTOR:        
-    jns     [XAMNEXT]       ; B7=0 for XAM, 1 for BLOCK XAM. ?
-    mov     BL, #02h        ; Byte count.
+    JMP     [NEXTITEM]              ; Get next command item.
+RUN:
+    JMP     %XAM                    ; Run at current XAM index.
+NOTSTOR:
+    jms     [XAMNEXT]               ; B7=0 for XAM, 1 for BLOCK XAM.
+    mov     X,          #02h        ; Byte count.
 SETADR:
-    PUSHR
-    add     CL, BL
-    mov     AX, [CL]-1      ; Copy hex data to
-    add     YH, BL
-    mov     [YH]-1, AX      ;  ‘store index’.
-    POPR
-    PUSHR
-    add     BL, %XAM
-    mov     [BL]-1, AX      ; And to ‘XAM index’.
-    POPR
-    dec     BL              ; Next of 2 bytes.
-    jne     [SETADR]        ; Loop unless X=0.
+    mov     DL,         %L
+    mov     AX,         [DL]-1&X    ; Copy hex data to
+    mov     DL,         %ST
+    mov     [DL]-1&X,   AX          ; store index.
+    mov     DL,         %XAM
+    mov     [DL]-1&X,   AX          ; And to XAM index.
+    dec     XL                      ; Next of 2 bytes.
+    jne     [SETADR]                ; Loop unless X=0.
 NXTPRNT:        
-    je      [PRDATA]        ; NE means no address to print.
-    mov     AX, #KW_ENT     ; CR.
-    call    [ECHO]          ; Output it.
-
-    mov     AX, %XAM        ; ‘Examine index’ high-order byte.
-    mov     AL, AX
-    call    [PRBYTE]        ; Output it in hex format.
-    mov     AX, %XAM        ; Low-order ‘examine index’ byte.
-    mov     AH, AX
-    call    [PRBYTE]        ; Output it in hex format.
-    mov     AX, #':'        ; ":".
-    call    [ECHO]          ; Output it.
-PRDATA:         
-    mov     AX, #0h         ; Blank.
-    call    [ECHO]          ; Output it.
-    mov     BL, %XAM
-    mov     AX, BL          ; Get data byte at ‘examine index’.
-    call    [PRBYTE]        ; Output it in hex format.
-XAMNEXT:        
-    mov     [MODE], #0       ; 0->MODE (XAM mode).
-    mov     AX, %XAM
-    cmp     AL, CL            ; Compare ‘examine index’ to hex data.
-    sub     AH, CH
-    jmc     [TONEXTITEM]    ; Not less, so no more data to output.
-    mov     AX, %XAM
-    inc     AL
-    je      [MOD8CHK]       ; Increment ‘examine index’.
-    inc     AH
+    jne     [PRDATA]                ; NE means no address to print.
+    mov     AX,         #KW_ENT     ; CR.
+    call    [ECHO]                  ; Output it.
+    mov     DX,         %XAM
+    mov     AX,         [DH]        ; ‘Examine index’ high-order byte.
+    call    [PRBYTE]                ; Output it in hex format.
+    mov     AX,         [DL]        ; Low-order ‘examine index’ byte.
+    call    [PRBYTE]                ; Output it in hex format.
+    mov     AX,         #':'        ; ":".
+    call    [ECHO]                  ; Output it.
+PRDATA:
+    MOV     AX,         #' '        ; Blank.
+    call    [ECHO]                  ; Output it.
+    mov     DX,         %XAM
+    mov     AX,         [DL]&X      ; Get data byte at ‘examine index’.
+    call    [PRBYTE]                ; Output it in hex format.
+XAMNEXT:
+    mov     DX,         %XAM
+    mov     %MODE,      #0          ; 0->MODE (XAM mode).
+    mov     AX,         [DL]
+    CMP     AX,         %L          ; Compare ‘examine index’ to hex data.
+    mov     AX,         [DH]
+    sub     AX,         %H
+    jmc     [TONEXTITEM]            ; Not less, so no more data to output.
+    INC     [DL]
+    mov     %XAM,       DX
+    jne     [MOD8CHK]               ; Increment ‘examine index’.
+    INC     [DH]
+    mov     %XAM,       DX
 MOD8CHK:
-    mov     AX, %XAM        
-    mov     AL, AX           ; Check low-order ‘examine index’ byte
-    and     AL, #07h         ; For MOD 8=0
-    jms     [NXTPRNT]       ; Always taken.
+    mov     DX,         %XAM
+    mov     AX,         [DL]        ; Check low-order ‘examine index’ byte
+    AND     AX,         #07h        ; For MOD 8=0
+    mov     %XAM,       DX
+    jns     [NXTPRNT]               ; Always taken.
 PRBYTE:         
-    push    AX              ; Save A for LSD.
-    ROR     AX, #4          ; MSD to LSD position.
-    call    [PRHEX]         ; Output hex digit.
-    pop     AX              ; Restore A.
+    push    AX                      ; Save A for LSD.
+    shl     AX,         #4          ; MSD to LSD position.
+    call    [PRHEX]                 ; Output hex digit.
+    pop     AX                      ; Restore A.
 PRHEX:          
-    AND     AX, #0Fh         ; Mask LSD for hex print.
-    OR      AX, #'0'         ; Add "0".
-    cmp     AX, #BAh         ; Digit?
-    jnc     [ECHO]          ; Yes, output it.
-    add     AX, #06h         ; Add offset for letter.
+    AND     AX,         #0Fh        ; Mask LSD for hex print.
+    OR      AX,         #'0'        ; Add "0".
+    CMP     AX,         #3Ah        ; Digit?
+    jnc     [ECHO]                  ; Yes, output it.
+    add     AX,         #06h        ; Add offset for letter.
 ECHO:           
-    out     %DSP, AX
-    RTS                     ; Return.
+    out     %DSP,       AX
+    RTS                             ; Return.
 
 
 buffer:

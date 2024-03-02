@@ -1,0 +1,7 @@
+Input ./src/asm/TestProgram.Basm
+UseDebuger
+ObjFile ./Builds/ASMTEST/a.obj
+UseBinary ./Builds/ASMTEST/bin.bin
+Output ./Builds/ASMTEST/a.out
+DontBuild false
+FillTo 0x01000

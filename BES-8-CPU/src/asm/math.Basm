@@ -5,33 +5,33 @@
 push AX
 push BX
 
-mov ZX SP
+mov ZX, SP
 
-add SP #3
+add SP, #3
 
 pop BX
 pop AX
 
-mov SP ZX
+mov SP, ZX
 
 ; org A in Z
-mov ZX AX
+mov ZX, AX
 
-;q = A / B
-;AX = AX / BX
-div AX BX
+; q = A / B
+; AX = AX / BX
+div AX, BX
 
-;p = q * b
-;AX = AX * BX
-mul AX BX
+; p = q * b
+; AX = AX * BX
+mul AX, BX
 
-;r = p - a
-;AX = AX - ZX
-sub AX ZX
+; r = p - a
+; AX = AX - ZX
+sub AX, ZX
 
-;ZX = r
-;ZX = AX
-mov ZX AX
+; ZX = r
+; ZX = AX
+mov ZX, AX
 
 pop BX
 
@@ -49,22 +49,22 @@ rts
  push AX
  push #10
  call [MOD]
- add SP #2
+ add SP, #2
 
  mov XL ZL
 
  ; AX / 10
- div AX #10
+ div AX, #10
 
  ; AX % 10
  push AX
  push #10
  call [MOD]
- add SP #2
+ add SP, #2
 
- rol ZL #4
+ rol ZL, #4
 
- or XL ZL
+ or XL, ZL
 
  ; AX / 10
  div AX #10
@@ -73,9 +73,9 @@ rts
  push AX
  push #10
  call [MOD]
- add SP #2
+ add SP, #2
 
- mov XH ZL
+ mov XH, ZL
 
  ; AX / 10
  div AX #10
@@ -84,17 +84,17 @@ rts
  push AX
  push #10
  call [MOD]
- add SP #2
+ add SP, #2
 
- rol ZL #4
+ rol ZL, #4
 
- or XH ZL
+ or XH, ZL
 
  ; AX / 10
- div AX #10
+ div AX, #10
 
  push AX
- mov AX X
+ mov AX, X
  pop BX
  pop ZX
  pop X

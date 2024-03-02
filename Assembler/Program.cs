@@ -1,4 +1,5 @@
 ﻿using assembler;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -13,8 +14,8 @@ public class Program
     static string OutputSrcFile = "";
     public static string ProgramPath = "";
     public static string OGPorgramPath = "";
-    public static string LibsPath = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU\\Libs";
-    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\CPUs\\BES-8-CPU";
+    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\CPUs\\BES-8-CPU";
+    public static string LibsPath = $"{CurrentDirectory}\\Libs";
 
     static bool Build = true;
     static bool DoClear = false;
@@ -28,6 +29,10 @@ public class Program
 
     public static void Main(string[] args)
     {
+        for (int i = 0; i < args.Length; i++)
+        {
+            Console.WriteLine(i + " " + args[i]);
+        }
         if (args.Length > 2)
         {
             if (args[1] == "-D")
@@ -35,8 +40,6 @@ public class Program
                 if (args.Length == 4)
                 {
                     DecodeArguments((
-                        $"Input ./src/asm/{args[2]}\r\n" +
-                        $"InputDir ./src/asm/{args[3]}\r\n" +
                         "UseDebuger\r\n" +
                         "ObjFile ./Builds/DebugASM/a.obj\r\n" +
                         "UseBinary ./Builds/DebugASM/bin.bin\r\n" +
@@ -61,10 +64,27 @@ public class Program
                 }
             }
         }
+        else if (args.Length == 2)
+        {
+            DecodeArguments((
+                "UseDebuger\r\n" +
+                "ObjFile ./Builds/DebugASM/a.obj\r\n" +
+                "UseBinary ./Builds/DebugASM/bin.bin\r\n" +
+                "Output ./Builds/DebugASM/a.out\r\n" +
+                "UseSections false\r\n" +
+                "DontBuild false\r\n" +
+                "SrcFile ./Builds/DebugASM/src.out\r\n" +
+                "FillTo 0x05000").Split("\r\n"));
+            string SettingsFile = args[0];
+            Conv(ref SettingsFile);
+            DecodeArguments(File.ReadAllText(SettingsFile).Split("\r\n"));
+        }
         else
         {
             string SettingsFile = args[0];
+            Console.WriteLine("Before " + SettingsFile + " " + args[0]);
             Conv(ref SettingsFile);
+            Console.WriteLine("After " + SettingsFile);
             DecodeArguments(File.ReadAllText(SettingsFile).Split("\r\n"));
         }
         Console.CursorVisible = false;
@@ -112,9 +132,10 @@ public class Program
 
         Console.WriteLine("ProgramPath " + ProgramPath);
         Console.WriteLine("Input File " + Input);
-
+        string OutputPath = GetPathFromFile(OutputFile);
         if (File.Exists(Input) == false) Assembler.AssemblerErrors.ErrorCantFindInputFile(InputFile);
-        if (File.Exists(OutputFile) == false) File.Create(OutputFile, 100).Close();
+        if (Directory.Exists(OutputPath) == false) Directory.CreateDirectory(OutputPath);
+        if (File.Exists(OutputFile) == false) File.Create(OutputFile);
         string src;
         // go in to the assembler
         if (Directory.Exists(ProgramPath))
@@ -128,7 +149,7 @@ public class Program
 
             for (int f = 0; f < FilesCopy.Count; f++)
             {
-                if (FilesCopy[f].FullName != Input)
+                if (FilesCopy[f].FullName.Replace("\\", "/") != Input)
                 {
                     src += ".newfile " + OGPorgramPath + "\\" + FilesCopy[f].Name + "\r\n";
                     src += File.ReadAllText(FilesCopy[f].FullName) + "\r\n";
@@ -182,14 +203,14 @@ public class Program
         // main
         if (ObjFile != "")
         {
-            string formated = "";
-
-            for (int i = 0; i < Assembler.AssemblerObj.OBJString.Count; i++)
+            string OBJstring = Encoding.ASCII.GetString(Assembler.AssemblerObj.GetOBJ());
+            string Format = "";
+            byte[] bytes = Assembler.AssemblerObj.GetOBJ();
+            for (int i = 0; i < bytes.Length; i++)
             {
-                formated += Assembler.AssemblerObj.OBJString[i];
+                Format += (char)bytes[i];
             }
-
-            File.WriteAllText(ObjFile, formated);
+            File.WriteAllText(ObjFile, Format);
         }
         if (SrcCopyFile != "")
         {
@@ -230,7 +251,16 @@ public class Program
         File.WriteAllText(OutputFile, outputString);
 
     }
-
+    private static string GetPathFromFile(string File)
+    {
+        string[] Path = File.Split('/');
+        string Result = "";
+        for (int i = 0; i < Path.Length - 1; i++)
+        {
+            Result += Path[i] + "/";
+        }
+        return Result.TrimEnd('/');
+    }
     private static void Includes(ref string src, bool Mult, List<FileInfo> FilesCopy = null)
     {
         for (int i = 0; i < src.Split("\r\n").Length; i++)
@@ -239,7 +269,9 @@ public class Program
             if (src.Split("\r\n")[i].Contains(".include"))
             {
                 string FileName = src.Split("\r\n")[i].Split(' ')[1];
-                string file = Path.Combine(CurrentDirectory, FileName);
+                FileName = FileName.Replace("/", "\\");
+                string file = FileName.Replace(".\\", CurrentDirectory);
+
                 if (FileName == "BIOS")
                 {
                     file = LibsPath + "\\BIOS.basm";
@@ -479,9 +511,9 @@ public class Program
     }
     static void Conv(ref string file)
     {
-        file = file.Replace(".\\", CurrentDirectory + "\\");
-        file = file.Replace("./", CurrentDirectory + "\\");
-        file = file.Replace("/", "\\");
+        file = file.Replace(@"\", "/");
+        file = file.Replace("./", CurrentDirectory + "/");
+        file = file.Replace(@"\", "/");
         return;
     }
 }

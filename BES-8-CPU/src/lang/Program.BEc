@@ -1,11 +1,18 @@
 public word HELLO = 0
 ptr word hello = 0
 global word etst = 10
+const word NULL = 0
+global ptr word Address = 0
 
-func main(byte A, byte B, int C)
+func Main(byte A, byte B, int C)
 {
-    word ABC = 0
+    word ABC = NULL
     ABC = A
+    ABC = {ABC + 1 + (1 + 1) * 10}
+    Address = &ABC
+
+    free(Address
+
     free(&ABC)
     word ABC = add(10, 20)
     exit(A)
@@ -13,7 +20,7 @@ func main(byte A, byte B, int C)
 
 word add(word NumberA, word NumberB)
 {
-    word Result = {NumberA + NumberB}
+    word Result = {NumberA + NumberB * NumberA / 10}
     return Result
 }
 

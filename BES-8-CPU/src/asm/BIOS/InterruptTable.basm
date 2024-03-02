@@ -1,0 +1,6 @@
+.global INTERRUPT_TABLE:
+
+; int #0 
+; Exit
+.word 0, [Exit]
+.repeat FEh .word 0, 0

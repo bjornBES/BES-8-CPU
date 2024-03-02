@@ -113,16 +113,21 @@ NOTHEX:
                 INC STL         ; Increment store index.
                 BNE NEXTITEM    ; Get next item. (no carry).
                 INC STH         ; Add carry to ‘store index’ high order.
-TONEXTITEM:     JMP NEXTITEM    ; Get next command item.
-RUN:            JMP (XAML)      ; Run at current XAM index.
-NOTSTOR:        BMI XAMNEXT     ; B7=0 for XAM, 1 for BLOCK XAM.
+TONEXTITEM:     
+                JMP NEXTITEM    ; Get next command item.
+RUN:            
+                JMP (XAML)      ; Run at current XAM index.
+NOTSTOR:        
+                BMI XAMNEXT     ; B7=0 for XAM, 1 for BLOCK XAM.
                 LDX #$02        ; Byte count.
-SETADR:         LDA L-1,X       ; Copy hex data to
+SETADR:         
+                LDA L-1,X       ; Copy hex data to
                 STA STL-1,X     ;  ‘store index’.
                 STA XAML-1,X    ; And to ‘XAM index’.
                 DEX             ; Next of 2 bytes.
                 BNE SETADR      ; Loop unless X=0.
-NXTPRNT:        BNE PRDATA      ; NE means no address to print.
+NXTPRNT:        
+                BNE PRDATA      ; NE means no address to print.
                 LDA #$8D        ; CR.
                 JSR ECHO        ; Output it.
                 LDA XAMH        ; ‘Examine index’ high-order byte.
@@ -131,11 +136,13 @@ NXTPRNT:        BNE PRDATA      ; NE means no address to print.
                 JSR PRBYTE      ; Output it in hex format.
                 LDA #':'+$80    ; ":".
                 JSR ECHO        ; Output it.
-PRDATA:         LDA #$A0        ; Blank.
+PRDATA:         
+                LDA #$A0        ; Blank.
                 JSR ECHO        ; Output it.
                 LDA (XAML,X)    ; Get data byte at ‘examine index’.
                 JSR PRBYTE      ; Output it in hex format.
-XAMNEXT:        STX MODE        ; 0->MODE (XAM mode).
+XAMNEXT:        
+                STX MODE        ; 0->MODE (XAM mode).
                 LDA XAML
                 CMP L           ; Compare ‘examine index’ to hex data.
                 LDA XAMH
@@ -144,22 +151,26 @@ XAMNEXT:        STX MODE        ; 0->MODE (XAM mode).
                 INC XAML
                 BNE MOD8CHK     ; Increment ‘examine index’.
                 INC XAMH
-MOD8CHK:        LDA XAML        ; Check low-order ‘examine index’ byte
+MOD8CHK:        
+                LDA XAML        ; Check low-order ‘examine index’ byte
                 AND #$07        ;  For MOD 8=0
                 BPL NXTPRNT     ; Always taken.
-PRBYTE:         PHA             ; Save A for LSD.
+PRBYTE:         
+                PHA             ; Save A for LSD.
                 LSR
                 LSR
                 LSR             ; MSD to LSD position.
                 LSR
                 JSR PRHEX       ; Output hex digit.
                 PLA             ; Restore A.
-PRHEX:          AND #$0F        ; Mask LSD for hex print.
+PRHEX:          
+                AND #$0F        ; Mask LSD for hex print.
                 ORA #'0'+$80    ; Add "0".
                 CMP #$BA        ; Digit?
                 BCC ECHO        ; Yes, output it.
                 ADC #$06        ; Add offset for letter.
-ECHO:           BIT DSP         ; DA bit (B7) cleared yet?
+ECHO:           
+                BIT DSP         ; DA bit (B7) cleared yet?
                 BMI ECHO        ; No, wait for display.
                 STA DSP         ; Output character. Sets DA.
                 RTS             ; Return.

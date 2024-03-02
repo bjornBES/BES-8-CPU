@@ -45,6 +45,7 @@
         JNS,
         SHL,
         SHR,
+        HALT,
     }
     public enum ArgumentIdent
     {

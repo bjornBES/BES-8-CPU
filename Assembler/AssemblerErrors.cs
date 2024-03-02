@@ -101,13 +101,7 @@
             }
             public static void ErrorVariableNotFound(string Name)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error");
-                Console.ResetColor();
-                Console.Write(" BES-19091 "); //todo error code
-                Console.WriteLine("in " + CurrentFile + " at line " + LineIndex);
-                Console.WriteLine("\t\t" + OrgSrc[LineIndex]);
-                Console.Write("\t\t");
+                Error("19091");
 
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(Name);
@@ -123,7 +117,7 @@
                 Console.Write(" BES-" + code + " ");
                 Console.Write("in " + CurrentFile + " at line ");
 
-                Console.WriteLine(LineIndex);
+                Console.WriteLine(LineNumber);
                 Console.WriteLine("\t\t" + OrgSrc[LineIndex]);
                 Console.Write("\t\t");
                 HasError = true;
