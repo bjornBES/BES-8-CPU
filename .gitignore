@@ -463,3 +463,6 @@ BES-8-CPU/CsBuilds/emu/runtimes/osx-arm64/native/libglfw.3.dylib
 BES-8-CPU/CsBuilds/emu/runtimes/osx-x64/native/libglfw.3.dylib
 BES-8-CPU/CsBuilds/emu/runtimes/win-x64/native/glfw3.dll
 BES-8-CPU/CsBuilds/emu/runtimes/win-x86/native/glfw3.dll
+BES-8-CPU/Variables.txt
+BES-8-CPU/tools/Assembler/assembler.dll
+BES-8-CPU/tools/compiler/compiler.dll
