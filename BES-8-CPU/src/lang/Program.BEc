@@ -11,7 +11,7 @@ func Main(byte A, byte B, int C)
     ABC = {ABC + 1 + (1 + 1) * 10}
     Address = &ABC
 
-    free(Address
+    free(Address)
 
     free(&ABC)
     word ABC = add(10, 20)

@@ -1,0 +1,183 @@
+$Keyboard #=            0004h
+$Dispaly #=             0005h
+
+$PortIsthere *=         E900h   ; bank 1
+$ExitCode *=            E901h   ; bank 1
+
+OLD_Main:
+pushr
+sef #FI
+
+; moving 3 to the memory bank 
+mov MB, #3
+mov XL, #FFh
+mov DX, #80FFh                      ; testing the ports
+out %Dispaly, DX
+; testing what port are in use and what are not in use
+Test_Port_Loop:
+; overflow XL from FF to 0
+inc XL
+call [Test_Ports]
+; exit loop?
+cmp XL, #9                          ; Test_Port_Loop > 9?
+jl [Test_Port_Loop]                 ; yes
+
+; setting up the interrupt table
+; MB = 2
+;     \/ in bank 3
+mov [2000h], [INTERRUPT_TABLE]
+
+mov DL, #FFh
+mov AX, #70Ah                       ; ushort address
+mov CX, #0                          ; page 0
+Disk_Is_Bootabul_Loop:
+inc DL
+; cheaking the disk is bootabul
+; DL = disk
+int #EAh                            ; read
+cmp ZX, #1
+
+cmp DL, #6
+je [Error_Not_Bootabul]
+
+jne [Disk_Is_Bootabul_Loop]
+inc AX                              ; AX = 70Bh
+int #EAh
+cmp ZX, #1
+jne [Disk_Is_Bootabul_Loop]
+; read a disk
+; here we get the bytes used to boot (55AA)
+Read_Disk_Loop:
+; here we read the disk
+
+push DL                             ; disk
+push #1                             ; page = 1
+push #4                             ; sector = 4
+call [Read]
+; getting the boot bytes (55AA)
+mov BX, [D9FFh]                    ; high byte
+mov AX, [D9FEh]                    ; low byte
+; placing the bytes in to AX
+or AX, BL
+
+cmp AX, #55AAh
+jne [Disk_Is_Bootabul_Loop]
+
+; no call?
+; need full stack to do shit
+; fx. the bootloader and other things
+
+; this is where the BOOT code is at
+; Bootstrap Loader
+Boot:
+mov PMB, #3
+
+pushr
+mov AX, #703h                       ; address
+; page = 0 && CX = 0
+; disk is in DH
+int #EAh                            ; read
+; calculate the sectors par page
+
+push DL                             ; byte Disk
+push #1                             ; short Page = 1
+push ZX                             ; byte sector
+call [Read]
+
+; set up some things
+
+; Boot to an OS
+; reading boot in page from sector 4 page 1
+dec MB
+mov R1, [100Ch]                    ; 0x70C
+mov BX, [100Eh]                    ; 0x70E
+; combining AX and BX
+or R1, BX
+; disk is in the DL
+mov R2, DL
+
+; page * PageSize(0x800) = BootAddress
+; setting the address using AX
+mul R1, #800h
+
+popr
+
+; the OS now uses the BIOS ints
+clf #FI
+
+mov XH, R2
+mov XL, R3
+
+; Jump to Program
+int #FAh
+
+; after exiting the OS
+mov AX, %ExitCode
+cmp AX, #0                          ; 0 = good
+; AX == 0
+je [Exit_BIOS]
+
+
+Exit_Fall:
+; clearing the scrren
+out #5, #80FFh
+
+mov AX, R1
+
+mov AX, [Exit_Fall_Message]
+call [Print_Message]
+
+mov AX, R1
+; conv from dec to hex
+int #E7h
+; returns a pointer to a null terminated string in ZX
+
+mov AX, ZX
+call [Print_Message]
+
+Exit_BIOS:
+int #E0h
+
+Error_Not_Bootabul:
+mov AX, [Error_Disk_Not_Bootabul_Message]
+call [Print_Message]
+
+jmp $
+
+; XL byte Port
+; DX uint value
+; testing if a port is in use or not
+Test_Ports:
+push AX
+out XL, DX
+in XL, AX
+; the port will return with CARRY set to 0 if there
+; and CARRY set to 1 if not there
+jnc [ISTHERE]
+; setting it to 1 if it is not there
+or %PortIsthere, XL
+
+ISTHERE:
+pop AX
+rts
+
+; AX uint* Address
+.global Print_Message:
+pushr
+
+mov X, #0
+Print_Message_Loop:
+mov BX, [AX]&X
+jmz [Exit_Print_Loop] 
+out #5, BX
+inc X
+jnc [Print_Message_Loop]
+Exit_Print_Loop:
+popr
+rts
+
+; data
+Exit_Fall_Message:
+.strz "Error: the program was not a success"
+Error_Disk_Not_Bootabuk_Message:
+.strz "Error: the disks are not bootabul"

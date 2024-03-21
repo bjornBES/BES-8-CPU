@@ -1,32 +1,32 @@
 Overview: 
-The system encompasses 1 megabyte of data distributed over 20 address lines,
-each carrying 16 bits of data. The disk is divided into 511 pages, 
+The system encompasses 1 megabyte of data distributed over 27 address lines,
+each carrying 16 bits of data. The disk is divided into 65535 pages, 
 each containing 2048 bytes. Each page is further split into 4 sectors,
 each of which is 0x200 bytes in width.
-
-Instructions:
-Writing to Disk:
-Write the address to the disk header port at 0x010 using `outb`.
-In the low part, specify the sector you wish to write, 
-and in the high data byte, indicate the disk.
-Write the data to one of the 14 disks using `outb`.
-
-Reading from Disk
-Write the page you wish to read to the disk header port at 0x010 using OUTB.
-In the low part, specify the sector you want to read into one of the disks.
-Read the data from memory at 0x10000 - 0x1FFFF in bank 2.
 
 Note: The first disk always serves as the boot disk and requires special bytes 
 for proper functioning. Ensure there is a 0x55AA at the bottom 
 of the first page user page of the disk to enable booting.
 
+Reading instruction
+1. write to the disk using OUT the Page     (if you writen in one of these before you dont need to write again)
+2. write to the disk using OUT the sector
+3. write to the disk using OUT the address
+4. read the disk using IN
+
+Writing instruction
+1. write the disk using OUT the Page
+3. write the disk using OUT the sector
+5. write the disk using OUT the address
+7. write the disk using OUT the data with the 16th bit set
+
 directory/file entrie layout
-[0000-000F] Name
-[0010-0013] Start address
-[0014-0017] File length
-[0018-0019] Flags more at Flags
-[001A-001B] Folder deep
-[001C-001F] continue address
+[00-0F] Name
+[10-13] Start address
+[14-17] File length
+[18-18] Flags more at Flags
+[1A-1B] Entry Count
+[1B-1F] Date 
 
 page layout
 [0000-01FF] sector 1
@@ -35,12 +35,12 @@ page layout
 [0600-0800] sector 4
 
 on the first page all the metadata is located (this is in bytes)
-[0000-0002] file system version
-[0003-0004] free pages count
-[0005-01FF] fat 
+[0000-0003] file system version
+[0004-0004] Disk Letter
+[0005-0006] free pages count
+[0007-01FF] Unused
 [0200-06FF] root directory entries (20 entries)
-[0700-0701] Disk Size
-[0702-0702] Disk Letter Writable
+[0700-0702] Unused
 [0703-0703] sectors par page
 [070A-070A] Bootabul
 [070B-070B] Boot from disk if Bootabul == 1
@@ -48,16 +48,12 @@ on the first page all the metadata is located (this is in bytes)
 
 Pages
 page 0 is the metadata/file system data 
-page 1 - 510 is user defind
+page 1 - 65533 is user defind
 
 
 Flags
-bits
-    0   file or directory (1 == directory and 0 == a file)
-    1   active
-    2   
-    3
-    4
-    5
-    6
-    7
+    0 Is directory			1 = is directory and 0 = is not directory
+    1 Is protected			1 = is protected and 0 = is not protected
+    2 Is hidden			    1 = is hidden and 0 = is not hidden
+    3 Is over 0x800 bytes   1 = is over 0x800 byte in size
+    4 is active			    1 = is not deleted

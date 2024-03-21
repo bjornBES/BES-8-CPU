@@ -1,0 +1,20 @@
+$Test = 5000h
+$PointerTest *= 5000h
+$ImmTest #= 5000h
+
+
+mov X, %ImmTest
+
+Main:
+
+mov AX, #10
+mov AX, #10h
+mov AX, #'A'
+
+mov AX, [1000h]
+
+mov AX, [1000h]&X
+
+mov [Main], #10
+
+nop

@@ -1,0 +1,67 @@
+{
+	"NodeProg": {
+		"NodeStmtAssign": {
+			"NodeExpr": {
+				"Token": {
+					"type":"ident",
+					"Value":"etst",
+					"Line":"1",
+					"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+				}
+			},
+			"Token": {
+				"Token": {
+					"type":"int_lit",
+					"Value":"0",
+					"Line":"1",
+					"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+				}
+			}
+		},
+		"NodeStmtFunc": {
+			"NodeExpr": {
+				"NodeTermIdent": {
+					"Token": {
+						"type":"ident",
+						"Value":"Main",
+						"Line":"2",
+						"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+					}
+				}
+			},
+			"NodeTermType": {
+				"ReturnType":"TokenType"
+			}
+		},
+		"NodeScope": {
+			"NodeStmtAssign": {
+				"NodeExpr": {
+					"Token": {
+						"type":"ident",
+						"Value":"a",
+						"Line":"4",
+						"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+					}
+				},
+				"Token": {
+					"Token": {
+						"type":"int_lit",
+						"Value":"0",
+						"Line":"4",
+						"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+					}
+				}
+			},
+			"NodeStmtReturn": {
+				"NodeExpr": {
+					"Token": {
+						"type":"int_lit",
+						"Value":"0",
+						"Line":"5",
+						"File":"C:/Users/bjorn/Desktop/BES-8-CPU/CPUs/BES-8-CPU/src/lang/src.BEc"
+					}
+				}
+			}
+		}
+	}
+}

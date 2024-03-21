@@ -62,8 +62,8 @@ MEMORY LAYOUT:
     General Purpose Memory Range:   0x0000 to 0x7FFF
     Variable Memory Range static:   0x8000 to 0xFFFF
 
-  Bank 5:
-    General Purpose Memory Range:   0x0000 to 0xFFFF
+  Bank 5, 6, 7:
+    General Purpose Memory Range:   0x00000 to 0x30000
 
 PORTS
   0x000         Expansion slot 0

@@ -1,0 +1,303 @@
+NodeVariableExpr = { Name = Keyboard operator = "#=" value = 0004h Line = 1 }
+NodeVariableExpr = { Name = Dispaly operator = "#=" value = 0005h Line = 2 }
+NodeVariableExpr = { Name = PortIsthere operator = "*=" value = E900h Line = 4 }
+NodeVariableExpr = { Name = ExitCode operator = "*=" value = E901h Line = 5 }
+NodeVariableExpr = { Name = PortTestingValue operator = "#=" value = 80FFh Line = 7 }
+NodeLable = { Name = _Main addr = 0 Line = 11 }
+NodeExprInstruction = {Instr = PUSHR, Value = 30}
+NodeExprInstruction = {Instr = SEF, Value = 37}
+NoteExpr = {Value = 0x0100}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 7}
+NoteExpr = {Value = 0x3}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NodeExprAddress = {Address = 2000}
+NodeExprAddress = {Address = L:INTERRUPT_TABLE}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 8}
+NoteExpr = {Value = 0xFFFF}
+NodeLable = { Name = Port_There_Loop addr = 12 Line = 23 }
+NodeExprInstruction = {Instr = INC, Value = 32}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Test_Port}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 8}
+NoteExpr = {Value = 0xA}
+NodeExprInstruction = {Instr = JL, Value = 21}
+NodeExprAddress = {Address = L:Port_There_Loop}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 40}
+NoteExpr = {Value = 0xFF}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 2}
+NoteExpr = {Value = 0x0}
+NodeLable = { Name = Disk_Is_Bootabul_Loop addr = 27 Line = 39 }
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x70A}
+NodeExprInstruction = {Instr = INC, Value = 32}
+NoteExprRegister = {Value = 35}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 35}
+NoteExpr = {Value = 0x6}
+NodeExprInstruction = {Instr = JGE, Value = 18}
+NodeExprAddress = {Address = L:Error_Not_Bootabul}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xEA}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 4}
+NoteExpr = {Value = 0x1}
+NodeExprInstruction = {Instr = JNE, Value = 20}
+NodeExprAddress = {Address = L:Disk_Is_Bootabul_Loop}
+NodeExprInstruction = {Instr = INC, Value = 32}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xEA}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 4}
+NoteExpr = {Value = 0x1}
+NodeExprInstruction = {Instr = JNE, Value = 20}
+NodeExprAddress = {Address = L:Disk_Is_Bootabul_Loop}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExprRegister = {Value = 35}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExpr = {Value = 0x1}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExpr = {Value = 0x4}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Read_Sector}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 16}
+NodeExprAddress = {Address = E0FE}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 32}
+NodeExprAddress = {Address = E0FF}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x55AA}
+NodeExprInstruction = {Instr = JNE, Value = 20}
+NodeExprAddress = {Address = L:Disk_Is_Bootabul_Loop}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x703}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xEA}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 1}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExprRegister = {Value = 35}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExprRegister = {Value = 2}
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExprRegister = {Value = 1}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Read_Sector}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0xF00C}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 41}
+NoteExpr = {Value = 0x3}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xE6}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 21}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xE7}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 5}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = MUL, Value = 6}
+NoteExprRegister = {Value = 5}
+NoteExpr = {Value = 0x800}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 37}
+NoteExprRegister = {Value = 35}
+NodeExprInstruction = {Instr = POPR, Value = 31}
+NodeExprInstruction = {Instr = CLF, Value = 36}
+NoteExpr = {Value = 0x0100}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 24}
+NoteExprRegister = {Value = 37}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 40}
+NoteExprRegister = {Value = 21}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xFA}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NodeExprAddress = {Address = 0xE901}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x0}
+NodeExprInstruction = {Instr = JE, Value = 17}
+NodeExprAddress = {Address = L:Exit_BIOS}
+NodeLable = { Name = Exit_Fall addr = 132 Line = 138 }
+NodeExprInstruction = {Instr = OUT, Value = 35}
+NoteExpr = {Value = 0x5}
+NoteExpr = {Value = 0x80FF}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExprRegister = {Value = 5}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NodeExprAddress = {Address = L:Exit_Fall_Message}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Print_Message}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExprRegister = {Value = 5}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xE7}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Print_Message}
+NodeLable = { Name = Exit_BIOS addr = 153 Line = 155 }
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xE0}
+NodeLable = { Name = Error_Not_Bootabul addr = 155 Line = 161 }
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NodeExprAddress = {Address = L:Error_Disk_Not_Bootabul_Message}
+NodeExprInstruction = {Instr = CALL, Value = 27}
+NodeExprAddress = {Address = L:Print_Message}
+NodeExprInstruction = {Instr = JMP, Value = 14}
+NodeExprAddress = {NoteExpr = {Value = 0xa0}}
+NodeLable = { Name = Test_Port addr = 162 Line = 168 }
+NodeExprInstruction = {Instr = PUSH, Value = 2}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x0}
+NodeExprInstruction = {Instr = OUT, Value = 35}
+NoteExprRegister = {Value = 8}
+NodeExpr = {Value = 0x80FF}
+NodeExprInstruction = {Instr = IN, Value = 34}
+NoteExprRegister = {Value = 8}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = CMP, Value = 15}
+NoteExprRegister = {Value = 0}
+NoteExpr = {Value = 0x1}
+NodeExprInstruction = {Instr = JNE, Value = 20}
+NodeExprAddress = {Address = L:ISNOTTHERE}
+NodeExprInstruction = {Instr = SHR, Value = 42}
+NoteExprRegister = {Value = 0}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = OR, Value = 9}
+NodeExprAddress = {Address = 0xE900}
+NoteExprRegister = {Value = 0}
+NodeLable = { Name = ISNOTTHERE addr = 184 Line = 180 }
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = RTS, Value = 28}
+NodeLable = { Name = Print_Message IsGlobal = true addr = 187 Line = 186 }
+NodeExprInstruction = {Instr = PUSHR, Value = 30}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 8}
+NoteExpr = {Value = 0x0}
+NodeLable = { Name = Print_Message_Loop addr = 191 Line = 190 }
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 1}
+NodeExprIndexedAddress = {Address = NodeExprRegister{X}, Indexed = NodeExprRegister{0x8, Ident = X}}
+NodeExprInstruction = {Instr = JMZ, Value = 24}
+NodeExprAddress = {Address = L:Exit_Print_Loop}
+NodeExprInstruction = {Instr = OUT, Value = 35}
+NoteExpr = {Value = 0x5}
+NoteExprRegister = {Value = 1}
+NodeExprInstruction = {Instr = INC, Value = 32}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = JNC, Value = 25}
+NodeExprAddress = {Address = L:Print_Message_Loop}
+NodeLable = { Name = Exit_Print_Loop addr = 203 Line = 196 }
+NodeExprInstruction = {Instr = POPR, Value = 31}
+NodeExprInstruction = {Instr = RTS, Value = 28}
+NodeLable = { Name = Exit_Fall_Message addr = 205 Line = 201 }
+NodeLable = { Name = Error_Disk_Not_Bootabul_Message addr = 242 Line = 203 }
+NodeLable = { Name = Exit IsGlobal = true addr = 276 Line = 2 }
+NodeExprInstruction = {Instr = PUSHR, Value = 30}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 4}
+NoteExprRegister = {Value = 6}
+NodeExprInstruction = {Instr = ADD, Value = 4}
+NoteExprRegister = {Value = 6}
+NoteExpr = {Value = 0x8}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 6}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = SEF, Value = 37}
+NoteExpr = {Value = 0x0100}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 7}
+NoteExpr = {Value = 0x1}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NodeExprAddress = {Address = 0xE901}
+NoteExprRegister = {Value = 0}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xFB}
+NodeExprInstruction = {Instr = POPR, Value = 31}
+NodeExprInstruction = {Instr = RET, Value = 29}
+NoteExpr = {Value = 0x1}
+NodeLable = { Name = Read_Sector IsGlobal = true addr = 301 Line = 4 }
+NodeExprInstruction = {Instr = PUSHR, Value = 30}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 4}
+NoteExprRegister = {Value = 6}
+NodeExprInstruction = {Instr = ADD, Value = 4}
+NoteExprRegister = {Value = 6}
+NoteExpr = {Value = 0x8}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 16}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 8}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 32}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 6}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = CLF, Value = 36}
+NoteExpr = {Value = 0x3}
+NodeExprInstruction = {Instr = ADD, Value = 4}
+NoteExprRegister = {Value = 32}
+NoteExpr = {Value = 0xA}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xEC}
+NodeExprInstruction = {Instr = POPR, Value = 31}
+NodeExprInstruction = {Instr = RET, Value = 29}
+NoteExpr = {Value = 0x3}
+NodeLable = { Name = Write IsGlobal = true addr = 327 Line = 30 }
+NodeExprInstruction = {Instr = PUSHR, Value = 30}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 4}
+NoteExprRegister = {Value = 6}
+NodeExprInstruction = {Instr = ADD, Value = 4}
+NoteExprRegister = {Value = 6}
+NoteExpr = {Value = 0x8}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 1}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 32}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 2}
+NodeExprInstruction = {Instr = POP, Value = 3}
+NoteExprRegister = {Value = 35}
+NodeExprInstruction = {Instr = MOV, Value = 1}
+NoteExprRegister = {Value = 6}
+NoteExprRegister = {Value = 4}
+NodeExprInstruction = {Instr = INT, Value = 26}
+NoteExpr = {Value = 0xEB}
+NodeExprInstruction = {Instr = POPR, Value = 31}
+NodeExprInstruction = {Instr = RET, Value = 29}
+NoteExpr = {Value = 0x4}
+NodeLable = { Name = INTERRUPT_TABLE IsGlobal = true addr = 350 Line = 1 }
+NoteExpr = {Value = 0x0}
+NodeExprAddress = {Address = L:Exit}

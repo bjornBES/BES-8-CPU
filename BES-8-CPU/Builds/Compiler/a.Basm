@@ -1,0 +1,19 @@
+call [_Main]
+mov [12000h], #0
+_Main:
+push BP
+mov BP, SP
+pushr
+; scope 0
+
+mov DX, #0
+push DX
+
+_Main_R:
+mov ZX, #0
+popr
+mov SP, BP
+pop BP
+ret #0
+; end scope 0
+add sp, #1

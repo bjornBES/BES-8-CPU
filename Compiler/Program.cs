@@ -1,4 +1,5 @@
 ﻿using Compiler;
+using Compiler.nodes;
 using System.Text.Json;
 
 internal class Program
@@ -11,6 +12,7 @@ internal class Program
     static bool DoClear = false;
 
     static Tokenization Tokenization = new Tokenization();
+    static Parser Parser = new Parser();
     static Generation Generation = new Generation();
     public static FileInfo[] Files;
     public static string[] SrcCode;
@@ -69,16 +71,112 @@ internal class Program
         }
         src = "Main(10,20,30)" + Environment.NewLine + src;
         src = $"FILE:{Input}{Environment.NewLine}" + File.ReadAllText(Input);
+        src = src.Replace("\r\n", "\n");
         SrcCode = src.Split(Environment.NewLine);
         Tokenization.Build(src);
         Console.WriteLine("TOKEN DONE");
-        Generation.Build(Tokenization);
+        NodeProg nodes = Parser.Parse_Prog(Tokenization.tokens.ToArray());
+        string StringFormatter = "";
+
+        StringFormatter += "".PadLeft(0, '\t') + $"{{\r\n";
+        StringFormatter += "".PadLeft(1, '\t') + $"\"{nodes.GetType().Name}\": {{\r\n";
+        FormatNodes(nodes.stmts, ref StringFormatter,2);
+
+        StringFormatter = StringFormatter.Substring(0, StringFormatter.Length - 17);
+
+        StringFormatter += $"}}\r\n";
+        StringFormatter += "".PadLeft(3, '\t') + $"}}\r\n";
+        StringFormatter += "".PadLeft(2, '\t') + $"}}\r\n";
+        StringFormatter += "".PadLeft(1, '\t') + $"}}\r\n";
+        StringFormatter += "".PadLeft(0, '\t') + $"}}\r\n";
+        
+        File.WriteAllText($"{CurrentDirectory}/Builds/Compiler/parserNodes.json", StringFormatter);
+        string jsonString = JsonSerializer.Serialize(nodes, new JsonSerializerOptions() { WriteIndented = true });
+        File.WriteAllText($"{CurrentDirectory}/Builds/Compiler/parserNodes.txt", jsonString);
+        Generation.gen_prog(nodes);
         Console.WriteLine("GENERATION DONE");
         
         if (DoClear) Console.Clear();
 
         WriteOutAsm();
     }
+
+    static void FormatNodes(NodeStmt[] nodes, ref string StringFormatter, int taps = 0)
+    {
+        for (int i = 0; i < nodes.Length; i++)
+        {
+            if (nodes[i].stmt == null) continue;
+            StringFormatter += "".PadLeft(0  + taps, '\t') + $"\"{nodes[i].stmt.GetType().Name}\": ";
+            StringFormatter += $"{{\r\n";
+            if (nodes[i].stmt.GetType() == typeof(NodeStmtFunc))
+            {
+                NodeStmtFunc stmtFunc = (NodeStmtFunc)nodes[i].stmt;
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"\"{stmtFunc.Name.GetType().Name}\": {{\r\n";
+
+                NodeTermIdent nodeTermIdent = (NodeTermIdent)stmtFunc.Name.var;
+                StringFormatter += "".PadLeft(2 + taps, '\t') + $"\"{nodeTermIdent.GetType().Name}\": {{\r\n";
+
+                FormatNodeExpr(nodeTermIdent, ref StringFormatter, taps + 1);
+
+                StringFormatter += "".PadLeft(2 + taps, '\t') + $"}}\r\n";
+
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"}},\r\n";
+
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"\"{stmtFunc.ReturnType.GetType().Name}\": {{\r\n";
+                StringFormatter += "".PadLeft(2 + taps, '\t') + $"\"ReturnType\":\"{stmtFunc.ReturnType.type.GetType().Name}\"\r\n";
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"}}\r\n";
+            }
+            else if (nodes[i].stmt.GetType() == typeof(NodeScope))
+            {
+                NodeScope nodeScope = (NodeScope)nodes[i].stmt;
+                FormatNodes(nodeScope.stmts, ref StringFormatter, taps + 1);
+            }
+            else if (nodes[i].stmt.GetType() == typeof(NodeStmtAssign))
+            {
+                NodeStmtAssign nodeStmtInt = (NodeStmtAssign)nodes[i].stmt;
+                NodeTermIdent nodeTermIdentExpr = (NodeTermIdent)nodeStmtInt.name.var;
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"\"{nodeStmtInt.name.GetType().Name}\": {{\r\n";
+                FormatNodeExpr(nodeTermIdentExpr, ref StringFormatter, taps);
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"}},\r\n";
+
+                NodeTermIntLit nodeTermIdentValue = (NodeTermIntLit)nodeStmtInt.value.var;
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"\"{nodeTermIdentValue.int_lit.GetType().Name}\": {{\r\n";
+                FormatNodeExpr(nodeTermIdentValue, ref StringFormatter, taps);
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"}}\r\n";
+            }
+            else if (nodes[i].stmt.GetType() == typeof(NodeStmtReturn))
+            {
+                NodeStmtReturn stmtReturn = (NodeStmtReturn)nodes[i].stmt;
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"\"{stmtReturn.expr.GetType().Name}\": {{\r\n";
+
+                NodeTermIntLit nodeTermIntLit = (NodeTermIntLit)stmtReturn.expr.var;
+                FormatNodeExpr(nodeTermIntLit, ref StringFormatter, taps);
+                StringFormatter += "".PadLeft(1 + taps, '\t') + $"}},\r\n";
+            }
+            StringFormatter += "".PadLeft(0 + taps, '\t') + "},\r\n";
+        }
+        StringFormatter = StringFormatter.TrimEnd(',');
+    }
+
+    static void FormatNodeExpr(NodeTermIdent nodeExpr, ref string StringFormatter, int taps)
+    {
+        StringFormatter += "".PadLeft(2 + taps, '\t') + $"\"{nodeExpr.ident}\": {{\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"type\":\"{nodeExpr.ident.Type}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"Value\":\"{nodeExpr.ident.Value}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"Line\":\"{nodeExpr.ident.Line}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"File\":\"{nodeExpr.ident.File.Replace("\\", "/")}\"\r\n";
+        StringFormatter += "".PadLeft(2 + taps, '\t') + $"}}\r\n";
+    }
+    static void FormatNodeExpr(NodeTermIntLit nodeExpr, ref string StringFormatter, int taps)
+    {
+        StringFormatter += "".PadLeft(2 + taps, '\t') + $"\"{nodeExpr.int_lit.GetType().Name}\": {{\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"type\":\"{nodeExpr.int_lit.Type}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"Value\":\"{nodeExpr.int_lit.Value}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"Line\":\"{nodeExpr.int_lit.Line}\",\r\n";
+        StringFormatter += "".PadLeft(3 + taps, '\t') + $"\"File\":\"{nodeExpr.int_lit.File.Replace("\\", "/")}\"\r\n";
+        StringFormatter += "".PadLeft(2 + taps, '\t') + $"}}\r\n";
+    }
+
     static void WriteOutAsm()
     {
         Console.WriteLine("WRITEING");
@@ -93,36 +191,23 @@ internal class Program
             TokenFormatOutput += $"Token = {{{token.Type}, {Value} at line {token.Line}}}\n";
         }
 
-        File.WriteAllText($"{CurrentDirectory}/tokens.txt", TokenFormatOutput);
+        File.WriteAllText($"{CurrentDirectory}/Builds/Compiler/tokens.txt", TokenFormatOutput);
 
         string jsonVariablesFormat = "";
 
-        for (int i = 0; i < Generation.Variables.Count; i++)
+        for (int i = 0; i < Generation.m_stack_var.Count; i++)
         {
-            Variable variable = Generation.Variables[i];
+            Variable variable = Generation.m_stack_var[i];
             jsonVariablesFormat += 
                 $"{variable.Name}{{\n" +
-                $"\t" + $"Addr = {variable.Address}" + "\n" +
+                $"\t" + $"Addr = {variable.Stack_loc}" + "\n" +
                 $"\t" + $"Size = {variable.Size}" + "\n" +
-                $"\t" + $"FuncName = {variable.FuncName}" + "\n" +
-                $"\t" + $"Settings {{" + "\n" +
-                $"\t\t" + $"IsLocal = {variable.IsLocal}" + "\n" +
-                $"\t\t" + $"IsPublic = {variable.IsPublic}" + "\n" +
-                $"\t\t" + $"IsConst = {variable.IsConst}" + "\n" +
-                $"\t\t" + $"IsGlobal = {variable.IsGlobal}" + "\n" +
-                $"\t\t" + $"IsProtected = {variable.IsProtected}" + "\n" +
-                $"\t\t" + $"IsPtr = {variable.IsPtr}" + "\n" +
-                "\t}\n" +
                 "}\n";
         }
 
-        File.WriteAllText($"{CurrentDirectory}/Variables.txt", jsonVariablesFormat);
+        File.WriteAllText($"{CurrentDirectory}/Builds/Compiler/Variables.txt", jsonVariablesFormat);
 
-        //string jsonFunctionsFormat = JsonSerializer.Serialize(Generation.functions, new JsonSerializerOptions { WriteIndented = true });
-        //File.WriteAllText($"{CurrentDirectory}/Functions.json", jsonFunctionsFormat);
-
-        File.WriteAllText($"{CurrentDirectory}/tokens.txt", TokenFormatOutput);
-        File.WriteAllLines(OutputFile, Generation.Assembly_Src);
+        File.WriteAllLines(OutputFile, Generation.m_output);
     }
     private static void Exit(int exitCode = 0)
     {

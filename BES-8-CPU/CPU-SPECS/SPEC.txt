@@ -50,35 +50,39 @@ INSTRUCTIONS
  0x2B    HALT 
 
 REGISTERS
-AX  (0b0000_0000)   GP 16 bit register
-AL  (0b0010_0000)   GP 8 bit register LOW
-AH  (0b0001_0000)   GP 8 bit register HIGH
-BX  (0b0000_0001)   GP 16 bit register
-BL  (0b0010_0001)   GP 8 bit register LOW
-BH  (0b0001_0001)   GP 8 bit register HIGH
-CX  (0b0000_0010)   GP 16 bit register
-CL  (0b0010_0010)   GP 8 bit register LOW
-CH  (0b0001_0010)   GP 8 bit register HIGH
-DX  (0b0000_0011)   GP 16 bit register
-DL  (0b0010_0011)   GP 8 bit register LOW
-DH  (0b0001_0011)   GP 8 bit register HIGH
-ZX  (0b0000_0100)   GP 16 bit register
-ZL  (0b0010_0100)   GP 8 bit register LOW
-ZH  (0b0001_0100)   GP 8 bit register HIGH
-PC  (0b0000_0101)   Program Counter   16 bit register
-SP  (0b0000_0110)   Stack Pointer     16 bit register
-MB  (0b0000_0111)   Memory bank       16 bit register
-X   (0b0000_1000)   16 bit Index register
-XL  (0b0010_1000)   8 bit Index register LOW
-XH  (0b0001_1000)   8 bit Index register HIGH
-Y   (0b0000_1001)   16 bit Index register
-YL  (0b0010_1001)   8 bit Index register LOW
-YH  (0b0001_1001)   8 bit Index register HIGH
-XY  (0b0000_1010)   32 bit Index register (combineing the X and Y registers into one)
-AB  (0b0001_1010)   32 bit GP register (combineing the A and B registers into one)
-CD  (0b0010_1010)   32 bit GP register (combineing the C and D registers into one)
-PMB (0b0000_1011)   Program Memory bank
-F   (0b0000_1111)   32 status register
+AX      (0b0000_0000)   GP 16 bit register
+AL      (0b0010_0000)   GP 8 bit register LOW
+AH      (0b0001_0000)   GP 8 bit register HIGH
+BX      (0b0000_0001)   GP 16 bit register
+BL      (0b0010_0001)   GP 8 bit register LOW
+BH      (0b0001_0001)   GP 8 bit register HIGH
+CX      (0b0000_0010)   GP 16 bit register
+CL      (0b0010_0010)   GP 8 bit register LOW
+CH      (0b0001_0010)   GP 8 bit register HIGH
+DX      (0b0000_0011)   GP 16 bit register
+DL      (0b0010_0011)   GP 8 bit register LOW
+DH      (0b0001_0011)   GP 8 bit register HIGH
+ZX      (0b0000_0100)   GP 16 bit register
+ZL      (0b0010_0100)   GP 8 bit register LOW
+ZH      (0b0001_0100)   GP 8 bit register HIGH
+PC      (0b0000_0101)   Program Counter   16 bit register
+SP      (0b0000_0110)   Stack Pointer     16 bit register
+MB      (0b0000_0111)   Memory bank       16 bit register
+X       (0b0000_1000)   16 bit Index register
+XL      (0b0010_1000)   8 bit Index register LOW
+XH      (0b0001_1000)   8 bit Index register HIGH
+Y       (0b0000_1001)   16 bit Index register
+YL      (0b0010_1001)   8 bit Index register LOW
+YH      (0b0001_1001)   8 bit Index register HIGH
+XY      (0b0000_1010)   32 bit Index register (combineing the X and Y registers into one)
+AB      (0b0001_1010)   32 bit GP register (combineing the A and B registers into one)
+CD      (0b0010_1010)   32 bit GP register (combineing the C and D registers into one)
+R1      (0b0000_1011)   Temp Register
+R2      (0b0001_1011)   Temp Register
+R3      (0b0010_1011)   Temp Register
+R4      (0b0011_1011)   Temp Register
+PMB     (0b0000_1100)   Program Memory bank
+F       (0b0000_1111)   32 status register
     0.  ZERO
     1.  EQUAL
     2.  LESS
@@ -123,23 +127,18 @@ you can used more banks but bank 0 to 2 is resuves
 for the program 
 
 BANK LAYOUT
-Bank 0, 1, 2: 
-    ROM Range static:               0x00000 to 0x30000
+Bank 0: 
+  ROM Range static:               0x000000 to 0xDEFFFE (~14 megabyte)
+  Interrupt Table Location:       0xDEFFFF to 0xDEFFFF
+  Read only data static:          0xDF0000 to 0xFEFFFF (2 megabyte)
+  IO Range static:                0xFF0000 to 0xFF00FF
+  Stack Range static:             0xFF0100 to 0xFF1FFF
+  Video Memory Range static:      0xFF2000 to 0xFFFFFF
 
-Bank 3:
-    IO Range static:                0x0000 to 0x01FF
-    Stack Range static:             0x0200 to 0x1FFF
-    Interrupt Table Location:       0x2000 to 0x2000
-    Video Memory Range static:      0x2001 to 0xD8FF
-    Cache1 Range static:            0xD900 to 0xE8FF
-    General Purpose Memory Range:   0xE900 to 0xFFFF
-
-Bank 4:
-    General Purpose Memory Range:   0x0000 to 0x7FFF
-    Variable Memory Range static:   0x8000 to 0xFFFF
-
-Bank 5:
-    General Purpose Memory Range:   0x0000 to 0xFFFF
+Bank 1:
+  Cache1 Range static:            0x000000 to 0x000FFF
+  Variable Memory Range static:   0x001000 to 0x008FFF (32 kilobyte)
+  General Purpose Memory Range:   0x009000 to 0xFFFFFF (16,7 megabyte)
 
 PORTS
 PORTS are used to communicate with devices or by the BES-8 itself. See

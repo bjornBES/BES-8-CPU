@@ -3,6 +3,9 @@
     public class Variables
     {
         public string Name = "";
-        public uint Value = 0;
+        // value is in hex
+        public string Value = "";
+        public bool IsImm;
+        public bool IsPointer;
     }
 }

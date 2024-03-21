@@ -2,18 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../Assembler"
-		},
-		{
-			"path": "../Compiler"
-		},
-		{
-			"path": "../emulator"
-		},
-		{
-			"path": "../docs"
 		}
 	],
 	"settings": {

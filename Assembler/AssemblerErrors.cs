@@ -1,165 +1,81 @@
 ﻿namespace assembler
 {
-    public partial class Assembler
+    public static class AssemblerErrors
     {
-        public static class AssemblerErrors
+        public static void LabelNotFound(string labelName)
         {
-            public static void ErrorSyntax(string From)
-            {
-                Error("19094"); // todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(OrgSrc[LineIndex].Length, '~') + " ");
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("Error Syntax from " + From);
-            }
-            public static void ErrorSyntax(string line, string where)
-            {
-                Error("19094"); // todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(OrgSrc[LineIndex].Length, '~') + " ");
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("Error Syntax case " + line + " at " + where);
-            }
-            public static void ErrorRegisterNotFound(string regsiter)
-            {
-                Error("19094"); // todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(OrgSrc[LineIndex].Length, '~') + " ");
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("can't find the Register");
-            }
-            public static void ErrorDirInstructionNotFound(string Instr)
-            {
-                Error("19094"); //todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(Instr.Length + 1, '~') + " ");
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("can't find the Instruction");
-            }
-            public static void ErrorInstrLength(int ErrorIndex, string[] arg)
-            {
-                Error("19093"); //todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(ErrorIndex, '~') + " ");
-                for (int i = 0; i < arg.Length; i++)
-                {
-                    Console.Write("".PadLeft(arg[i].Length, '~') + " ");
-                }
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("the arguments are not right length");
-            }
-            public static void ErrorArgIsNull()
-            {
-                Error("19093"); //todo error codes
+            Error("E00005");
+            Console.WriteLine($"Label was not found in the project {labelName}");
+            Console.WriteLine($"try to see if the label is local or not global");
+            Exit(-1);
+        }
+        public static void ErrorUnexpectedToken(Token token)
+        {
+            Error("E00001", token);
+            Console.WriteLine("0");
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("the argument is null empty");
-                Environment.Exit(1);
-            }
-            public static void ErrorCantFindInputFile(string FilePath)
-            {
-                ErrorOutAssembler("19093"); //todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(FilePath);
-                Console.ResetColor();
-                Console.WriteLine("can't find the input file");
-            }
-            public static void ErrorInstructionNotFound(string Instr)
-            {
-                Error("19092"); //todo error codes
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("".PadLeft(Instr.Length, '~') + " ");
-                Console.WriteLine("");
-                Console.ResetColor();
-                Console.WriteLine("can't find the Instruction");
-            }
-            public static void ErrorLebleNotFound(string Name)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error");
-                Console.ResetColor();
-                Console.Write(" BES-19091 "); //todo error code
-                string file = GetFile(Name);
-                Console.Write("in " + file + " at line ");
-                Console.WriteLine(GetSrcLineNumber(file));
-                Console.WriteLine("\t\t" + OrgSrc[LineIndex]);
-                Console.Write("\t\t");
+            Console.WriteLine($"Unexpected {token.Type}");
+            Exit(-1);
+        }
+        public static void ErrorExpectedToken(Token token, TokenType ExpectedToken)
+        {
+            Error("E00002", token);
+            Console.WriteLine("0");
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Name);
-                Console.WriteLine("\t\t" + "".PadLeft(Name.Length, '~'));
-                Console.ResetColor();
-                Console.WriteLine("can't find the Lable");
-                HasError = true;
-            }
-            public static void ErrorVariableNotFound(string Name)
-            {
-                Error("19091");
+            Console.WriteLine($"Expected {ExpectedToken}");
+            Exit(-1);
+        }
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Name);
-                Console.WriteLine("\t\t" + "".PadLeft(Name.Length, '~'));
-                Console.ResetColor();
-                Console.WriteLine("can't find the Variable");
-            }
-            private static void Error(string code)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error");
-                Console.ResetColor();
-                Console.Write(" BES-" + code + " ");
-                Console.Write("in " + CurrentFile + " at line ");
+        public static void ErrorBitSize(Token token)
+        {
+            Error("E00003", token);
+            Console.WriteLine("0");
 
-                Console.WriteLine(LineNumber);
-                Console.WriteLine("\t\t" + OrgSrc[LineIndex]);
-                Console.Write("\t\t");
-                HasError = true;
-            }
-            private static void ErrorOutAssembler(string code)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Error");
-                Console.ResetColor();
-                Console.WriteLine(" BES-" + code + " ");
-                Console.Write("\t\t");
-                HasError = true;
-            }
-            public static string GetFile(string HelpSrc)
-            {
-                if (Program.Files == null) return CurrentFile;
+            Console.WriteLine("The bit size is over 16 bits");
+            Exit(-1);
+        }
+        public static void ErrorCantFindInputFile(string FilePath)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(FilePath);
+            Console.ResetColor();
+            Console.WriteLine("can't find the input file");
+            Exit(-1);
+        }
+        public static void ErrorInstructionNotFound(Token Instr)
+        {
+            Error("E00004", Instr); //todo error codes
+            Console.WriteLine("0");
 
-                for (int f = 0; f < Program.Files.Count; f++)
-                {
-                    string[] src = File.ReadAllText(Program.Files[f].FullName).Split("\r\n");
-                    for (int i = 0; i < src.Length; i++)
-                    {
-                        if (src[i].Contains(HelpSrc)) return Program.Files[f].FullName;
-                    }
-                }
-                Console.WriteLine("ERROR get files " + HelpSrc);
-                return "";
-            }
-            public static int GetSrcLineNumber(string path)
-            {
-                int Line = 0;
-                string[] SrcFile = File.ReadAllText(path).Split("\r\n");
-                for (int i = 0; i < SrcFile.Length; i++)
-                {
-                    if (string.IsNullOrEmpty(SrcFile[i])) { Line++; }
-                    else if (SrcFile[i].StartsWith('.')) { Line++; }
-                    else if (SrcFile[i].StartsWith('$')) { Line++; }
-                    else if (SrcFile[i].EndsWith(':')) { Line++; }
-                    else Line++;
-                }
-                return Line;
-            }
+            FormatText(ConsoleColor.Red, Instr.Value + " ");
+            FormatText(ConsoleColor.Red, "".PadLeft(Instr.Value.Length, '~') + " ");
+            Console.WriteLine("can't find the Instruction");
+            Exit(-1);
+        }
+        private static void Error(string code, Token token)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Error");
+            Console.ResetColor();
+            Console.Write(" BES-" + code + " ");
+            Console.Write($"in {token.File}:{token.Line}:");
+        }
+        private static void Error(string code)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Error");
+            Console.ResetColor();
+            Console.WriteLine(" BES-" + code + " ");
+        }
+        static void FormatText(ConsoleColor color, string text)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+        static void Exit(int exitCode)
+        {
+            Environment.Exit(exitCode);
         }
     }
 }

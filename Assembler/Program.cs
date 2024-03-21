@@ -6,26 +6,24 @@ using System.Text;
 public class Program
 {
     static string InputFile = "\0\0";
-    static string SrcCopyFile = "";
-    static string ObjFile = "";
     static string OutputFile = "";
     static string BinFile = "";
     static string TokenFile = "";
+    static string ParserTokenFile = "";
     static string OutputSrcFile = "";
+    public static string FormatOutputFile = "";
     public static string ProgramPath = "";
-    public static string OGPorgramPath = "";
-    public static string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\CPUs\\BES-8-CPU";
-    public static string LibsPath = $"{CurrentDirectory}\\Libs";
+    public const string CurrentDirectory = "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\CPUs\\BES-8-CPU";
+    public const string LibsPath = $"{CurrentDirectory}\\Libs";
 
     static bool Build = true;
     static bool DoClear = false;
 
     static bool UseDebuger = false;
-    static bool WriteBin = false;
     public static List<FileInfo> Files = new List<FileInfo>();
 
-    public static int Max_Length = 0x2FFFF + 1;
-    public const int Pading_Length = 5;
+    public static int Max_Length = 0xFFFF + 1;
+    public const int Pading_Length = 4;
 
     public static void Main(string[] args)
     {
@@ -89,23 +87,30 @@ public class Program
         }
         Console.CursorVisible = false;
 
-        if (InputFile == "\0\0") Assembler.AssemblerErrors.ErrorCantFindInputFile("");
+        if (InputFile == "\0\0") AssemblerErrors.ErrorCantFindInputFile("");
+        if (FormatOutputFile == "") FormatOutputFile = "Bin";
+        Formats formats = (Formats)Enum.Parse(typeof(Formats), FormatOutputFile);
         if (OutputFile == "")
         {
-            OutputFile = "./a.out";
+            switch (formats)
+            {
+                case Formats.Bin:
+                    OutputFile = "./a.bin";
+                    break;
+                case Formats.Obj:
+                    OutputFile = "./a.obj";
+                    break;
+                default:
+                    break;
+            }
         }
         if (BinFile != "")
         {
             Conv(ref BinFile);
-            WriteBin = true;
         }
         if (TokenFile != "")
         {
             Conv(ref TokenFile);
-        }
-        if (SrcCopyFile != "")
-        {
-            Conv(ref SrcCopyFile);
         }
         if (ProgramPath != "")
         {
@@ -119,10 +124,11 @@ public class Program
         {
             Conv(ref OutputSrcFile);
         }
-        if (ObjFile != "")
+        if (ParserTokenFile != "")
         {
-            Conv(ref ObjFile);
+            Conv(ref ParserTokenFile);
         }
+
         string Input = InputFile;
         Conv(ref Input);
         InputFile = InputFile.Replace(".\\", "/");
@@ -133,7 +139,7 @@ public class Program
         Console.WriteLine("ProgramPath " + ProgramPath);
         Console.WriteLine("Input File " + Input);
         string OutputPath = GetPathFromFile(OutputFile);
-        if (File.Exists(Input) == false) Assembler.AssemblerErrors.ErrorCantFindInputFile(InputFile);
+        if (File.Exists(Input) == false) AssemblerErrors.ErrorCantFindInputFile(InputFile);
         if (Directory.Exists(OutputPath) == false) Directory.CreateDirectory(OutputPath);
         if (File.Exists(OutputFile) == false) File.Create(OutputFile);
         string src;
@@ -143,38 +149,67 @@ public class Program
             DirectoryInfo Programdirectory = new DirectoryInfo(ProgramPath);
             Files = Programdirectory.GetFiles("*.Basm").ToList();
             List<FileInfo> FilesCopy = Files;
-            src = ".newfile " + Input + "\r\n";
-            src += File.ReadAllText(Input) + "\r\n";
+            src = ".newfile " + Input + Environment.NewLine;
+            src += File.ReadAllText(Input) + Environment.NewLine;
             Includes(ref src, true, FilesCopy);
 
             for (int f = 0; f < FilesCopy.Count; f++)
             {
                 if (FilesCopy[f].FullName.Replace("\\", "/") != Input)
                 {
-                    src += ".newfile " + OGPorgramPath + "\\" + FilesCopy[f].Name + "\r\n";
-                    src += File.ReadAllText(FilesCopy[f].FullName) + "\r\n";
+                    src += ".newfile " + ProgramPath + "/" + FilesCopy[f].Name + Environment.NewLine;
+                    src += File.ReadAllText(FilesCopy[f].FullName) + Environment.NewLine;
                 }
             }
         }
         else
         {
             src = File.ReadAllText(Input);
-            src = ".newfile " + Input + "\r\n" + src;
+            src = ".newfile " + Input + Environment.NewLine + src;
 
-            src = src.Replace("\n", "\r\n");
+            src = src.ReplaceLineEndings(Environment.NewLine);
             Includes(ref src, false);
-            src = src.Replace("\n", "\r\n");
+            src = src.ReplaceLineEndings(Environment.NewLine);
         }
-        Assembler.Build(src.Split("\r\n"));
+        Assembler Assembler = new Assembler()
+        { Src = src };
+        Assembler.Build();
 
         if (UseDebuger)
         {
-            File.WriteAllLines(TokenFile, Assembler.AssemblerLists.Tokens.ToArray());
-            File.WriteAllLines(OutputSrcFile, Assembler.OrgSrc);
+            List<Token> tokens = Assembler.tokenization.tokens;
+            string TokenForamt = "";
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                TokenForamt += $"token{i.ToString().PadRight(5, '0')}{{ {tokens[i].Type.ToString().PadRight(14, ' ')}\t{tokens[i].Value} at line {tokens[i].Line} }}{Environment.NewLine}";
+            }
+            File.WriteAllText(TokenFile, TokenForamt);
+            File.WriteAllText(OutputSrcFile, Assembler.Src);
+            File.WriteAllLines(ParserTokenFile, Assembler.generation.ParserTokens);
+        }
+        switch (formats)
+        {
+            case Formats.Bin:
+                File.WriteAllLines(OutputFile, Assembler.generation.MachineCode);
+                break;
+            case Formats.Obj:
+                string Format = "";
+                byte[] bytes = Array.Empty<byte>();
+                bytes = ObjFormatter.GetOBJ();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    Format += (char)bytes[i];
+                }
+                File.WriteAllText(OutputFile, Format);
+                break;
+            default:
+                break;
         }
 
+        /*
         if (Assembler.HasError)
             Environment.Exit(0);
+        */
 
         Console.WriteLine("starter");
         //Environment.Exit(0);
@@ -191,64 +226,11 @@ public class Program
 
         Console.Clear();
         Console.WriteLine("Writing");
-        Thread BinThread = new Thread(new ThreadStart(WriteOutBin));
-        if (WriteBin == true)
-        {
-            BinThread.Start();
-        }
-
-        int SaveProgressBar = 0;
-        string outputString = "";
+        WriteOutBin(Assembler.generation);
 
         // main
-        if (ObjFile != "")
-        {
-            string OBJstring = Encoding.ASCII.GetString(Assembler.AssemblerObj.GetOBJ());
-            string Format = "";
-            byte[] bytes = Assembler.AssemblerObj.GetOBJ();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                Format += (char)bytes[i];
-            }
-            File.WriteAllText(ObjFile, Format);
-        }
-        if (SrcCopyFile != "")
-        {
-            File.WriteAllLines(SrcCopyFile, Assembler.OutSrc);
-        }
-        for (int i = 0; i < Max_Length; i++)
-        {
-            if (i > Assembler.MaxPC) break;
-            if (!(i < Assembler.AssemblerLists.MCcode.Length)) break;
-            if (string.IsNullOrEmpty(Assembler.AssemblerLists.MCcode[i]) == false)
-            {
-                //Console.WriteLine("data " + assembler.MCcode[i]);
-                string Value = Assembler.AssemblerLists.MCcode[i].Trim().ToUpper();
-                outputString += Value.PadLeft(Pading_Length, '0') + "|";
-                // info
-
-
-                int percentComplete = (int)(0.5f + ((100f * i) / (Max_Length - 1)));
-                if (DoClear == false)
-                {
-                    int ProgressBar = (int)(0.5f + (((Console.WindowWidth - 1) * i) / (Max_Length - 1)));
-                    for (int p = SaveProgressBar; p < ProgressBar; p++)
-                    {
-                        Console.SetCursorPosition(p, Console.WindowHeight - 1);
-                        Console.Write("=");
-                        Console.SetCursorPosition(p, Console.WindowHeight - 2);
-                        Console.Write("-");
-                    }
-                    SaveProgressBar = ProgressBar;
-                    Console.SetCursorPosition((Console.WindowWidth - 18 / 2) / 2, Console.WindowHeight - 2);
-                    Console.Write(Convert.ToString(i, 16).PadLeft(5, '0') + " / " + Convert.ToString(Max_Length, 16));
-                    Console.SetCursorPosition((Console.WindowWidth - 14 / 2) / 2, Console.WindowHeight - 1);
-                    Console.Write(percentComplete.ToString().PadLeft(3, '0') + "% / 100%");
-                }
-            }
-        }
         Console.WriteLine("DONE");
-        File.WriteAllText(OutputFile, outputString);
+        //File.WriteAllText(OutputFile, outputString);
 
     }
     private static string GetPathFromFile(string File)
@@ -270,7 +252,7 @@ public class Program
             {
                 string FileName = src.Split("\r\n")[i].Split(' ')[1];
                 FileName = FileName.Replace("/", "\\");
-                string file = FileName.Replace(".\\", CurrentDirectory);
+                string file = FileName.Replace(".\\", CurrentDirectory + "\\");
 
                 if (FileName == "BIOS")
                 {
@@ -295,7 +277,7 @@ public class Program
 
                 if (fileExists)
                 {
-                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
+                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + Environment.NewLine + File.ReadAllText(file));
                 }
 
                 if (Mult == true)
@@ -310,35 +292,35 @@ public class Program
                     }
                     if (InTheSame == true)
                     {
-                        src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n; in the same dir " + file + "\r\n" + File.ReadAllText(file));
+                        src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n; in the same dir " + file + Environment.NewLine + File.ReadAllText(file));
                         continue;
                     }
                 }
                 if (File.Exists(file))
                 {
-                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + "\r\n" + File.ReadAllText(file));
+                    src = src.Replace(src.Split("\r\n")[i], ".newfile " + file + Environment.NewLine + File.ReadAllText(file));
                 }
                 else
                 {
-                    // todo Error
+                    Console.WriteLine("File not found " + file);
                     Environment.Exit(1);
                 }
             }
         }
     }
 
-    static void WriteOutBin()
+    static void WriteOutBin(Generation generation)
     {
         string outputString = "";
         for (int i = 0; i < Max_Length; i++)
         {
-            if (!(i < Assembler.AssemblerLists.MCcode.Length)) break;
-            if (string.IsNullOrEmpty(Assembler.AssemblerLists.MCcode[i]) == false)
+            if (!(i < generation.MachineCode.Count)) break;
+            if (string.IsNullOrEmpty(generation.MachineCode[i]) == false)
             {
                 if (i >= 0x30000 && i <= 0x30FFF) continue;
                 if (i >= 0x37000 && i <= 0xFFFF9) continue;
                 //Console.WriteLine("data " + assembler.MCcode[i]);
-                string Value = Assembler.AssemblerLists.MCcode[i].Trim().ToUpper();
+                string Value = generation.MachineCode[i].Trim().ToUpper();
                 if (i % 16 == 0)
                 {
                     if (i == 0)
@@ -373,13 +355,12 @@ public class Program
         DecodeInstr(text, "Input", ref InputFile);
         DecodeInstr(text, "InputDir", ref ProgramPath);
         DecodeInstr(text, "Output", ref OutputFile);
-        DecodeInstr(text, "ObjFile", ref ObjFile);
+        DecodeInstr(text, "Format", ref FormatOutputFile);
         DecodeInstr(text, "DontBuild", ref Build, "false", "true");
         DecodeInstr(text, "Silent", ref DoClear, true);
         DecodeInstr(text, "FillTo", ref Max_Length);
         DecodeInstr(text, "UseBinary", useBinFiles);
         DecodeInstr(text, "UseDebuger", useDebug);
-        DecodeInstr(text, "SrcFile", ref SrcCopyFile);
     }
 
     static void DecodeInstr(string[] args, string instr, ref string Result)
@@ -497,7 +478,6 @@ public class Program
 
     static bool useBinFiles(int index, string[] args)
     {
-        WriteBin = true;
         BinFile = args[index];
 
         return false;
@@ -507,6 +487,7 @@ public class Program
         UseDebuger = true;
         OutputSrcFile = "./Builds/src.txt";
         TokenFile = "./Builds/Tokens.txt";
+        ParserTokenFile = "./Builds/ParserTokens.txt";
         return false;
     }
     static void Conv(ref string file)

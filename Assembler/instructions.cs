@@ -43,5 +43,8 @@
         XOR,
         JMS,
         JNS,
+        SHL,
+        SHR,
+        HALT,
     }
 }

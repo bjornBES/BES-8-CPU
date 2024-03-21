@@ -1,9 +1,10 @@
-$Keyboard #= 4
-$Dispaly #= 5
+$Keyboard #=            0004h
+$Dispaly #=             0005h
 
-$PortIsthere *= 02000h              ; bank 1
-$ExitCode *= 02001h                 ; bank 1
-$ProgramBankRegister *= FFFFFh      ; bank 0
+$PortIsthere *=         E900h   ; bank 3
+$ExitCode *=            E901h   ; bank 3
+
+$PortTestingValue #=    80FFh
 
 .org 0
 
@@ -11,45 +12,84 @@ _Main:
 pushr
 sef #FI
 
-; moving 1 to the memory bank 
-mov MB, #1
-mov XL, #FFh
-mov DX, #80FFh                      ; testing the ports
-out %Dispaly, DX
-; testing what port are in use and what are not in use
-Test_Port_Loop:
-; overflow XL from FF to 0
-inc XL
-call [Test_Ports]
-; exit loop?
-cmp XL, #9                          ; Test_Port_Loop > 9?
-jl [Test_Port_Loop]                 ; yes
+mov MB, #3
+; settint the INTERRUPT_TABLE at 2000h in bank 3
+mov [2000h], [INTERRUPT_TABLE]
 
-; overflowing XL
-inc MB
-; setting up the interrupt table
-; MB = 2
-;     \/ in bank 2
-mov [0D801h], [INTERRUPT_TABLE]
-; read a disk
-; here we get the bytes used to boot (55AA)
-Read_Disk_Loop:
-inc XH
+mov X, #FFFFh
+
+; this loop will test the port one by one
+; and put the result in %PortIsthere one bit at a time
+Port_There_Loop:
+
+; overflowing X to 0
+inc X
+call [Test_Port]
+cmp X, #A
+jl [Port_There_Loop]
+
+; here we now need to look at if the disks a bootabul
+; and other things
+mov XL, #FFh                    ; disk
+
+
+mov CX, #0                      ; page 0
+
+; here we cheak all the disks to see if they are bootabul
+Disk_Is_Bootabul_Loop:
+; 0x70A is the address for the Bootabul flag on a disk
+; this is also in the first page and the last sector
+mov AX, #70Ah                   ; address
+; we need to set this if any other plas needs to jump back here
+
+; overflowing DL to 0
+inc DL
+
+; cheaking if DL is overflowing
+cmp DL, #6
+jge [Error_Not_Bootabul]
+
+; reading the disk at 0x70A
+int #EAh
+
+; returns in ZX
+cmp ZX, #1                      ; ZX == 1
+jne [Disk_Is_Bootabul_Loop]     ; no
+; yes
+inc AX                          ; AX = 70Bh
+; here we cheak if we can boot from the disk
+
+int #EAh
+; returns in ZX
+cmp ZX, #1                      ; ZX == 1
+jne [Disk_Is_Bootabul_Loop]     ; no
+; yes
+
 ; here we read the disk
+; to get the boot byte (55AA)
+push DL                         ; disk
+push #1                         ; page 1
+push #4                         ; sector 4
+; here we read the 1 page bc that, that is the first
+; page that the user have control over
+call [Read_Sector]
+; call in fileTest.Basm
 
-; disk in XL
-push XH                             ; disk
-push #1                             ; page = 1
-push #4                             ; sector = 4
-call [Read]
-; getting the to bytes
-mov BX, [101FFh]                    ; high byte
-mov AX, [101FEh]                    ; low byte
-; placing the bytes in to AX
-or AX, BL
+; now we need to read the cache
+; at 0xDAFE and 0xDAFF
+mov AH, [E0FEh]                 ; high byte
+mov AL, [E0FFh]                 ; low byte
 
-cmp AX, #55AAh
-jne [Read_Disk_Loop]
+cmp AX, #55AAh                  ; AX == 0x55AA
+jne [Disk_Is_Bootabul_Loop]     ; no
+; yes
+
+; getting the sectors par page
+mov AX, #703h                       ; address
+; CX = 0
+; disk is in DL
+int #EAh                            ; read
+mov BX, ZX                          ; BX = sectors par page
 
 ; no call?
 ; need full stack to do shit
@@ -57,68 +97,88 @@ jne [Read_Disk_Loop]
 
 ; this is where the BOOT code is at
 ; Bootstrap Loader
-Boot:
-mov MB, #0
-mov %ProgramBankRegister, #3
 
-push XH                             ; byte Disk
-push #0                             ; short Page
-push #4                             ; byte sector
-call [Read]
+push DL                             ; byte disk
+push CX                             ; short Page = 0
+push BX                             ; byte sector
+call [Read_Sector]
 
-; set up some things
+mov AX, #F00Ch
+mov YL, #3
+int #E6h
+mov R2, X
 
-; Boot to an OS
-; reading boot in page from sector 4 page 0
-mov MB, #2
-mov R1, [1000Ch]                    ; 0x70C
-mov BX, [1000Eh]                    ; 0x70E
-; combining AX and BX
-or R1, BX
+mov AX, X
+int #E7h
+mov R1, ZX
 
 ; page * PageSize(0x800) = BootAddress
-; setting the address using AX
+; setting the address using R1
 mul R1, #800h
-
+mov R3, DL
 popr
-
-; the OS now uses the BIOS ints
 clf #FI
+
+; Boot
+; R1 = address
+mov XH, R3                          ; disk
+mov XL, R2                          ; sectors
 
 ; Jump to Program
 int #FAh
+; returning from the OS
+; returns Exit_code in AX
 
-; after exiting the OS
 mov AX, %ExitCode
-cmp AX, #1                          ; 0 = good
-; AX >= 1
-jge [Exit_Fall]
+cmp AX, #0                          ; 0 = good
+; AX == 0
+je [Exit_BIOS]
 
 
 Exit_Fall:
 ; clearing the scrren
 out #5, #80FFh
 
+mov AX, R1
+
 mov AX, [Exit_Fall_Message]
+call [Print_Message]
+
+mov AX, R1
+; conv from dec to hex
+int #E7h
+; returns a pointer to a null terminated string in ZX
+
+mov AX, ZX
 call [Print_Message]
 
 Exit_BIOS:
 int #E0h
 
-; XL byte Port
-; DX uint value
-; testing if a port is in use or not
-Test_Ports:
-push AX
-out XL, DX
-in XL, AX
-; the port will return with CARRY set to 0 if there
-; and CARRY set to 1 if not there
-jnc [ISTHERE]
-; setting it to 1 if it is not there
-or %PortIsthere, XL
 
-ISTHERE:
+
+; helper functions
+Error_Not_Bootabul:
+mov AX, [Error_Disk_Not_Bootabul_Message]
+call [Print_Message]
+
+jmp $
+
+; byte port in X
+Test_Port:
+push AX
+mov AX, #0
+out X, %PortTestingValue
+in X, AX
+
+cmp AX, #1                      ; AX == 1
+jne [ISNOTTHERE]                ; no
+; yes
+shr AX, X
+or %PortIsthere, AX
+
+ISNOTTHERE:
+
 pop AX
 rts
 
@@ -139,4 +199,6 @@ rts
 
 ; data
 Exit_Fall_Message:
-.strz "Error: "
+.strz "Error: the program was not a success"
+Error_Disk_Not_Bootabul_Message:
+.strz "Error: the disks are not bootabul"

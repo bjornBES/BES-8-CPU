@@ -2,11 +2,14 @@
 {
     public enum TokenType
     {
+        none,
+
         int_lit,
         ident,
 
         port,
 
+        long_,
         func,
         ptr,
         byte_,

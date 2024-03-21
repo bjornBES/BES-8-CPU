@@ -1,0 +1,129 @@
+# CPU Specifications:
+OVERVIEW
+    Name: BES-8-CPU
+    Data Bus: 24 bits
+    Address Bus: 24 bits
+    Core Count: 0
+    Clock Speed: 0 (MHz)
+REGISTERS:
+    AX: 24 bits (can be split into AL and AH - 12 bits each)
+    BX: 24 bits (can be split into BL and BH - 12 bits each)
+    CX: 24 bits (can be split into CL and CH - 12 bits each)
+    DX: 24 bits (can be split into DL and DH - 12 bits each)
+    ZX: 24 bits (can be split into ZL and ZH - 12 bits each)
+    X:  24 bits (can be split into XL and XH - 12 bits each)
+    Y:  24 bits (can be split into YL and YH - 12 bits each)
+    R1: 24 bits [are temp registers]
+    R2: 24 bits [are temp registers]
+    R3: 24 bits [are temp registers]
+    R4: 24 bits [are temp registers]
+    MB: 24 bits
+    PMB:24 bits Program Memory Bank Register
+
+    BP: 24 bits Base Pointer
+    Stack Pointer (SP): 24 bits
+        The stack pointer keeps track of the top of the stack in memory.
+        Stack operations (PUSH and POP) affect the stack pointer.
+    Program Counter (PC): 24 bits
+        The program counter holds the memory address of the next instruction to be executed.
+        It increments automatically after fetching each instruction.
+    Flags Register Low:
+        0. ZERO
+        1. EQUAL
+        2. LESS
+        3. CARRY
+        4. Unused
+        5. SIGN
+        6. PARITY
+        7. OVERFLOW
+      Flags Register High:
+        0. INTERRUPT_ENABLE
+        1. HALT
+        2. ERROR
+        
+CACHE:
+  - Cache 1: File data cache
+      - Size:       4095 bytes
+      - Type:       Read only
+      - Location:   Bank 1 (0x000000 to 0x000FFF)
+
+MEMORY LAYOUT:
+the memory layout is ranged from 0x000000 to 0xFFFFFF where each locateden is a word(16 bits/2 bytes)  
+  Bank 0: 
+    ROM Range static:               0x000000 to 0xDEFFFE (~14 megabyte)
+    Interrupt Table Location:       0xDEFFFF to 0xDEFFFF
+    Read only data static:          0xDF0000 to 0xFEFFFF (2 megabyte)
+    IO Range static:                0xFF0000 to 0xFF00FF
+    Video Memory Range static:      0xFF0100 to 0xFFFFFF
+
+
+  Bank 1:
+    Cache1 Range static:            0x000000 to 0x000FFF
+    Variable Memory Range static:   0x001000 to 0x008FFF (~32 kilobyte)
+    Stack Range static:             0x009000 to 0x00FFFF (~28 kilobyte)
+    General Purpose Memory Range:   0x010000 to 0xFFFFFF (16,7 megabyte)
+
+PORTS
+  0x000         Expansion slot 0
+  0x001         Expansion slot 1
+  0x002         Expansion slot 2
+  0x003         Expansion slot 3
+  0x004         Keyboard Port
+  0x005         Screen port
+  0x006         User port 1
+  0x007         User port 2
+  0x008         User port 3
+  0x009         User port 4
+  0x00A         Disk 1
+  0x00B         Disk 2
+  0x00C         Disk 3
+  0x00D         Disk 4
+  0x00E         Floppy Disk       Read only
+  0x00F         Cartridge Disk    Read only
+  0x010 - 0x1FF Unused
+
+INSTRUCTION SET:
+    0x00    NOP                             No Operation
+    0x01    MOV     destination, source     Move the value from source to destination (destination can be an address or a register)
+    0x02    PUSH    source                  Push the value from source onto the stack and decrease the stack pointer
+    0x03    POP     destination             Increase the stack pointer and pop a value off the stack into the destination
+    0x04    ADD     destination, source     Add the value from the source to the destination and store the result in the destination
+    0x05    SUB     destination, source     Subtract the value from the source from the destination and store the result in the destination
+    0x06    MUL     destination, source     Multiply the value in source by the value in destination and store the result in destination
+    0x07    DIV     destination, source     Divide the value in source by the value in destination, storing the quotient in destination and the remainder in source
+    0x08    AND     destination, source     Bitwise AND operation between the values in source and destination, storing the result in destination
+    0x09    OR      destination, source     Bitwise OR operation between the values in source and destination, storing the result in destination
+    0x0A    NOT     destination             Bitwise NOT operation on the value in destination, storing the result in destination
+    0x0B    NOR     destination, source     Bitwise NOR operation between the values in source and destination, storing the result in destination
+    0x0C    ROL     source, operand1        Rotate the bits in the destination right by the number of positions specified in operand1. The CARRY flag is used in the rotation.
+    0x0D    ROR     source, operand1        Rotate the bits in the destination left by the number of positions specified in operand1. The CARRY flag is used in the rotation.
+    0x0E    JMP     address                 Jump to the specified address
+    0x0F    CMP     operand1, operand2      Compare operand1 and operand2 and set flags in the Flags Register for conditional jumps
+    0x10    JLE     address                 Jump to the specified address if less than or equal to (<=) flag is set
+    0x11    JE      address                 Jump to the specified address if equal (==) flag is set
+    0x12    JGE     address                 Jump to the specified address if less than or equal to (>=) flag is not set
+    0x13    JG      address                 Jump to the specified address if less than (>) flag is not set
+    0x14    JNE     address                 Jump to the specified address if not equal (!=) flag is set
+    0x15    JL      address                 Jump to the specified address if lees (<) flag is set
+    0x16    JER     address                 Jump to the specified address if the ERROR flag is set
+    0x17    JMC     address                 Jump to the specified address if the CARRY flag is set
+    0x18    JMZ     address                 Jump to the specified address if the ZERO flag is set
+    0x19    JNC     address                 Jump to the specified address if the CARRY flag is not set
+    0x1A    INT     interrupt_number        Generate a software interrupt with the specified interrupt number
+    0x1B    CALL    address                 Call a function at the specified address
+    0x1C    RTS                             Return from a function without an offset
+    0x1D    RET     offset                  Return from a function with the specified offset
+    0x1E    PUSHR                           Push all registers (AX, BX, CX, DX, ZX, X, Y) onto the stack
+    0x1F    POPR                            Pop all registers (Y, X, DX, CX, BX, AX) from the stack
+    0x20    INC     destination             Increment the value in destination
+    0x21    DEC     destination             Decrement the value in destination
+    0x22    IN      port, operand           Input the value from the specified port into the operand
+    0x23    OUT     port, operand           Output the value in the operand to the specified port
+    0x24    CLF     flag                    Clear the specified flag in the Flags Register
+    0x25    SEF     flag                    Set the specified flag in the Flags Register
+    0x26    XOR     destination, source     Bitwise XOR operation between the values in source and destination, storing the result in destination
+    0x27    JMS     address                 Jump to the specified address if the SIGN flag is set
+    0x28    JNS     address                 Jump to the specified address if the SIGN flag is not set
+    0x29    SHL     source, operand1        Shift the bits in the destination left by the number of positions specified in operand1. The CARRY flag receives the overflowed bit, and a zero bit is shifted in from the right.
+    0x2A    SHR     source, operand1        Shift the bits in the destination right by the number of positions specified in operand1. The CARRY flag receives the overflowed bit, and a zero bit is shifted in from the left.
+    0x2B    HALT                            Sets the HALT flag

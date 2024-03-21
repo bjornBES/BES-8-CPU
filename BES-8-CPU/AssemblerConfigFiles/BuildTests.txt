@@ -1,4 +1,4 @@
-Input ./src/asm/TestProgram.Basm
+Input ./src/asm/AssemblerTests/Tests.Basm
 UseDebuger
 ObjFile ./Builds/ASMTEST/a.obj
 UseBinary ./Builds/ASMTEST/bin.bin

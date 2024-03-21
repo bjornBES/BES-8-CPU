@@ -1,0 +1,6 @@
+
+
+
+; boot bytes
+.org 7FEh
+.word 55AAh

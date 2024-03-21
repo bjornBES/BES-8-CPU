@@ -5,7 +5,7 @@
     },
     "Compiler Tests": {
       "commandName": "Project",
-      "commandLineArgs": "-i ./src/lang/Program.BEc -o ./builds/a.Basm -D"
+      "commandLineArgs": "-i ./src/lang/src.BEc -o ./builds/a.Basm -D"
     }
   }
 }

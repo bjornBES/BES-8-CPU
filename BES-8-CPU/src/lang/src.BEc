@@ -1,0 +1,6 @@
+int etst = 0
+func Main()
+{
+    int a = 0
+    return 0
+}

@@ -27,6 +27,7 @@ namespace Compiler
 
                 case TokenType.inc:
 
+                case TokenType.long_:
                 case TokenType.func:
                 case TokenType.ptr:
                 case TokenType.let:
@@ -105,7 +106,7 @@ namespace Compiler
         {
             string File = "";
             string buf = "";
-            int line_count = 0;
+            int line_count = 1;
             while (peek() != '\0')
             {
                 buf = "";
@@ -124,7 +125,7 @@ namespace Compiler
                 else if (char.IsLetter(peek()))
                 {
                     buf += consume();
-                    while (peek() != '\0' && char.IsLetter(peek()))
+                    while (peek() != '\0' && char.IsLetterOrDigit(peek()))
                     {
                         buf += consume();
                     }
@@ -141,6 +142,7 @@ namespace Compiler
                         case "local": tokens.Add(new Token() { Type = TokenType.local, Line = line_count , File = File }); break;
                         
                         // types
+                        case "long": tokens.Add(new Token() { Type = TokenType.long_, Line = line_count , File = File }); break;
                         case "byte": tokens.Add(new Token() { Type = TokenType.byte_, Line = line_count , File = File }); break;
                         case "word": tokens.Add(new Token() { Type = TokenType.word, Line = line_count , File = File }); break;
                         case "let": tokens.Add(new Token() { Type = TokenType.word, Line = line_count , File = File }); break;
@@ -313,7 +315,7 @@ namespace Compiler
                     consume();
                     tokens.Add(new() { Type = TokenType.close_curly, Line = line_count, File = File });
                 }
-                else if (peek() == Environment.NewLine[0])
+                else if (peek() == '\n')
                 {
                     consume();
                     line_count++;

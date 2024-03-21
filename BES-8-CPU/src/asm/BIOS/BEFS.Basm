@@ -1,0 +1,73 @@
+; [bp + 3] byte sector
+; [bp + 2] ushort address
+; [bp + 1] ushort page
+; [bp + 0] byte disk
+.global ReadByte:
+    pushr
+
+    mov BP, SP
+
+    add BP, #8
+
+    push MB
+    mov MB, #1
+
+    push R1
+    push R2
+    push R3
+    push R4
+
+    ; calculating the SectorAddress
+    sef #FI             ; setting the int flag to use the CPU ints
+
+    mov AX, 009h        ; Sectors Per page
+    mov CX, [bp + 1]    ; pages
+    mov DL, [bp]        ; disk
+    mov DH, [bp + 3]    ; sector
+    int #EAh
+
+    ; R2 = Sectors par page
+    mov R2, ZX
+
+    inc AX              ; Page size
+    mov BX, #2          ; count
+    int #E9h
+
+    mov AL [000000h]    ; LOW byte
+    mov AH [000001h]    ; high byte
+    mov R1, AX          ; Disk.Pagesize
+    clf #FI
+    clf #FC             ; cleaing the carry flag
+
+    div AX, R2          ; (Disk.PageSize / Disk.SectorsParPage)
+
+    mul AX, [bp + 3]    ; sector *
+    push AX             ; [SP + 2] SectorAddress
+    push R1             ; [SP + 1] Pagesize
+
+    mov R1, [sp + 1]
+    mul R1, [bp + 1]
+    ; page * pagesize
+
+    add R1, [sp + 2]
+    ; SectorAddress + (page * pagesize)
+
+    add R1, [bp + 2]
+    ; (SectorAddress + page * pagesize) + address
+
+    pop R4
+    pop R4
+
+    mov AX, R1
+    mov BL, DL          ; DL = [bp + 0]
+    int #0Eh            ; read byte
+    
+    pop R4
+    pop R3
+    pop R2
+    pop R1
+    pop MB
+    mov BP, ZX
+    popr
+    mov ZX, BP
+    ret #4

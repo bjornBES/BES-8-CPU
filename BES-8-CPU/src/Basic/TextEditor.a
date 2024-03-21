@@ -1,3 +1,64 @@
-00 HOME
-10 LET CX = 1 : LET CY = 1
-20 LET H = 25 : LET W = 40
+00000 HOME
+
+00002 rem here we have the Char X pos and char Y pos
+00003 LET CX = 1 : LET CY = 1
+
+00005 rem the screen size
+00006 LET H = 23 : LET W = 40
+00007 LET Size = H * W
+
+00020 rem initiating the screen and ports
+00022 DIM scrren (Size)
+00024 GOSUB 10000 : rem going to the PRINT FUNC sub
+
+00026 IB$ = "^S"
+00028 GOSUB 15000 : rem going to the PRINT INFO BAR sub
+
+00099 rem Start of the main loop
+00100 let KB = PEEK(49152)
+00110 IF KB = 0 THEN goto 00100
+00115 IF KB = 28 THEN END : rem KB == escape
+00120 IF KB = 13 THEN goto 00400 : rem KB == ENTER?
+00125 IF KB = 83 THEN goto 01000 : rem KB == 'S' SAVE
+00130 IF KB = 8 THEN goto 00410 : rem KB == BACKSPACE
+00134 rem else
+00140 PRINT KB
+00145 scrren(CX + CY) = KB
+00146 CX = CX + 1
+00150 GOTO 00100 : REM jump Main_Loop
+
+00399 rem Enter
+00400 CY = CY + 1
+00401 HTAB CX : VTAB CY
+00402 GOTO 00100 : rem going back to the main loop
+
+00409 REM BACKSPACE
+00410 IF CX = 0 THEN 00430
+00420 CX = CX - 1
+00425 GOTO 00499
+00430 CX = H
+00440 IF CY = 0 THEN 00500
+00445 CY = CY - 1
+00499 scrren(CX + CY) = 0
+00500 GOSUB 10000
+00505 goto 00100 : rem going back to the main loop
+
+00999 rem SAVE
+01000 rem WIP
+
+09999 rem PRINT FUNC
+10000 HOME
+10001 HTAB 1 : VTAB 1
+10005 FOR X = 1 TO W - 1:
+10010 FOR Y = 1 TO H - 1:
+10011 VTAB Y : HTAB X
+10015 PRINT scrren(X + Y)
+10020 NEXT Y
+10025 NEXT X
+10029 HTAB CX : VTAB CY
+10030 RETURN
+
+14999 rem PRINT INFO BAR
+15000 HTAB 1 : VTAB H
+15010 PRINT IB$
+15020 RETURN

@@ -7,7 +7,7 @@ pop AX
 mov SP, ZX
 
 ; enabling non BIOS ints
-sef #9
+sef #FI
 
 mov MB, #1
 mov %ExitCode, AX

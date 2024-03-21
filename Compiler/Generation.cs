@@ -1,226 +1,285 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using Compiler.nodes;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Compiler
 {
     public class Generation
     {
+        bool HasMainFunc = false;
 
-        int m_index = 0;
-        Token[] m_src;
-
-        bool IsGlobal = false;
-        bool IsPublic = false;
-        bool IsPointer = false;
-        bool IsConst = false;
-        bool Call_Func = false;
         int Level = 0;
+        Stack<int> m_scopes = new Stack<int>();
+        int m_stack_size = 0;
+        const int Pushr_length = 7;
 
-        public List<Variable> Variables = new List<Variable>();
-        public List<string> Assembly_Src = new List<string>();
+        public List<Variable> m_stack_var = new List<Variable>();
+        public Variable[] m_var = new Variable[0x8000];
+        public List<Function> m_functions = new List<Function>();
+        public List<string> m_output = new List<string>();
         public List<string> Const_Src = new List<string>();
 
-        const string Variable_Word = "Var_";
-
         public bool Debug = false;
-        string Func_Name = "";
-        const uint ArgumentVariableOffset = 0x11000;
-        const uint VariableOffset = 0x12000;
-        uint ArgumentVariable = 0;
-        uint VariableCount = 0;
-        uint RegisterCount = 1;
-        uint ArgumentCount = 0;
+        const int VariableOffset = 0x12000;
+        int VariableCount = 0;
+        int RegisterCount = 1;
 
-        public void Build(Tokenization tokenization)
+        public object gen_expr(NodeExpr nodeExpr)
         {
-            m_src = tokenization.tokens.ToArray();
-            gen();
-        }
-        void gen()
-        {
-            Assembly_Src.Add($"mov MB, #2");
-            while (peek() != null)
+            if (testType(nodeExpr.var, typeof(NodeTermIdent)))
             {
-                if(peek(-8) != null && peek(-8).Type == TokenType.ident && peek(-8).Value == "Main" && peek(-1).Type == TokenType.close_paren)
+                NodeTermIdent nodeTermIdent = (NodeTermIdent)nodeExpr.var;
+                return nodeTermIdent;
+            }
+            else if (testType(nodeExpr.var, typeof(NodeTermIntLit)))
+            {
+                NodeTermIntLit nodeTermIntLit = (NodeTermIntLit)nodeExpr.var;
+                return nodeTermIntLit;
+            }
+            return null;
+        }
+        void gen_stmtreturn(NodeStmtReturn nodeStmtReturn)
+        {
+            NodeTermIntLit nodeTermIntLit = (NodeTermIntLit)gen_expr(nodeStmtReturn.expr);
+            m_output.Add($"_{m_functions.Last().Name}_R:");
+            m_output.Add($"mov ZX, #{nodeTermIntLit.int_lit.Value}");
+            m_output.Add($"popr");
+            m_output.Add($"mov SP, BP");
+            m_output.Add($"pop BP");
+            m_output.Add($"ret #0");
+        }
+        void gen_stmtfunc(NodeStmtFunc nodeStmtFunc)
+        {
+            NodeTermIdent name = (NodeTermIdent)gen_expr(nodeStmtFunc.Name);
+            TokenType returnType = nodeStmtFunc.ReturnType.type;
+            m_functions.Add(new Function()
+            {
+                Name = name.ident.Value,
+                RetrunType = returnType,
+            });
+            
+            if(name.ident.Value == "Main")
+            {
+                HasMainFunc = true;
+            }
+
+            m_output.Add($"_{name.ident.Value}:");
+            push("BP");
+            m_output.Add($"mov BP, SP");
+            pushr();
+        }
+
+        public void gen_assing(NodeStmtAssign nodeStmtAssign)
+        {
+            NodeTermIdent name = (NodeTermIdent)gen_expr(nodeStmtAssign.name);
+            NodeTermIntLit value = (NodeTermIntLit)gen_expr(nodeStmtAssign.value);
+            TokenType type = nodeStmtAssign.type.type;
+            TokenType OperatiorType1 = nodeStmtAssign.OperatorToken.tokens[0];
+            TokenType OperatiorType2 = nodeStmtAssign.OperatorToken.tokens[1];
+
+            byte size = 0x06;
+
+            switch (type)
+            {
+                case TokenType.byte_:
+                    size = 1;
+                    break;
+                case TokenType.char_:
+                    size = 1;
+                    break;
+                case TokenType.word:
+                    size = 2;
+                    break;
+                case TokenType.int_:
+                    size = 4;
+                    break;
+                case TokenType.let:
+                    size = 4;
+                    break;
+                default:
+                    break;
+            }
+
+            if (OperatiorType1 == TokenType.eq)
+            {
+                if (m_scopes.Count != 0)
                 {
-                    Assembly_Src.Add("");
-                    Assembly_Src.Add("call [Exit]");
+                    m_stack_var.Add(new Variable()
+                    {
+                        Name = name.ident.Value,
+                        Stack_loc = m_stack_size,
+                        Size = size
+                    }) ;
+                    m_output.Add($"mov DX, #{value.int_lit.Value}");
+                    push("DX");
                 }
-                switch (peek().Type)
+                else
                 {
-                    case TokenType.func:
-                        consume();
-                        if (peek().Type == TokenType.ident)
-                        {
-                            if (peek(1).Type == TokenType.open_paren)
-                            {
-                                gen_Func(TokenType.func);
-                            }
-                        }
-                        break;
-                    case TokenType.const_:
-                        consume();
-                        IsConst = true;
-                        break;
-                    case TokenType.ptr:
-                        consume();
-                        IsPointer = true;
-                        break;
-                    case TokenType.global:
-                        consume();
-                        IsGlobal = true;
-                        break;
-                    case TokenType.public_:
-                        consume();
-                        IsPublic = true;
-                        break;
-                    case TokenType.word:
-                        consume();
-                        if (peek().Type == TokenType.ident)
-                        {
-                            if (peek(1).Type == TokenType.open_paren)
-                            {
-                                gen_Func(TokenType.word);
-                            }
-                            else if (peek(1).Type == TokenType.eq)
-                            {
-                                genAssingVariable(TokenType.word, true);
-                            }
-                        }
-                        break;
-
-                    case TokenType.return_:
-                        consume();
-                        if (peek().Type == TokenType.ident)
-                        {
-                            string VariableName = GetVariableName(consume().Value);
-                            if (isVariable(VariableName) == true)
-                            {
-                                Variable variable = get_Variable(VariableName);
-                                Assembly_Src.Add($"");
-                                Assembly_Src.Add($"; moving Address 0x{Convert.ToString(variable.Address, 16)} into an temp register to return out of the func");
-                                Assembly_Src.Add($"mov {GetTempRegister()}, [{Convert.ToString(variable.Address, 16)}h]");
-                                RegisterCount++;
-                            }
-                        }
-                        break;
-
-                    case TokenType.ident:
-                        if (isVariable(GetVariableName(peek().Value)) == true)
-                        {
-                            string VariableName = GetVariableName(peek().Value);
-                            Variable variable = get_Variable(VariableName);
-                            if (peek(1).Type == TokenType.eq)
-                            {
-                                genAssingVariable(TokenType.ident, true);
-                            }
-                            else
-                            {
-                                goto default;
-                            }
-                        }
-                        else if (peek(1).Type == TokenType.open_paren)
-                        {
-                            gen_CallFunc();
-                        }
-                        else
-                        {
-                            goto default;
-                        }
-                        break;
-
-                    case TokenType.open_curly:
-                        Level++;
-                        consume();
-                        break;
-                    case TokenType.close_curly:
-                        if (Level == 1)
-                        {
-                            Variable[] variables = get_Local_Variables(Func_Name);
-
-                            for (int i = 0; i < variables.Length; i++)
-                            {
-                                gen_FreeVariable(variables[i], true);
-                            }
-
-                            Level--;
-                            Assembly_Src.Add($"{Environment.NewLine}; close_curly");
-                            Assembly_Src.Add("popr");
-                            if(RegisterCount > 1)
-                            {
-                                RegisterCount--;
-                                Assembly_Src.Add($"mov ZX, {GetTempRegister()}");
-                            }
-
-                            Assembly_Src.Add($"; returning from {Func_Name} with {ArgumentCount} argsuments");
-                            Assembly_Src.Add($"ret #{ArgumentCount}");
-                        }
-                        Call_Func = false;
-                        consume();
-                        break;
-
-                    case TokenType.exit:
-                        consume();
-                        gen_Exit();
-                        break;
-                    case TokenType.free:
-                        consume();
-                        gen_Free();
-                        break;
-                    default:
-                        Console.WriteLine($"skip {Tokenization.to_string(consume().Type)}");
-                        break;
+                    int address = VariableOffset + VariableCount;
+                    m_stack_var.Add(new Variable()
+                    {
+                        Name = name.ident.Value,
+                        Stack_loc = address,
+                        Size = size
+                    });
+                    m_output.Add($"mov [{Convert.ToString(address, 16)}h], #{value.int_lit.Value}");
                 }
             }
-            Assembly_Src.Add($"");
-            Assembly_Src.Add($"; Inports");
-            Assembly_Src.Add($".include ./Libs/Function.basm");
-            Assembly_Src.Add($"");
-            Assembly_Src.InsertRange(Assembly_Src.Count, Const_Src);
         }
 
+        public void gen_scope(NodeScope nodeScope)
+        {
+            begin_scope();
+            for (int i = 0; i < nodeScope.stmts.Length; i++)
+            {
+                m_output.Add("");
+                gen_stmt(nodeScope.stmts[i]);
+            }
+            end_scope();
+        }
+
+        public void gen_stmt(NodeStmt nodeStmt)
+        {
+            if (nodeStmt.stmt == null) return;
+            if (testType(nodeStmt.stmt, typeof(NodeStmtFunc)))
+            {
+                gen_stmtfunc((NodeStmtFunc)nodeStmt.stmt);
+            }
+            else if (testType(nodeStmt.stmt, typeof(NodeStmtReturn)))
+            {
+                gen_stmtreturn((NodeStmtReturn)nodeStmt.stmt);
+            }
+            else if (testType(nodeStmt.stmt, typeof(NodeScope)))
+            {
+                gen_scope((NodeScope)nodeStmt.stmt);
+            }
+            else if (testType(nodeStmt.stmt, typeof(NodeStmtAssign)))
+            {
+                gen_assing((NodeStmtAssign)nodeStmt.stmt);
+            }
+        }
+
+        public void gen_prog(NodeProg nodeProg)
+        {
+            m_output.Add("call [_Main]");
+
+            for (int i = 0; i < nodeProg.stmts.Length; i++)
+            {
+                gen_stmt(nodeProg.stmts[i]);
+            }
+
+            if(HasMainFunc == false)
+            {
+                Console.WriteLine("program needs Main func");
+                Environment.Exit(0);
+            }
+        }
+        bool testType(Type stmtType, Type testedType)
+        {
+            if (testedType == stmtType)
+            {
+                return true;
+            }
+            return false;
+        }
+        bool testType(object stmtType, Type testedType)
+        {
+            if (testedType == stmtType.GetType())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        void push(string reg)
+        {
+            m_output.Add($"push {reg}");
+            m_stack_size++;
+        }
+
+        void pop(string reg)
+        {
+            m_output.Add($"pop {reg}");
+            m_stack_size--;
+        }
+
+        void pushr()
+        {
+            m_output.Add($"pushr");
+            m_stack_size += Pushr_length;
+        }
+
+        void popr()
+        {
+            m_output.Add($"popr");
+            m_stack_size -= Pushr_length;
+        }
+
+        void begin_scope()
+        {
+            m_output.Add($"; scope {m_scopes.Count}");
+            m_scopes.Push(m_stack_var.Count);
+        }
+
+        void end_scope()
+        {
+            m_output.Add($"; end scope {m_scopes.Count - 1}");
+            int pop_count = (m_stack_var.Count - m_scopes.Last());
+            if (pop_count != 0)
+            {
+                m_output.Add($"add sp, #{pop_count}");
+            }
+            m_stack_size -= pop_count;
+            for (int i = 0; i < pop_count; i++)
+            {
+                m_stack_var.RemoveAt(i);
+            }
+            m_scopes.Pop();
+        }
+
+        /*
         void gen_Func(TokenType ReturnType)
         {
             ArgumentCount = 0;
-            if (peek().Type == TokenType.ident)
+            if (//peek().Type == TokenType.ident)
             {
                 string FuncName = Parse_Expr(out _);
                 Func_Name = FuncName;
-                if (peek().Type == TokenType.open_paren)
+                if (//peek().Type == TokenType.open_paren)
                 {
-                    consume();
+                    //consume();
                     Assembly_Src.Add($"{Environment.NewLine}; func return type is {Tokenization.to_string(ReturnType)}");
                     Assembly_Src.Add($"Func_{FuncName}:");
                     Assembly_Src.Add($"pushr");
                 }
-                if (peek().Type != TokenType.close_paren)
+                if (//peek().Type != TokenType.close_paren)
                 {
                     Assembly_Src.Add("mov ZX, SP");
                     Assembly_Src.Add("add SP, #8");
-                    while (peek().Type != TokenType.close_paren)
+                    while (//peek().Type != TokenType.close_paren)
                     {
                         string name;
-                        switch (peek().Type)
+                        switch (//peek().Type)
                         {
                             case TokenType.char_:
                             case TokenType.byte_:
                             case TokenType.word:
                             case TokenType.let:
                             case TokenType.int_:
-                                Token token = consume();
-                                if (peek().Type != TokenType.ident)
+                                Token token = //consume();
+                                if (//peek().Type != TokenType.ident)
                                 {
-                                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
+                                    Console.WriteLine($"ERORR {Tokenization.to_string(//peek().Type)}");
                                     Environment.Exit(1);
                                 }
                                 name = Parse_Expr(out _);
                                 gen_Local_Variable(name, FuncName, token.Type, true, token);
-                                if (peek().Type == TokenType.close_paren) break;
-                                if (peek().Type != TokenType.comma)
+                                if (//peek().Type == TokenType.close_paren) break;
+                                if (//peek().Type != TokenType.comma)
                                 {
-                                    Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
+                                    Console.WriteLine($"ERORR {Tokenization.to_string(//peek().Type)}");
                                     Environment.Exit(1);
                                 }
-                                consume();
+                                //consume();
                                 break;
                             case TokenType.ptr:
                                 break;
@@ -231,51 +290,51 @@ namespace Compiler
                     }
                     Assembly_Src.Add("mov SP, ZX");
                 }
-                if (peek().Type != TokenType.close_paren)
+                if (//peek().Type != TokenType.close_paren)
                 {
-                    CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
+                    CompilerErrors.ExpectedError(//peek(), TokenType.close_paren);
                 }
-                consume();
+                //consume();
             }
         }
 
         void gen_CallFunc()
         {
             Call_Func = true;
-            string funcName = consume().Value;
+            string funcName = //consume().Value;
             CallFunc(funcName);
         }
         void gen_CallFunc(string funcName)
         {
-            CallFunc(funcName);
+            //CallFunc(funcName);
         }
 
         void CallFunc(string funcname)
         {
             List<string> args = new List<string>();
-            if (peek().Type != TokenType.open_paren)
+            if (//peek().Type != TokenType.open_paren)
             {
-                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
+                CompilerErrors.ExpectedError(//peek(), TokenType.open_paren);
             }
-            consume();
-            while (peek().Type != TokenType.close_paren)
+            //consume();
+            while (//peek().Type != TokenType.close_paren)
             {
-                if (peek().Type == TokenType.int_lit)
+                if (//peek().Type == TokenType.int_lit)
                 {
-                    string value = "#" + consume().Value;
+                    string value = "#" + //consume().Value;
                     args.Add(value);
                 }
 
-                if (peek().Type == TokenType.close_paren) break;
+                if (//peek().Type == TokenType.close_paren) break;
 
-                if (peek().Type != TokenType.comma)
+                if (//peek().Type != TokenType.comma)
                 {
-                    CompilerErrors.ExpectedError(peek(), TokenType.comma);
+                    CompilerErrors.ExpectedError(//peek(), TokenType.comma);
                 }
-                consume();
+                //consume();
             }
 
-            consume();
+            //consume();
 
             for (int i = args.Count - 1; i > -1; i--)
             {
@@ -287,37 +346,37 @@ namespace Compiler
 
         void gen_Exit()
         {
-            if (peek().Type != TokenType.open_paren)
+            if (//peek().Type != TokenType.open_paren)
             {
-                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
+                CompilerErrors.ExpectedError(//peek(), TokenType.open_paren);
             }
 
             Assembly_Src.Add($"{Environment.NewLine}; Exit");
 
-            consume(); // open_paren
+            //consume(); // open_paren
 
-            if (peek().Type == TokenType.int_lit)
+            if (//peek().Type == TokenType.int_lit)
             {
                 string Exit_Value = Parse_Expr(out _);
-                if (peek().Type != TokenType.close_paren)
+                if (//peek().Type != TokenType.close_paren)
                 {
-                    CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
+                    CompilerErrors.ExpectedError(//peek(), TokenType.close_paren);
                 }
-                consume();
+                //consume();
                 Assembly_Src.Add($"mov AX, #{Exit_Value}");
                 Assembly_Src.Add($"int #0");
             }
-            else if (peek().Type == TokenType.ident)
+            else if (//peek().Type == TokenType.ident)
             {
-                if (isVariable(GetVariableName(peek().Value)) == true)
+                if (isVariable(GetVariableName(//peek().Value)) == true)
                 {
-                    string VariableName = GetVariableName(consume().Value);
+                    string VariableName = GetVariableName(//consume().Value);
                     Variable variable = get_Variable(VariableName);
-                    if (peek().Type != TokenType.close_paren)
+                    if (//peek().Type != TokenType.close_paren)
                     {
-                        CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
+                        CompilerErrors.ExpectedError(//peek(), TokenType.close_paren);
                     }
-                    consume();
+                    //consume();
                     Assembly_Src.Add($"mov AX, [{Convert.ToString(variable.Address, 16)}h]");
                     Assembly_Src.Add($"int #0");
                 }
@@ -326,21 +385,21 @@ namespace Compiler
 
         void gen_Free()
         {
-            if (peek().Type != TokenType.open_paren)
+            if (//peek().Type != TokenType.open_paren)
             {
-                CompilerErrors.ExpectedError(peek(), TokenType.open_paren);
+                CompilerErrors.ExpectedError(//peek(), TokenType.open_paren);
             }
 
-            consume();
-            if (peek().Type == TokenType.ampersand)
+            //consume();
+            if (//peek().Type == TokenType.ampersand)
             {
-                consume();
-                string Name = consume().Value;
+                //consume();
+                string Name = //consume().Value;
                 Variable variable = get_Variable(GetVariableName(Name));
                 if (variable.IsPtr == true)
                 {
-                    CompilerErrors.ErrorVariablePointer(Name, peek(), variable);
-                    //Console.WriteLine($"ERORR {TokenType.ampersand} at line {peek().Line}");
+                    CompilerErrors.ErrorVariablePointer(Name, //peek(), variable);
+                    //Console.WriteLine($"ERORR {TokenType.ampersand} at line {//peek().Line}");
                     //Console.WriteLine($"{variable.Name} is a Pointer");
                     //Environment.Exit(1);
                 }
@@ -348,23 +407,23 @@ namespace Compiler
             }
             else
             {
-                string Name = consume().Value;
+                string Name = //consume().Value;
                 Variable variable = get_Variable(GetVariableName(Name));
                 if (variable.IsPtr != true)
                 {
-                    CompilerErrors.ErrorVariableNotPointer(Name, peek(), variable);
-                    //Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)} at line {peek().Line}");
+                    CompilerErrors.ErrorVariableNotPointer(Name, //peek(), variable);
+                    //Console.WriteLine($"ERORR {Tokenization.to_string(//peek().Type)} at line {//peek().Line}");
                     //Console.WriteLine($"{variable.Name} is not a Pointer");
                     //Environment.Exit(1);
                 }
                 gen_FreeVariable(variable);
             }
 
-            if (peek().Type != TokenType.close_paren)
+            if (//peek().Type != TokenType.close_paren)
             {
-                CompilerErrors.ExpectedError(peek(), TokenType.close_paren);
+                CompilerErrors.ExpectedError(//peek(), TokenType.close_paren);
             }
-            consume();
+            //consume();
         }
 
         void gen_FreeVariable(Variable variable, bool force = false)
@@ -404,9 +463,9 @@ namespace Compiler
         void genAssingVariable(TokenType type, bool Local)
         {
             string Name = Parse_Expr(out _);
-            if (peek().Type == TokenType.eq)
+            if (//peek().Type == TokenType.eq)
             {
-                consume();
+                //consume();
                 string value = Parse_Expr(out Token Token);
                 if (IsConst == true)
                 {
@@ -450,7 +509,7 @@ namespace Compiler
                 }
                 else if (Local && type != TokenType.ident)
                 {
-                    if (peek(0).Type == TokenType.open_paren)
+                    if (//peek(0).Type == TokenType.open_paren)
                     {
                         gen_CallFunc(value);
                         if (Level > 0)
@@ -607,83 +666,12 @@ namespace Compiler
                 }
                 else
                 {
-                    CompilerErrors.ExpectedExpressionError(peek());
+                    CompilerErrors.ExpectedExpressionError(//peek());
                 }
             }
             else
             {
-                CompilerErrors.ExpectedError(peek(), TokenType.eq);
-            }
-        }
-
-        string Parse_Expr(out Token token)
-        {
-            switch (peek().Type)
-            {
-                case TokenType.ident:
-                    if (isVariable(GetVariableName(peek().Value)))
-                    {
-                        Variable variable = get_Variable(GetVariableName(peek().Value));
-                        if (variable.IsConst == true)
-                        {
-                            token = consume();
-                            return $"[{variable.Name}]";
-                        }
-                        else
-                        {
-                            token = consume();
-                            return $"[{Convert.ToString(variable.Address)}]";
-                        }
-                    }
-                    else if (!isVariable(GetVariableName(peek().Value)))
-                    {
-                        token = peek();
-                        return consume().Value;
-                    }
-                    token = peek();
-                    return "";
-                case TokenType.ampersand:
-                    consume();
-                    if (isVariable(GetVariableName(peek().Value)))
-                    {
-                        Variable variable = get_Variable(GetVariableName(peek().Value));
-                        token = consume();
-                        return $"{Convert.ToString(variable.Address, 16)}";
-                    }
-                    else if (!isVariable(GetVariableName(peek().Value)))
-                    {
-                        token = peek();
-                        return consume().Value;
-                    }
-                    token = peek();
-                    return "";
-                case TokenType.int_lit:
-                    token = peek();
-                    return consume().Value;
-                case TokenType.Bin_int_lit:
-                    consume();
-                    if (peek().Type != TokenType.int_lit)
-                    {
-
-                    }
-                    token = peek();
-                    return Convert.ToString(Convert.ToUInt32(consume().Value, 2));
-                case TokenType.Hex_int_lit:
-                    consume();
-                    if (peek().Type != TokenType.int_lit)
-                    {
-
-                    }
-                    token = peek();
-                    return Convert.ToString(Convert.ToUInt32(consume().Value, 16));
-                case TokenType.open_curly:
-                    token = peek();
-                    CompileExpression(Debug);
-                    return "";
-                default:
-                    CompilerErrors.ExpectedExpressionError(peek());
-                    token = peek();
-                    return "";
+                CompilerErrors.ExpectedError(//peek(), TokenType.eq);
             }
         }
 
@@ -702,7 +690,7 @@ namespace Compiler
                 }
             }
 
-            Console.WriteLine($"ERORR can't find variable {name} at line {peek().Line}");
+            Console.WriteLine($"ERORR can't find variable {name} at line {//peek().Line}");
             Environment.Exit(1);
             return null;
         }
@@ -894,218 +882,25 @@ namespace Compiler
             int ExprOperator = 2;
             int Save_m_index = m_index;
             int End_Index = m_index;
-            while (peek().Type != TokenType.close_curly)
+            while (//peek().Type != TokenType.close_curly)
             {
-                consume();
+                //consume();
                 End_Index++;
             }
             m_index = Save_m_index;
 
-            if (peek().Type != TokenType.open_curly)
+            if (//peek().Type != TokenType.open_curly)
             {
-                Console.WriteLine($"ERORR {Tokenization.to_string(peek().Type)}");
+                Console.WriteLine($"ERORR {Tokenization.to_string(//peek().Type)}");
                 Environment.Exit(1);
             }
-            consume();
+            //consume();
 
             Assembly_Src.Add("");
             Assembly_Src.Add("push ZX");
             Assembly_Src.Add("push AX");
             Assembly_Src.Add($"");
-            uint Address;
-            string name;
-            int Times = 0;
-            Stack<int> stack = new Stack<int>();
-            StartAgain:
-            while (peek().Type != TokenType.close_curly)
-            {
-                Token token = peek();
-                switch (token.Type)
-                {
-                    case TokenType.int_lit:
-                    case TokenType.Hex_int_lit:
-                    case TokenType.Bin_int_lit:
-                        if (Times == 0)
-                        {
-                            Assembly_Src.Add($"push #{Parse_Expr(out _)}");
-                            Assembly_Src.Add($"");
-                        }
-                        else
-                        {
-                            consume();
-                        }
-                        break;
-                    case TokenType.ident:
-                        if (Times == 0)
-                        {
-                            name = peek().Value;
-                            Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
-                            if (debug)
-                            {
-                                Assembly_Src.Add($"; {name}");
-                            }
-                            Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
-                            Assembly_Src.Add($"");
-                        }
-                        else
-                        {
-                            consume();
-                        }
-                        break;
-                    case TokenType.close_paren:
-                        if(Times == 0 && stack.Count == 0)
-                        {
-                            if (debug)
-                            {
-                                Assembly_Src.Add($"; {token.Type}");
-                            }
-                            ExprOperator = 1;
-                        }
-                        if (Times == 0 && stack.Count > 0)
-                        {
-                            m_index = stack.Pop();
-                            ExprOperator--;
-                        }
-                            consume();
-                        break;
-                    case TokenType.open_paren:
-                        if (Times == 0)
-                        {
-                            if (debug)
-                            {
-                                Assembly_Src.Add($"; {token.Type}");
-                            }
-                            stack.Push(m_index + 1);
-                            ExprOperator = 1;
-                        }
-                            consume();
-                        break;
-                    case TokenType.minus:
-                    case TokenType.plus:
-                        if (ExprOperator == 0)
-                        {
-                            if (debug)
-                            {
-                                Assembly_Src.Add($"; {token.Type} {ExprOperator}");
-                            }
-                            consume();
-                            if (Times == 0)
-                            {
-                                if (peek().Type == TokenType.ident)
-                                {
-                                    name = peek().Value;
-                                    Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
-                                    if (debug)
-                                    {
-                                        Assembly_Src.Add($"; {name}");
-                                    }
-                                    Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
-                                }
-                                else
-                                {
-                                    Assembly_Src.Add($"push #{Parse_Expr(out _)}");
-                                }
-                            }
-                            else
-                            {
-                                consume();
-                            }
-                            Assembly_Src.Add($"");
-                            Assembly_Src.Add($"pop {Register}");
-                            Assembly_Src.Add($"pop {ExpressionRegister}");
-                            if (token.Type == TokenType.plus)
-                            {
-                                Assembly_Src.Add($"add {ExpressionRegister}, {Register}");
-                            }
-                            if (token.Type == TokenType.minus)
-                            {
-                                Assembly_Src.Add($"sub {ExpressionRegister}, {Register}");
-                            }
-                            Assembly_Src.Add($"push {ExpressionRegister}");
-                            Assembly_Src.Add($"");
-                        }
-                        else
-                        {
-                            consume();
-                        }
-                        break;
-                    case TokenType.fslash:
-                    case TokenType.star:
-                        if (ExprOperator == 1)
-                        {
-                            if (debug)
-                            {
-                                Assembly_Src.Add($"; {token.Type} {ExprOperator}");
-                            }
-                            consume();
-                            if (Times == 0)
-                            {
-                                if (peek().Type == TokenType.ident)
-                                {
-                                    name = peek().Value;
-                                    Address = Convert.ToUInt32(Parse_Expr(out _).TrimStart('[').TrimEnd(']'));
-                                    if (debug)
-                                    {
-                                        Assembly_Src.Add($"; {name}");
-                                    }
-                                    Assembly_Src.Add($"push [{Convert.ToString(Address, 16)}h]");
-                                }
-                                else
-                                {
-                                    Assembly_Src.Add($"push #{Parse_Expr(out _)}");
-                                }
-                            }
-                            else
-                            {
-                                consume();
-                            }
-                            Assembly_Src.Add($"");
-                            Assembly_Src.Add($"pop {Register}");
-                            Assembly_Src.Add($"pop {ExpressionRegister}");
-                            if (token.Type == TokenType.star)
-                            {
-                                Assembly_Src.Add($"mul {ExpressionRegister}, {Register}");
-                            }
-                            if (token.Type == TokenType.fslash)
-                            {
-                                Assembly_Src.Add($"mul {ExpressionRegister}, {Register}");
-                            }
-                            Assembly_Src.Add($"push {ExpressionRegister}");
-                            Assembly_Src.Add($"");
-                        }
-                        else
-                        {
-                            consume();
-                        }
-                        break;
-
-                    default:
-                        CompilerErrors.ExpectedExpressionError(peek());
-                        break;
-                }
-            }
-
-            if(Times == 0 || Times == 1)
-            {
-                if(stack.Count > 0)
-                {
-                    m_index = Save_m_index;
-                    ExprOperator--;
-                    consume();
-                }
-                Times++;
-                m_index = Save_m_index;
-                ExprOperator--;
-                consume();
-                goto StartAgain;
-            }
-
-            if (peek().Type != TokenType.close_curly)
-            {
-                CompilerErrors.ExpectedError(peek(), TokenType.close_curly);
-            }
-            consume();
-
+            
             Assembly_Src.Add($"pop {GetTempRegister()}");
             Assembly_Src.Add("pop AX");
             Assembly_Src.Add("pop ZX");
@@ -1122,21 +917,7 @@ namespace Compiler
             return $"{Variable_Word}{name}";
         }
 
-        Token peek(int offset = 0)
-        {
-            if (m_index + offset >= m_src.Length || m_index + offset < 0)
-            {
-                return null;
-            }
-            else
-            {
-                return m_src[m_index + offset];
-            }
-        }
-        Token consume()
-        {
-            return m_src[m_index++];
-        }
+        
         bool IsDigit(string str)
         {
             for (int i = 0; i < str.Length; i++)
@@ -1148,5 +929,6 @@ namespace Compiler
             }
             return true;
         }
+        */
     }
 }
