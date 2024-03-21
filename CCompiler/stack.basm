@@ -1,0 +1,12 @@
+; pushed from right to left
+; byte test = [BP + 1 + 7]
+FUNC:
+    push BP
+    pushr
+    mov BP, SP
+    ; code
+    
+    mov SP, BP
+    popr
+    pop BP
+    ret #1

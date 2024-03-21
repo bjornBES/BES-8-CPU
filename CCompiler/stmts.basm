@@ -1,0 +1,27 @@
+; if_stmt
+; expr1 rhs = [SP + 1]
+; Operater = '=='
+; expr2 lhs = [SP + 0]
+
+cmp [SP + 0], [SP + 1]
+jne [IF_END]
+; rhs == lhs
+    ; code
+jmp [Exit_IF]
+IF_END:
+; else
+    ; code
+Exit_IF:
+
+; if_stmt
+; expr1 lhs = [SP + 0]
+
+cmp [SP + 0], #0
+je [IF_END]
+; lhs == 1 
+    ; code
+jmp [Exit_IF]
+IF_END:
+; else
+    ; code
+Exit_IF:

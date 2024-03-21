@@ -1,0 +1,148 @@
+push XL ; sectors
+push XH ; disk
+call [_main]
+mov AX, ZX
+int #FBh
+
+
+; int globalVariabel
+mov MB, #1
+mov [1000h], #0010
+
+; `int` main with 2 argument
+_main:
+push BP
+mov BP, SP
+pushr
+; char disk
+; disk with size 1 as argument
+
+; char sector
+; sector with size 1 as argument
+
+
+; {
+; scope 0
+; int test1
+mov DX, [BP + 0002]
+push DX
+
+; int test2
+mov DX, [BP + 0001]
+push DX
+
+; int num1
+mov DX, #0010
+push DX
+
+; int num2
+mov DX, #0020
+push DX
+
+; char letter
+mov DX, #0041h
+push DX
+
+; int sum
+; add num1, num2
+mov AX, [SP + 2]
+add AX, [SP + 1]
+mov DX, 
+push DX
+
+; int difference
+; sub num1, num2
+mov AX, [SP + 3]
+sub AX, [SP + 2]
+mov DX, 
+push DX
+
+; int product
+; mul num1, num2
+mov AX, [SP + 4]
+mul AX, [SP + 3]
+mov DX, 
+push DX
+
+; if (sum == num2)
+cmp [SP - 2], [SP - 4]
+jne [label_0]
+; {
+; scope 1
+; int test
+mov DX, #0000
+push DX
+
+; end scope 1
+; }
+
+jmp [label_1]
+label_0:
+; else if
+cmp [SP - 6], [SP - 5]
+je [label_2]
+; {
+; scope 1
+; int test2
+mov DX, #0000
+push DX
+
+; end scope 1
+; }
+
+jmp [label_1]
+label_2:
+; else
+; {
+; scope 1
+; char test3
+mov DX, #0041h
+push DX
+
+; end scope 1
+; }
+
+label_1:
+
+; calling exampleFunction with 2 arguments
+push #num2
+push #'0'
+call [_exampleFunction]
+
+; returning with int literal
+popr
+pop BP
+mov ZX, #0
+ret #2
+
+
+mov ZX, #FFFFFFh
+; end scope 0
+popr
+pop BP
+ret #2
+; }
+
+
+; `void` exampleFunction with 2 argument
+_exampleFunction:
+push BP
+mov BP, SP
+pushr
+; int value
+; value with size 2 as argument
+
+; char test
+; test with size 1 as argument
+
+
+; {
+; scope 0
+mov ZX, #FFFFFFh
+; end scope 0
+popr
+pop BP
+ret #2
+; }
+
+

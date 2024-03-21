@@ -1,0 +1,1175 @@
+{
+  "$type": "Ccompiler.nodes.NodeProg, Ccompiler",
+  "NodeStmt": {
+    "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+    "$values": [
+      {
+        "$type": "Ccompiler.nodes.NodeStmtFuncPrototype, Ccompiler",
+        "Func_name": {
+          "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+          "var": {
+            "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+            "term": {
+              "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+              "ident": {
+                "$type": "Token, Ccompiler",
+                "Type": 5,
+                "value": "exampleFunction",
+                "File": " ./src.c",
+                "line": 3,
+                "column": 21
+              }
+            }
+          }
+        },
+        "ReturnType": 36,
+        "arguments": {
+          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+          "$values": [
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": null,
+              "Value": null,
+              "assingmentOperater": 0,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        },
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 52,
+          "value": null,
+          "File": " ./src.c",
+          "line": 3,
+          "column": 27
+        }
+      },
+      {
+        "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+        "Name": {
+          "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+          "var": {
+            "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+            "term": {
+              "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+              "ident": {
+                "$type": "Token, Ccompiler",
+                "Type": 5,
+                "value": "globalVariabel",
+                "File": " ./src.c",
+                "line": 5,
+                "column": 19
+              }
+            }
+          }
+        },
+        "Value": {
+          "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+          "var": {
+            "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+            "term": {
+              "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+              "int_lit": {
+                "$type": "Token, Ccompiler",
+                "Type": 4,
+                "value": "10",
+                "File": " ./src.c",
+                "line": 5,
+                "column": 24
+              }
+            }
+          }
+        },
+        "assingmentOperater": 1,
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 52,
+          "value": null,
+          "File": " ./src.c",
+          "line": 5,
+          "column": 25
+        }
+      },
+      {
+        "$type": "Ccompiler.nodes.NodeStmtFunc, Ccompiler",
+        "Func_name": {
+          "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+          "var": {
+            "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+            "term": {
+              "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+              "ident": {
+                "$type": "Token, Ccompiler",
+                "Type": 5,
+                "value": "main",
+                "File": " ./src.c",
+                "line": 7,
+                "column": 9
+              }
+            }
+          }
+        },
+        "ReturnType": 22,
+        "arguments": {
+          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+          "$values": [
+            {
+              "$type": "Ccompiler.nodes.NodeStmtChar, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "disk",
+                      "File": " ./src.c",
+                      "line": 7,
+                      "column": 19
+                    }
+                  }
+                }
+              },
+              "Value": null,
+              "assingmentOperater": 0,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtChar, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "sector",
+                      "File": " ./src.c",
+                      "line": 7,
+                      "column": 32
+                    }
+                  }
+                }
+              },
+              "Value": null,
+              "assingmentOperater": 0,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        },
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 62,
+          "value": null,
+          "File": " ./src.c",
+          "line": 7,
+          "column": 33
+        }
+      },
+      {
+        "$type": "Ccompiler.nodes.NodeScope, Ccompiler",
+        "ScopeStmts": {
+          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+          "$values": [
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "test1",
+                      "File": " ./src.c",
+                      "line": 10,
+                      "column": 14
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "sector",
+                      "File": " ./src.c",
+                      "line": 10,
+                      "column": 23
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "test2",
+                      "File": " ./src.c",
+                      "line": 11,
+                      "column": 14
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "disk",
+                      "File": " ./src.c",
+                      "line": 11,
+                      "column": 21
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "num1",
+                      "File": " ./src.c",
+                      "line": 12,
+                      "column": 13
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+                    "int_lit": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 4,
+                      "value": "10",
+                      "File": " ./src.c",
+                      "line": 12,
+                      "column": 18
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "num2",
+                      "File": " ./src.c",
+                      "line": 13,
+                      "column": 13
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+                    "int_lit": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 4,
+                      "value": "20",
+                      "File": " ./src.c",
+                      "line": 13,
+                      "column": 18
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtChar, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "letter",
+                      "File": " ./src.c",
+                      "line": 14,
+                      "column": 16
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermCharLit, Ccompiler",
+                    "C": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "A",
+                      "File": " ./src.c",
+                      "line": 14,
+                      "column": 22
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "sum",
+                      "File": " ./src.c",
+                      "line": 18,
+                      "column": 12
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeBinExpr, Ccompiler",
+                  "expr": {
+                    "$type": "Ccompiler.nodes.NodeBinExprAdd, Ccompiler",
+                    "lhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num1",
+                            "File": " ./src.c",
+                            "line": 18,
+                            "column": 19
+                          }
+                        }
+                      }
+                    },
+                    "rhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num2",
+                            "File": " ./src.c",
+                            "line": 18,
+                            "column": 26
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "difference",
+                      "File": " ./src.c",
+                      "line": 19,
+                      "column": 19
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeBinExpr, Ccompiler",
+                  "expr": {
+                    "$type": "Ccompiler.nodes.NodeBinExprSub, Ccompiler",
+                    "lhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num1",
+                            "File": " ./src.c",
+                            "line": 19,
+                            "column": 26
+                          }
+                        }
+                      }
+                    },
+                    "rhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num2",
+                            "File": " ./src.c",
+                            "line": 19,
+                            "column": 33
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "product",
+                      "File": " ./src.c",
+                      "line": 20,
+                      "column": 16
+                    }
+                  }
+                }
+              },
+              "Value": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeBinExpr, Ccompiler",
+                  "expr": {
+                    "$type": "Ccompiler.nodes.NodeBinExprMulti, Ccompiler",
+                    "lhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num1",
+                            "File": " ./src.c",
+                            "line": 20,
+                            "column": 23
+                          }
+                        }
+                      }
+                    },
+                    "rhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num2",
+                            "File": " ./src.c",
+                            "line": 20,
+                            "column": 30
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "assingmentOperater": 1,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtIf, Ccompiler",
+              "Scope": {
+                "$type": "Ccompiler.nodes.NodeScope, Ccompiler",
+                "ScopeStmts": {
+                  "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+                  "$values": [
+                    {
+                      "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+                      "Name": {
+                        "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                        "var": {
+                          "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                          "term": {
+                            "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                            "ident": {
+                              "$type": "Token, Ccompiler",
+                              "Type": 5,
+                              "value": "test",
+                              "File": " ./src.c",
+                              "line": 28,
+                              "column": 17
+                            }
+                          }
+                        }
+                      },
+                      "Value": {
+                        "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                        "var": {
+                          "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                          "term": {
+                            "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+                            "int_lit": {
+                              "$type": "Token, Ccompiler",
+                              "Type": 4,
+                              "value": "0",
+                              "File": " ./src.c",
+                              "line": 28,
+                              "column": 21
+                            }
+                          }
+                        }
+                      },
+                      "assingmentOperater": 1,
+                      "stmts": null,
+                      "Token": {
+                        "$type": "Token, Ccompiler",
+                        "Type": 0,
+                        "value": null,
+                        "File": null,
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ]
+                },
+                "stmts": null,
+                "Token": {
+                  "$type": "Token, Ccompiler",
+                  "Type": 0,
+                  "value": null,
+                  "File": null,
+                  "line": 0,
+                  "column": 0
+                }
+              },
+              "TermComparer": {
+                "$type": "Ccompiler.nodes.NodeTermComparer, Ccompiler",
+                "lhs": {
+                  "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                  "var": {
+                    "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                    "term": {
+                      "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                      "ident": {
+                        "$type": "Token, Ccompiler",
+                        "Type": 5,
+                        "value": "sum",
+                        "File": " ./src.c",
+                        "line": 26,
+                        "column": 12
+                      }
+                    }
+                  }
+                },
+                "rhs": {
+                  "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                  "var": {
+                    "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                    "term": {
+                      "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                      "ident": {
+                        "$type": "Token, Ccompiler",
+                        "Type": 5,
+                        "value": "num2",
+                        "File": " ./src.c",
+                        "line": 26,
+                        "column": 20
+                      }
+                    }
+                  }
+                },
+                "operater": 0
+              },
+              "pred": {
+                "$type": "Ccompiler.nodes.NodeIfPred, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeIfPredElif, Ccompiler",
+                  "Scope": {
+                    "$type": "Ccompiler.nodes.NodeScope, Ccompiler",
+                    "ScopeStmts": {
+                      "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+                      "$values": [
+                        {
+                          "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+                          "Name": {
+                            "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                            "var": {
+                              "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                              "term": {
+                                "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                                "ident": {
+                                  "$type": "Token, Ccompiler",
+                                  "Type": 5,
+                                  "value": "test2",
+                                  "File": " ./src.c",
+                                  "line": 32,
+                                  "column": 18
+                                }
+                              }
+                            }
+                          },
+                          "Value": {
+                            "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                            "var": {
+                              "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                              "term": {
+                                "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+                                "int_lit": {
+                                  "$type": "Token, Ccompiler",
+                                  "Type": 4,
+                                  "value": "0",
+                                  "File": " ./src.c",
+                                  "line": 32,
+                                  "column": 22
+                                }
+                              }
+                            }
+                          },
+                          "assingmentOperater": 1,
+                          "stmts": null,
+                          "Token": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 0,
+                            "value": null,
+                            "File": null,
+                            "line": 0,
+                            "column": 0
+                          }
+                        }
+                      ]
+                    },
+                    "stmts": null,
+                    "Token": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 0,
+                      "value": null,
+                      "File": null,
+                      "line": 0,
+                      "column": 0
+                    }
+                  },
+                  "TermComparer": {
+                    "$type": "Ccompiler.nodes.NodeTermComparer, Ccompiler",
+                    "lhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num1",
+                            "File": " ./src.c",
+                            "line": 30,
+                            "column": 18
+                          }
+                        }
+                      }
+                    },
+                    "rhs": {
+                      "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                      "var": {
+                        "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                        "term": {
+                          "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                          "ident": {
+                            "$type": "Token, Ccompiler",
+                            "Type": 5,
+                            "value": "num2",
+                            "File": " ./src.c",
+                            "line": 30,
+                            "column": 26
+                          }
+                        }
+                      }
+                    },
+                    "operater": 1
+                  },
+                  "pred": {
+                    "$type": "Ccompiler.nodes.NodeIfPred, Ccompiler",
+                    "var": {
+                      "$type": "Ccompiler.nodes.NodeIfPredElse, Ccompiler",
+                      "Scope": {
+                        "$type": "Ccompiler.nodes.NodeScope, Ccompiler",
+                        "ScopeStmts": {
+                          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+                          "$values": [
+                            {
+                              "$type": "Ccompiler.nodes.NodeStmtChar, Ccompiler",
+                              "Name": {
+                                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                                "var": {
+                                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                                  "term": {
+                                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                                    "ident": {
+                                      "$type": "Token, Ccompiler",
+                                      "Type": 5,
+                                      "value": "test3",
+                                      "File": " ./src.c",
+                                      "line": 36,
+                                      "column": 19
+                                    }
+                                  }
+                                }
+                              },
+                              "Value": {
+                                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                                "var": {
+                                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                                  "term": {
+                                    "$type": "Ccompiler.nodes.NodeTermCharLit, Ccompiler",
+                                    "C": {
+                                      "$type": "Token, Ccompiler",
+                                      "Type": 5,
+                                      "value": "A",
+                                      "File": " ./src.c",
+                                      "line": 36,
+                                      "column": 25
+                                    }
+                                  }
+                                }
+                              },
+                              "assingmentOperater": 1,
+                              "stmts": null,
+                              "Token": {
+                                "$type": "Token, Ccompiler",
+                                "Type": 0,
+                                "value": null,
+                                "File": null,
+                                "line": 0,
+                                "column": 0
+                              }
+                            }
+                          ]
+                        },
+                        "stmts": null,
+                        "Token": {
+                          "$type": "Token, Ccompiler",
+                          "Type": 0,
+                          "value": null,
+                          "File": null,
+                          "line": 0,
+                          "column": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtFuncCall, Ccompiler",
+              "FuncName": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "exampleFunction",
+                      "File": " ./src.c",
+                      "line": 41,
+                      "column": 20
+                    }
+                  }
+                }
+              },
+              "arguments": {
+                "$type": "Ccompiler.nodes.NodeExpr[], Ccompiler",
+                "$values": [
+                  {
+                    "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                    "var": {
+                      "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                      "term": {
+                        "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                        "ident": {
+                          "$type": "Token, Ccompiler",
+                          "Type": 5,
+                          "value": "num2",
+                          "File": " ./src.c",
+                          "line": 41,
+                          "column": 25
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                    "var": {
+                      "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                      "term": {
+                        "$type": "Ccompiler.nodes.NodeTermCharLit, Ccompiler",
+                        "C": {
+                          "$type": "Token, Ccompiler",
+                          "Type": 5,
+                          "value": "0",
+                          "File": " ./src.c",
+                          "line": 41,
+                          "column": 30
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtReturn, Ccompiler",
+              "expr": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIntLit, Ccompiler",
+                    "int_lit": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 4,
+                      "value": "0",
+                      "File": " ./src.c",
+                      "line": 43,
+                      "column": 13
+                    }
+                  }
+                }
+              },
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        },
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 64,
+          "value": null,
+          "File": " ./src.c",
+          "line": 44,
+          "column": 2
+        }
+      },
+      {
+        "$type": "Ccompiler.nodes.NodeStmtFunc, Ccompiler",
+        "Func_name": {
+          "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+          "var": {
+            "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+            "term": {
+              "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+              "ident": {
+                "$type": "Token, Ccompiler",
+                "Type": 5,
+                "value": "exampleFunction",
+                "File": " ./src.c",
+                "line": 47,
+                "column": 21
+              }
+            }
+          }
+        },
+        "ReturnType": 36,
+        "arguments": {
+          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+          "$values": [
+            {
+              "$type": "Ccompiler.nodes.NodeStmtInt, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "value",
+                      "File": " ./src.c",
+                      "line": 47,
+                      "column": 31
+                    }
+                  }
+                }
+              },
+              "Value": null,
+              "assingmentOperater": 0,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            },
+            {
+              "$type": "Ccompiler.nodes.NodeStmtChar, Ccompiler",
+              "Name": {
+                "$type": "Ccompiler.nodes.NodeExpr, Ccompiler",
+                "var": {
+                  "$type": "Ccompiler.nodes.NodeTerm, Ccompiler",
+                  "term": {
+                    "$type": "Ccompiler.nodes.NodeTermIdent, Ccompiler",
+                    "ident": {
+                      "$type": "Token, Ccompiler",
+                      "Type": 5,
+                      "value": "test",
+                      "File": " ./src.c",
+                      "line": 47,
+                      "column": 42
+                    }
+                  }
+                }
+              },
+              "Value": null,
+              "assingmentOperater": 0,
+              "stmts": null,
+              "Token": {
+                "$type": "Token, Ccompiler",
+                "Type": 0,
+                "value": null,
+                "File": null,
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        },
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 62,
+          "value": null,
+          "File": " ./src.c",
+          "line": 47,
+          "column": 43
+        }
+      },
+      {
+        "$type": "Ccompiler.nodes.NodeScope, Ccompiler",
+        "ScopeStmts": {
+          "$type": "Ccompiler.nodes.NodeStmt[], Ccompiler",
+          "$values": []
+        },
+        "stmts": null,
+        "Token": {
+          "$type": "Token, Ccompiler",
+          "Type": 64,
+          "value": null,
+          "File": " ./src.c",
+          "line": 49,
+          "column": 2
+        }
+      }
+    ]
+  }
+}

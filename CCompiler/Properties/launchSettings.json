@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Ccompiler": {
+      "commandName": "Project",
+      "commandLineArgs": "./src.c -d",
+      "workingDirectory": "C:\\Users\\bjorn\\Desktop\\BES-8-CPU\\CCompiler"
+    }
+  }
+}
